@@ -24,16 +24,18 @@ tests/render.test.mjs = golden tests over render.mjs (fixtures in tests/golden/)
 ```
 
 Site URL scheme (web/src/pages): `/` home (one row per Windows version, colour-coded
-client/server/insider) · `/v/<arch>/<build>.html` version page (userland | kernel module
-cards) · `/v/<arch>/<build>/<module>.html` type listing ·
-`/v/<arch>/<build>/<module>/<Type>.html` type page · `/ti/<arch>/<build>/<module>.json`
-sidebar index · `/search-index.json` ⌘K index. Home rows link to the version page,
-which is the no-JS fallback. nav.js retargets each row to the module last viewed for
-that build (localStorage `vp-mod:<arch>/<build>`), or the kernel if none.
+client/server/insider) · `/v/<arch>/<build>/<module>.html` type listing (full width,
+columns sized to the 90th-percentile name) · `/v/<arch>/<build>/<module>/<Type>.html`
+type page · `/ti/<arch>/<build>/<module>.json` sidebar index · `/search-index.json` ⌘K
+index. There is deliberately no per-build page: switching modules happens via the
+module chips in the context bar. Home rows link to the build's kernel listing, and
+nav.js retargets each one to the module last viewed for that build (localStorage
+`vp-mod:<arch>/<build>`).
 `web/src/lib/render.mjs` is the type→C renderer + `catalog()` (all docs loaded once,
 memoized — never re-read JSON per page). `web/src/lib/modules.mjs` is the module
 table (ring + label). One layout, `web/src/layouts/Layout.astro` (`side` adds the
-type sidebar), and one stylesheet, `web/public/assets/site.css` (no Bootstrap). Listing
+type sidebar), and one stylesheet, `web/public/assets/site.css` (no Bootstrap); `wide` drops the
+max-width. Listing
 and type pages share `ContextBar.astro`: build select ▾ / module toggles / Type,
 plus prev/next over the builds defining the type. It's the only "where am I", so
 there are no breadcrumbs or page headings. Pages are static HTML: no islands, no

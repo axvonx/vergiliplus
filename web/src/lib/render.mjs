@@ -475,7 +475,6 @@ export function slugNames(doc) {
 }
 
 export const ctxPath = (a, b, m) => `/v/${a}/${b}/${m}`;
-export const versionPath = (a, b) => `/v/${a}/${b}.html`;
 
 // release channel from the family name, for colour-coding versions
 export const channel = (family) =>

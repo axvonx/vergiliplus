@@ -18,10 +18,13 @@ const names = slugNames(doc);
 const items = names.map((n) => ({ n, k: r.get(doc.named[n]).kind, s: slug(n) }));
 const counts = { all: items.length, struct: 0, union: 0, enum: 0 };
 for (const it of items) counts[it.k]++;
-const maxLen = Math.max(...names.map((n) => n.length));
+// size columns to the 90th-percentile name (the long tail ellipsizes, full name in
+// the tooltip) so wide screens get many columns instead of a few sized to the longest
+const lens = names.map((n) => n.length).sort((a, b) => a - b);
+const colCh = Math.max(20, lens[Math.floor(lens.length * 0.9)] || 20) + 3;
 const base = ctxPath(arch, build, module);
 ---
-<Layout title={`${module} ${build}`}>
+<Layout title={`${module} ${build}`} wide>
   <ContextBar arch={arch} build={build} module={module} />
   <div class="tl-top" data-tl-ctrl>
     <input class="tl-filter" placeholder="filter types…" />
@@ -29,9 +32,9 @@ const base = ctxPath(arch, build, module);
       <button class={`btn kind-btn${k === "all" ? " on" : ""}`} data-k={k}>{k} {n}</button>
     ))}
   </div>
-  <div class="hz-list" data-tl style={`column-width:${maxLen + 3}ch`}>
+  <div class="hz-list" data-tl style={`column-width:${colCh}ch`}>
     {items.map((it) => (
-      <a class={`hz k-${it.k}`} href={`${base}/${it.s}.html`}><span class="dot"></span>{it.n}</a>
+      <a class={`hz k-${it.k}`} href={`${base}/${it.s}.html`} title={it.n.length + 3 > colCh ? it.n : undefined}><span class="dot"></span>{it.n}</a>
     ))}
   </div>
 </Layout>

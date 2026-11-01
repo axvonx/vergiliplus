@@ -16,12 +16,6 @@ export const MODULES = {
   kernel32: { ring: "user", label: "kernel32" },
   combase: { ring: "user", label: "combase" },
 };
-export const RINGS = [
-  { ring: "user", label: "Userland" },
-  { ring: "kernel", label: "Kernel" },
-];
-export const RINGLABEL = { user: "userland", kernel: "kernel" };
-
 export function modInfo(m) {
   return MODULES[m] || { ring: "user", label: m };
 }

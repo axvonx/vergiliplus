@@ -1,9 +1,9 @@
 ---
 // Home: one row per Windows version, newest first, colour-coded by channel.
-// A row links to the version page (no-JS fallback); nav.js retargets it to the
-// module last viewed for that build, else the kernel.
+// A row links to the build's kernel listing; nav.js retargets it to the module
+// last viewed for that build.
 import Layout from "../layouts/Layout.astro";
-import { catalog, cmpBuild, versionPath, channel, modInfo } from "../lib/render.mjs";
+import { catalog, cmpBuild, ctxPath, channel, modInfo } from "../lib/render.mjs";
 const cat = catalog();
 const seen = new Set();
 const versions = cat.docs.slice().sort((a, b) => cmpBuild(b.build, a.build))
@@ -18,7 +18,7 @@ const multiArch = cat.archs().length > 1;
 <Layout>
   <ul class="vlist">
     {versions.map((v) => (
-      <li><a class={`vrow ch-${channel(v.family)}`} href={versionPath(v.arch, v.build)}
+      <li><a class={`vrow ch-${channel(v.family)}`} href={`${ctxPath(v.arch, v.build, v.kernel)}.html`}
              data-ab={`${v.arch}/${v.build}`} data-mods={v.mods.join(",")} data-def={v.kernel}>
         <span class="vr-fam">{v.family}</span>
         <span class="vr-build">{v.build}{multiArch ? ` · ${v.arch}` : ""}</span>

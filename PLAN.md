@@ -14,8 +14,9 @@ Repo: github.com/axvonx/vergiliplus (public, branch `main`, CI green). **Live: h
   Labels are derived from the binaries. Sources: msdl (24H2, 28000), UUP (29680), ISOs.
 - **Site** — 27.6k static pages, ~8 s build, `dist` 230 MB, 0 broken links (326k).
   Home = version list (colour-coded client/server/insider) → last-viewed module (else
-  kernel); version page = userland | kernel cards. One context bar per page (build ▾ /
-  module / Type), no breadcrumbs. Struct summary is a pahole footer line; the bottom
+  kernel); no per-build page (module chips in the context bar switch). Listings are
+  full-width multi-column. One context bar per page (build ▾ / module / Type), no
+  breadcrumbs. Struct summary is a pahole footer line; the bottom
   band is only "Used in". No islands, no Bootstrap: `site.css`, `nav.js`, `struct.js`.
 - **Renderer** — anonymous union/struct reconstruction, inlined `<unnamed-tag>`
   members, enum tables, function-pointer signatures, bitfield bit positions,
