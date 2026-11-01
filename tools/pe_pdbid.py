@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Extract the CodeView (RSDS) PDB identity from a PE binary.
+"""Extract the CodeView (RSDS) PDB identity and FileVersion from a PE binary.
 
 Prints the Microsoft symbol-server path for the module's PDB, i.e.
     <pdbname>/<GUID><AGE>/<pdbname>
-plus the individual fields. Pure stdlib, no deps.
+plus the individual fields, and VERSION (VS_FIXEDFILEINFO FileVersion, e.g.
+10.0.26100.7824) when the PE carries a version resource. Pure stdlib, no deps.
 
 Usage: pe_pdbid.py <path-to-exe-or-dll>
 """
@@ -36,6 +37,18 @@ def extract(path):
     return None
 
 
+def file_version(path):
+    """VS_FIXEDFILEINFO dwFileVersionMS/LS as "a.b.c.d", or None."""
+    data = open(path, "rb").read()
+    i = data.find(struct.pack("<I", 0xFEEF04BD))
+    while i != -1:
+        strucver, ms, ls = struct.unpack_from("<III", data, i + 4)
+        if strucver == 0x10000:
+            return "%d.%d.%d.%d" % (ms >> 16, ms & 0xFFFF, ls >> 16, ls & 0xFFFF)
+        i = data.find(struct.pack("<I", 0xFEEF04BD), i + 4)
+    return None
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit("usage: pe_pdbid.py <pe>")
@@ -44,6 +57,9 @@ def main():
         sys.exit("no RSDS CodeView record found in %s" % sys.argv[1])
     for k in ("pdb", "guid", "age", "sympath"):
         print("%s=%s" % (k.upper(), info[k]))
+    ver = file_version(sys.argv[1])
+    if ver:
+        print("VERSION=%s" % ver)
 
 
 if __name__ == "__main__":

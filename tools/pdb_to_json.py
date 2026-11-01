@@ -56,6 +56,15 @@ def run_pdbutil(pdb, pdbutil):
     return out.stdout.splitlines()
 
 
+def pdb_identity(pdb, pdbutil):
+    """{guid, age} of the PDB itself, so a doc can be re-fetched from msdl later."""
+    out = subprocess.run([find_pdbutil(pdbutil), "dump", "-summary", pdb],
+                         capture_output=True, text=True).stdout
+    guid = grab(r"GUID: \{([0-9A-Fa-f-]+)\}", out)
+    age = grab(r"Age: (\d+)", out, cast=int)
+    return {"guid": guid.replace("-", "").upper(), "age": age} if guid else None
+
+
 def split_records(lines):
     """Yield (index, kind, blob_lines) for each top-level type record."""
     cur_idx = cur_kind = None
@@ -152,12 +161,22 @@ def parse(lines):
         elif kind == "LF_BITFIELD":
             ty = grab(r"type = 0x([0-9A-Fa-f]+)", text)
             bits = grab(r"# bits = (\d+)", text, cast=int, default=0)
+            pos = grab(r"bit offset = (\d+)", text, cast=int, default=0)
             types[key] = {"kind": "bitfield",
-                          "type": hexi(int(ty, 16)) if ty else None, "bits": bits}
+                          "type": hexi(int(ty, 16)) if ty else None,
+                          "bits": bits, "pos": pos}
         elif kind == "LF_PROCEDURE":
             ret = grab(r"return type = 0x([0-9A-Fa-f]+)", text)
+            args = grab(r"param list = 0x([0-9A-Fa-f]+)", text)
             types[key] = {"kind": "proc",
-                          "return": hexi(int(ret, 16)) if ret else None}
+                          "return": hexi(int(ret, 16)) if ret else None,
+                          "args": hexi(int(args, 16)) if args else None}
+        elif kind == "LF_ARGLIST":
+            # one "0xIDX[ (name)]: `type`" line per parameter
+            types[key] = {"kind": "arglist",
+                          "args": [hexi(int(a, 16)) for a in
+                                   re.findall(r"^\s*0x([0-9A-Fa-f]+)(?: \([^)]*\))?: `",
+                                              text, re.M)]}
         else:
             types[key] = {"kind": "other", "lf": kind}
 
@@ -175,6 +194,8 @@ def main():
     ap.add_argument("--build", required=True)
     ap.add_argument("--family", default="")
     ap.add_argument("--timestamp", type=int, default=0)
+    ap.add_argument("--file-version", default=None,
+                    help="the module's PE FileVersion, when known")
     ap.add_argument("--pdbutil", default=None)
     ap.add_argument("-o", "--out", default=None)
     args = ap.parse_args()
@@ -194,6 +215,8 @@ def main():
         "build": args.build,
         "family": args.family,
         "timestamp": args.timestamp,
+        "fileVersion": args.file_version,
+        "pdb": pdb_identity(args.pdb, args.pdbutil),
         "named": named,
         "types": types,
     }

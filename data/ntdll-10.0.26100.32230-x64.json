@@ -4,6 +4,11 @@
  "build": "10.0.26100.32230",
  "family": "Windows Server 2025",
  "timestamp": 0,
+ "fileVersion": "10.0.26100.32230",
+ "pdb": {
+  "guid": "9C2DF5479734883AE216C3023DD7DE26",
+  "age": 4
+ },
  "named": {
   "LIST_ENTRY64": "0x100A",
   "LIST_ENTRY32": "0x100E",
@@ -836,12 +841,16 @@
    "referent": "0x100F"
   },
   "0x1011": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1010",
+    "0x23"
+   ]
   },
   "0x1012": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x1011"
   },
   "0x1013": {
    "kind": "pointer",
@@ -858,12 +867,16 @@
    "referent": "0x1014"
   },
   "0x1016": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1015",
+    "0x23"
+   ]
   },
   "0x1017": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x1016"
   },
   "0x1018": {
    "kind": "pointer",
@@ -899,82 +912,98 @@
   "0x101E": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 8
+   "bits": 8,
+   "pos": 0
   },
   "0x101F": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 8
   },
   "0x1020": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 9
   },
   "0x1021": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 10
   },
   "0x1022": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 11
   },
   "0x1023": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 12
   },
   "0x1024": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 13
   },
   "0x1025": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 15
   },
   "0x1026": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 3
+   "bits": 3,
+   "pos": 16
   },
   "0x1027": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 19
   },
   "0x1028": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 20
   },
   "0x1029": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 22
   },
   "0x102A": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 24
   },
   "0x102B": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 25
   },
   "0x102C": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 26
   },
   "0x102D": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 5
+   "bits": 5,
+   "pos": 27
   },
   "0x102E": {
    "kind": "fieldlist",
@@ -1084,67 +1113,80 @@
   "0x1031": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 0
   },
   "0x1032": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 1
   },
   "0x1033": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 2
   },
   "0x1034": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 3
   },
   "0x1035": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 4
   },
   "0x1036": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 5
   },
   "0x1037": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 7
   },
   "0x1038": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 19
+   "bits": 19,
+   "pos": 8
   },
   "0x1039": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 27
   },
   "0x103A": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 28
   },
   "0x103B": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 29
   },
   "0x103C": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 30
   },
   "0x103D": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 31
   },
   "0x103E": {
    "kind": "fieldlist",
@@ -1239,17 +1281,20 @@
   "0x1041": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 5
   },
   "0x1042": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 6
   },
   "0x1043": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 16
+   "bits": 16,
+   "pos": 16
   },
   "0x1044": {
    "kind": "fieldlist",
@@ -1410,24 +1455,31 @@
    "referent": "0x1050"
   },
   "0x1052": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x104F"
+   ]
   },
   "0x1053": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1052"
   },
   "0x1054": {
    "kind": "pointer",
    "referent": "0x1053"
   },
   "0x1055": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x101A",
+    "0x12"
+   ]
   },
   "0x1056": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1055"
   },
   "0x1057": {
    "kind": "pointer",
@@ -1435,7 +1487,8 @@
   },
   "0x1058": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1055"
   },
   "0x1059": {
    "kind": "pointer",
@@ -1452,24 +1505,30 @@
    "referent": "0x105A"
   },
   "0x105C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x101A"
+   ]
   },
   "0x105D": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x105C"
   },
   "0x105E": {
    "kind": "pointer",
    "referent": "0x105D"
   },
   "0x105F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1047"
+   ]
   },
   "0x1060": {
    "kind": "proc",
-   "return": "0x70"
+   "return": "0x70",
+   "args": "0x105F"
   },
   "0x1061": {
    "kind": "pointer",
@@ -1486,12 +1545,16 @@
    "referent": "0x1062"
   },
   "0x1064": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1049",
+    "0x70"
+   ]
   },
   "0x1065": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1064"
   },
   "0x1066": {
    "kind": "pointer",
@@ -1508,12 +1571,15 @@
    "referent": "0x1067"
   },
   "0x1069": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x104B"
+   ]
   },
   "0x106A": {
    "kind": "proc",
-   "return": "0x11"
+   "return": "0x11",
+   "args": "0x1069"
   },
   "0x106B": {
    "kind": "pointer",
@@ -1530,12 +1596,16 @@
    "referent": "0x106C"
   },
   "0x106E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x104D",
+    "0x11"
+   ]
   },
   "0x106F": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x106E"
   },
   "0x1070": {
    "kind": "pointer",
@@ -1602,12 +1672,15 @@
    "referent": "0x107B"
   },
   "0x107D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1051"
+   ]
   },
   "0x107E": {
    "kind": "proc",
-   "return": "0x13"
+   "return": "0x13",
+   "args": "0x107D"
   },
   "0x107F": {
    "kind": "pointer",
@@ -1624,12 +1697,16 @@
    "referent": "0x1080"
   },
   "0x1082": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x101C",
+    "0x13"
+   ]
   },
   "0x1083": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1082"
   },
   "0x1084": {
    "kind": "pointer",
@@ -1647,19 +1724,23 @@
   },
   "0x1087": {
    "kind": "proc",
-   "return": "0x13"
+   "return": "0x13",
+   "args": "0x1082"
   },
   "0x1088": {
    "kind": "pointer",
    "referent": "0x1087"
   },
   "0x1089": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x101C"
+   ]
   },
   "0x108A": {
    "kind": "proc",
-   "return": "0x13"
+   "return": "0x13",
+   "args": "0x1089"
   },
   "0x108B": {
    "kind": "pointer",
@@ -1955,42 +2036,50 @@
   "0x109F": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 1
+   "bits": 1,
+   "pos": 0
   },
   "0x10A0": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 1
+   "bits": 1,
+   "pos": 1
   },
   "0x10A1": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 1
+   "bits": 1,
+   "pos": 2
   },
   "0x10A2": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 1
+   "bits": 1,
+   "pos": 3
   },
   "0x10A3": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 1
+   "bits": 1,
+   "pos": 4
   },
   "0x10A4": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 1
+   "bits": 1,
+   "pos": 5
   },
   "0x10A5": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 1
+   "bits": 1,
+   "pos": 6
   },
   "0x10A6": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 1
+   "bits": 1,
+   "pos": 7
   },
   "0x10A7": {
    "kind": "array",
@@ -2044,7 +2133,8 @@
   "0x10B0": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 24
+   "bits": 24,
+   "pos": 8
   },
   "0x10B1": {
    "kind": "struct",
@@ -2079,12 +2169,13 @@
    "bytes": 240
   },
   "0x10B7": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": []
   },
   "0x10B8": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x10B7"
   },
   "0x10B9": {
    "kind": "pointer",
@@ -2156,7 +2247,8 @@
   "0x10C5": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 29
+   "bits": 29,
+   "pos": 3
   },
   "0x10C6": {
    "kind": "struct",
@@ -2189,7 +2281,8 @@
   "0x10CB": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 31
+   "bits": 31,
+   "pos": 1
   },
   "0x10CC": {
    "kind": "fieldlist",
@@ -2841,12 +2934,18 @@
    "referent": "0x10D0"
   },
   "0x10D2": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1015",
+    "0x622",
+    "0x10D1",
+    "0x10B4"
+   ]
   },
   "0x10D3": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x10D2"
   },
   "0x10D4": {
    "kind": "pointer",
@@ -2870,12 +2969,18 @@
    "referent": "0x10D6"
   },
   "0x10D8": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x10D7",
+    "0x22",
+    "0x10B4"
+   ]
   },
   "0x10D9": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x10D8"
   },
   "0x10DA": {
    "kind": "pointer",
@@ -3007,22 +3112,26 @@
   "0x10EA": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 2
+   "bits": 2,
+   "pos": 0
   },
   "0x10EB": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 2
+   "bits": 2,
+   "pos": 2
   },
   "0x10EC": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 2
+   "bits": 2,
+   "pos": 4
   },
   "0x10ED": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 2
+   "bits": 2,
+   "pos": 6
   },
   "0x10EE": {
    "kind": "array",
@@ -3032,7 +3141,8 @@
   "0x10EF": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 21
+   "bits": 21,
+   "pos": 11
   },
   "0x10F0": {
    "kind": "array",
@@ -3600,12 +3710,15 @@
    "forward": null
   },
   "0x10F9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1081"
+   ]
   },
   "0x10FA": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x10F9"
   },
   "0x10FB": {
    "kind": "pointer",
@@ -3669,7 +3782,8 @@
   },
   "0x1100": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x10B7"
   },
   "0x1101": {
    "kind": "pointer",
@@ -3709,12 +3823,16 @@
    "referent": "0x1106"
   },
   "0x1108": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x603"
+   ]
   },
   "0x1109": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1108"
   },
   "0x110A": {
    "kind": "pointer",
@@ -3743,12 +3861,16 @@
    "referent": "0x110D"
   },
   "0x110F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x110E",
+    "0x603"
+   ]
   },
   "0x1110": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x110F"
   },
   "0x1111": {
    "kind": "pointer",
@@ -3757,7 +3879,8 @@
   "0x1112": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 30
+   "bits": 30,
+   "pos": 2
   },
   "0x1113": {
    "kind": "fieldlist",
@@ -4081,87 +4204,104 @@
   "0x113C": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 16
+   "bits": 16,
+   "pos": 0
   },
   "0x113D": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 0
   },
   "0x113E": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 1
   },
   "0x113F": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 2
   },
   "0x1140": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 3
   },
   "0x1141": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 4
   },
   "0x1142": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 5
   },
   "0x1143": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 6
   },
   "0x1144": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 7
   },
   "0x1145": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 8
   },
   "0x1146": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 9
   },
   "0x1147": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 10
   },
   "0x1148": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 11
   },
   "0x1149": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 12
   },
   "0x114A": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 13
   },
   "0x114B": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 14
   },
   "0x114C": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 1
+   "bits": 1,
+   "pos": 15
   },
   "0x114D": {
    "kind": "struct",
@@ -4870,7 +5010,8 @@
   },
   "0x1150": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x10B7"
   },
   "0x1151": {
    "kind": "pointer",
@@ -4926,36 +5067,47 @@
    "referent": "0x1158"
   },
   "0x115A": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22"
+   ]
   },
   "0x115B": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x115A"
   },
   "0x115C": {
    "kind": "pointer",
    "referent": "0x115B"
   },
   "0x115D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x603",
+    "0x603"
+   ]
   },
   "0x115E": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x115D"
   },
   "0x115F": {
    "kind": "pointer",
    "referent": "0x115E"
   },
   "0x1160": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1152"
+   ]
   },
   "0x1161": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1160"
   },
   "0x1162": {
    "kind": "pointer",
@@ -4995,12 +5147,15 @@
    "referent": "0x1164"
   },
   "0x1168": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x108D"
+   ]
   },
   "0x1169": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x1168"
   },
   "0x116A": {
    "kind": "pointer",
@@ -5011,12 +5166,16 @@
    "referent": "0x1155"
   },
   "0x116C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x108F",
+    "0x603"
+   ]
   },
   "0x116D": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x116C"
   },
   "0x116E": {
    "kind": "pointer",
@@ -5225,12 +5384,17 @@
    "forward": null
   },
   "0x1181": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x74",
+    "0x23"
+   ]
   },
   "0x1182": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x1181"
   },
   "0x1183": {
    "kind": "pointer",
@@ -5319,36 +5483,50 @@
    "referent": "0x118C"
   },
   "0x118E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x118D",
+    "0x74",
+    "0x23"
+   ]
   },
   "0x118F": {
    "kind": "proc",
-   "return": "0x118D"
+   "return": "0x118D",
+   "args": "0x118E"
   },
   "0x1190": {
    "kind": "pointer",
    "referent": "0x118F"
   },
   "0x1191": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x118D",
+    "0x23",
+    "0x74"
+   ]
   },
   "0x1192": {
    "kind": "proc",
-   "return": "0x118D"
+   "return": "0x118D",
+   "args": "0x1191"
   },
   "0x1193": {
    "kind": "pointer",
    "referent": "0x1192"
   },
   "0x1194": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x118D",
+    "0x23"
+   ]
   },
   "0x1195": {
    "kind": "proc",
-   "return": "0x118D"
+   "return": "0x118D",
+   "args": "0x1194"
   },
   "0x1196": {
    "kind": "pointer",
@@ -5504,12 +5682,15 @@
    "referent": "0x1015"
   },
   "0x11A8": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1157"
+   ]
   },
   "0x11A9": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x11A8"
   },
   "0x11AA": {
    "kind": "pointer",
@@ -5810,24 +5991,33 @@
    "forward": null
   },
   "0x11C3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BC",
+    "0x603"
+   ]
   },
   "0x11C4": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x11C3"
   },
   "0x11C5": {
    "kind": "pointer",
    "referent": "0x11C4"
   },
   "0x11C6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BC",
+    "0x11BC",
+    "0x22"
+   ]
   },
   "0x11C7": {
    "kind": "proc",
-   "return": "0x11BC"
+   "return": "0x11BC",
+   "args": "0x11C6"
   },
   "0x11C8": {
    "kind": "pointer",
@@ -5835,127 +6025,184 @@
   },
   "0x11C9": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x11C3"
   },
   "0x11CA": {
    "kind": "pointer",
    "referent": "0x11C9"
   },
   "0x11CB": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BC",
+    "0x11CA",
+    "0x603",
+    "0x22"
+   ]
   },
   "0x11CC": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x11CB"
   },
   "0x11CD": {
    "kind": "pointer",
    "referent": "0x11CC"
   },
   "0x11CE": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x11BC"
+   ]
   },
   "0x11CF": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x11CE"
   },
   "0x11D0": {
    "kind": "pointer",
    "referent": "0x11CF"
   },
   "0x11D1": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BC",
+    "0x603",
+    "0x11D0",
+    "0x22"
+   ]
   },
   "0x11D2": {
    "kind": "proc",
-   "return": "0x11BC"
+   "return": "0x11BC",
+   "args": "0x11D1"
   },
   "0x11D3": {
    "kind": "pointer",
    "referent": "0x11D2"
   },
   "0x11D4": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BC",
+    "0x603",
+    "0x11D0",
+    "0x620",
+    "0x22"
+   ]
   },
   "0x11D5": {
    "kind": "proc",
-   "return": "0x11BC"
+   "return": "0x11BC",
+   "args": "0x11D4"
   },
   "0x11D6": {
    "kind": "pointer",
    "referent": "0x11D5"
   },
   "0x11D7": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BC",
+    "0x603",
+    "0x11D0",
+    "0x620",
+    "0x620",
+    "0x22"
+   ]
   },
   "0x11D8": {
    "kind": "proc",
-   "return": "0x11BC"
+   "return": "0x11BC",
+   "args": "0x11D7"
   },
   "0x11D9": {
    "kind": "pointer",
    "referent": "0x11D8"
   },
   "0x11DA": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BC",
+    "0x22"
+   ]
   },
   "0x11DB": {
    "kind": "proc",
-   "return": "0x11BC"
+   "return": "0x11BC",
+   "args": "0x11DA"
   },
   "0x11DC": {
    "kind": "pointer",
    "referent": "0x11DB"
   },
   "0x11DD": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BC",
+    "0x603",
+    "0x11D0",
+    "0x20",
+    "0x620",
+    "0x22"
+   ]
   },
   "0x11DE": {
    "kind": "proc",
-   "return": "0x11BC"
+   "return": "0x11BC",
+   "args": "0x11DD"
   },
   "0x11DF": {
    "kind": "pointer",
    "referent": "0x11DE"
   },
   "0x11E0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BA",
+    "0x22"
+   ]
   },
   "0x11E1": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x11E0"
   },
   "0x11E2": {
    "kind": "pointer",
    "referent": "0x11E1"
   },
   "0x11E3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BA"
+   ]
   },
   "0x11E4": {
    "kind": "proc",
-   "return": "0x11BC"
+   "return": "0x11BC",
+   "args": "0x11E3"
   },
   "0x11E5": {
    "kind": "pointer",
    "referent": "0x11E4"
   },
   "0x11E6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BA",
+    "0x11BC",
+    "0x20",
+    "0x11BC"
+   ]
   },
   "0x11E7": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x11E6"
   },
   "0x11E8": {
    "kind": "pointer",
@@ -5991,60 +6238,85 @@
    "forward": null
   },
   "0x11ED": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BC",
+    "0x11CA",
+    "0x603"
+   ]
   },
   "0x11EE": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x11ED"
   },
   "0x11EF": {
    "kind": "pointer",
    "referent": "0x11EE"
   },
   "0x11F0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11EA"
+   ]
   },
   "0x11F1": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x11F0"
   },
   "0x11F2": {
    "kind": "pointer",
    "referent": "0x11F1"
   },
   "0x11F3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BC",
+    "0x603",
+    "0x11D0"
+   ]
   },
   "0x11F4": {
    "kind": "proc",
-   "return": "0x11BC"
+   "return": "0x11BC",
+   "args": "0x11F3"
   },
   "0x11F5": {
    "kind": "pointer",
    "referent": "0x11F4"
   },
   "0x11F6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11BC",
+    "0x603",
+    "0x11D0",
+    "0x620"
+   ]
   },
   "0x11F7": {
    "kind": "proc",
-   "return": "0x11BC"
+   "return": "0x11BC",
+   "args": "0x11F6"
   },
   "0x11F8": {
    "kind": "pointer",
    "referent": "0x11F7"
   },
   "0x11F9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11EA",
+    "0x11BC",
+    "0x20",
+    "0x11BC"
+   ]
   },
   "0x11FA": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x11F9"
   },
   "0x11FB": {
    "kind": "pointer",
@@ -6100,12 +6372,18 @@
    "referent": "0x1200"
   },
   "0x1202": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x603",
+    "0x1201",
+    "0x10B4"
+   ]
   },
   "0x1203": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1202"
   },
   "0x1204": {
    "kind": "pointer",
@@ -6132,12 +6410,18 @@
    "referent": "0x1207"
   },
   "0x1209": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1206",
+    "0x23",
+    "0x1208",
+    "0x623"
+   ]
   },
   "0x120A": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1209"
   },
   "0x120B": {
    "kind": "pointer",
@@ -6623,12 +6907,18 @@
    "referent": "0x1245"
   },
   "0x1247": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1246",
+    "0x603",
+    "0x603",
+    "0x603"
+   ]
   },
   "0x1248": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1247"
   },
   "0x1249": {
    "kind": "pointer",
@@ -6654,22 +6944,26 @@
   "0x124D": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 8
+   "bits": 8,
+   "pos": 8
   },
   "0x124E": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 16
   },
   "0x124F": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 17
   },
   "0x1250": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 14
+   "bits": 14,
+   "pos": 18
   },
   "0x1251": {
    "kind": "struct",
@@ -6886,7 +7180,8 @@
   "0x1276": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 4
+   "bits": 4,
+   "pos": 1
   },
   "0x1277": {
    "kind": "array",
@@ -9228,12 +9523,15 @@
    "forward": null
   },
   "0x129F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x20"
+   ]
   },
   "0x12A0": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x129F"
   },
   "0x12A1": {
    "kind": "pointer",
@@ -9249,12 +9547,14 @@
   "0x12A3": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 12
+   "bits": 12,
+   "pos": 0
   },
   "0x12A4": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 52
+   "bits": 52,
+   "pos": 12
   },
   "0x12A5": {
    "kind": "fieldlist",
@@ -9406,12 +9706,15 @@
    "referent": "0x12B2"
   },
   "0x12B4": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1074"
+   ]
   },
   "0x12B5": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x12B4"
   },
   "0x12B6": {
    "kind": "pointer",
@@ -9465,12 +9768,16 @@
    "referent": "0x1266"
   },
   "0x12BF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x12BE",
+    "0x21"
+   ]
   },
   "0x12C0": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x12BF"
   },
   "0x12C1": {
    "kind": "pointer",
@@ -9515,12 +9822,16 @@
    "forward": null
   },
   "0x12C4": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x12BE",
+    "0x12BE"
+   ]
   },
   "0x12C5": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x12C4"
   },
   "0x12C6": {
    "kind": "pointer",
@@ -9809,24 +10120,31 @@
    "referent": "0x1208"
   },
   "0x12EA": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1068",
+    "0x20"
+   ]
   },
   "0x12EB": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x12EA"
   },
   "0x12EC": {
    "kind": "pointer",
    "referent": "0x12EB"
   },
   "0x12ED": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1063"
+   ]
   },
   "0x12EE": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x12ED"
   },
   "0x12EF": {
    "kind": "pointer",
@@ -10051,17 +10369,20 @@
   "0x1305": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 4
+   "bits": 4,
+   "pos": 7
   },
   "0x1306": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 13
   },
   "0x1307": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 18
+   "bits": 18,
+   "pos": 14
   },
   "0x1308": {
    "kind": "union",
@@ -10113,12 +10434,14 @@
   "0x1310": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 1
+   "bits": 1,
+   "pos": 0
   },
   "0x1311": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 1
+   "bits": 1,
+   "pos": 1
   },
   "0x1312": {
    "kind": "fieldlist",
@@ -10540,47 +10863,56 @@
   "0x131E": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 14
   },
   "0x131F": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 18
   },
   "0x1320": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 20
   },
   "0x1321": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 21
   },
   "0x1322": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 22
   },
   "0x1323": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 1
+   "bits": 1,
+   "pos": 23
   },
   "0x1324": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 8
+   "bits": 8,
+   "pos": 24
   },
   "0x1325": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 18
   },
   "0x1326": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 5
+   "bits": 5,
+   "pos": 3
   },
   "0x1327": {
    "kind": "struct",
@@ -10686,17 +11018,20 @@
   "0x133A": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 4
+   "bits": 4,
+   "pos": 0
   },
   "0x133B": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 8
+   "bits": 8,
+   "pos": 4
   },
   "0x133C": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 31
+   "bits": 31,
+   "pos": 0
   },
   "0x133D": {
    "kind": "struct",
@@ -12012,7 +12347,8 @@
   },
   "0x1351": {
    "kind": "proc",
-   "return": "0x1227"
+   "return": "0x1227",
+   "args": "0x10B7"
   },
   "0x1352": {
    "kind": "pointer",
@@ -12020,7 +12356,8 @@
   },
   "0x1353": {
    "kind": "proc",
-   "return": "0x121A"
+   "return": "0x121A",
+   "args": "0x10B7"
   },
   "0x1354": {
    "kind": "pointer",
@@ -12070,12 +12407,15 @@
    "referent": "0x1003"
   },
   "0x135C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x622"
+   ]
   },
   "0x135D": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x135C"
   },
   "0x135E": {
    "kind": "pointer",
@@ -12083,7 +12423,8 @@
   },
   "0x135F": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x105C"
   },
   "0x1360": {
    "kind": "pointer",
@@ -12091,7 +12432,8 @@
   },
   "0x1361": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x105C"
   },
   "0x1362": {
    "kind": "pointer",
@@ -12099,7 +12441,8 @@
   },
   "0x1363": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x10B7"
   },
   "0x1364": {
    "kind": "pointer",
@@ -12210,12 +12553,17 @@
    "forward": null
   },
   "0x1367": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1366",
+    "0x23",
+    "0x22"
+   ]
   },
   "0x1368": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x1367"
   },
   "0x1369": {
    "kind": "pointer",
@@ -12270,12 +12618,18 @@
    "forward": null
   },
   "0x136C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1366",
+    "0x23",
+    "0x22",
+    "0x136B"
+   ]
   },
   "0x136D": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x136C"
   },
   "0x136E": {
    "kind": "pointer",
@@ -12359,12 +12713,17 @@
    "forward": null
   },
   "0x1377": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1374",
+    "0x1376",
+    "0x20"
+   ]
   },
   "0x1378": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1377"
   },
   "0x1379": {
    "kind": "pointer",
@@ -12399,22 +12758,26 @@
   "0x137E": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 16
+   "bits": 16,
+   "pos": 0
   },
   "0x137F": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 48
+   "bits": 48,
+   "pos": 16
   },
   "0x1380": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 4
+   "bits": 4,
+   "pos": 0
   },
   "0x1381": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 60
+   "bits": 60,
+   "pos": 4
   },
   "0x1382": {
    "kind": "fieldlist",
@@ -12478,12 +12841,15 @@
    "forward": null
   },
   "0x1386": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x12"
+   ]
   },
   "0x1387": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1386"
   },
   "0x1388": {
    "kind": "pointer",
@@ -12510,12 +12876,15 @@
    "referent": "0x21"
   },
   "0x138E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x106D"
+   ]
   },
   "0x138F": {
    "kind": "proc",
-   "return": "0x21"
+   "return": "0x21",
+   "args": "0x138E"
   },
   "0x1390": {
    "kind": "pointer",
@@ -12600,24 +12969,33 @@
    "referent": "0x13A1"
   },
   "0x13A3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1184",
+    "0x139E"
+   ]
   },
   "0x13A4": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x13A3"
   },
   "0x13A5": {
    "kind": "pointer",
    "referent": "0x13A4"
   },
   "0x13A6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x118D",
+    "0x12B3",
+    "0x23"
+   ]
   },
   "0x13A7": {
    "kind": "proc",
-   "return": "0x118D"
+   "return": "0x118D",
+   "args": "0x13A6"
   },
   "0x13A8": {
    "kind": "pointer",
@@ -12677,48 +13055,63 @@
    "referent": "0x101A"
   },
   "0x13B0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1072",
+    "0x21"
+   ]
   },
   "0x13B1": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x13B0"
   },
   "0x13B2": {
    "kind": "pointer",
    "referent": "0x13B1"
   },
   "0x13B3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x105B",
+    "0x22"
+   ]
   },
   "0x13B4": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x13B3"
   },
   "0x13B5": {
    "kind": "pointer",
    "referent": "0x13B4"
   },
   "0x13B6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x105B"
+   ]
   },
   "0x13B7": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x13B6"
   },
   "0x13B8": {
    "kind": "pointer",
    "referent": "0x13B7"
   },
   "0x13B9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1086",
+    "0x23"
+   ]
   },
   "0x13BA": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x13B9"
   },
   "0x13BB": {
    "kind": "pointer",
@@ -12773,12 +13166,15 @@
    "referent": "0x101C"
   },
   "0x13C3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x13BE"
+   ]
   },
   "0x13C4": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x13C3"
   },
   "0x13C5": {
    "kind": "pointer",
@@ -12800,12 +13196,15 @@
    "referent": "0x13C7"
   },
   "0x13C9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603"
+   ]
   },
   "0x13CA": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x13C9"
   },
   "0x13CB": {
    "kind": "pointer",
@@ -12844,24 +13243,32 @@
    "referent": "0x13CB"
   },
   "0x13CF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x118D",
+    "0x23",
+    "0x22"
+   ]
   },
   "0x13D0": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x13CF"
   },
   "0x13D1": {
    "kind": "pointer",
    "referent": "0x13D0"
   },
   "0x13D2": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x12C8"
+   ]
   },
   "0x13D3": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x13D2"
   },
   "0x13D4": {
    "kind": "pointer",
@@ -12925,12 +13332,14 @@
   "0x13DB": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 1
+   "bits": 1,
+   "pos": 2
   },
   "0x13DC": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 1
+   "bits": 1,
+   "pos": 3
   },
   "0x13DD": {
    "kind": "fieldlist",
@@ -13098,24 +13507,34 @@
    "referent": "0x13E8"
   },
   "0x13EA": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1366",
+    "0x23",
+    "0x22",
+    "0x13E9"
+   ]
   },
   "0x13EB": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x13EA"
   },
   "0x13EC": {
    "kind": "pointer",
    "referent": "0x13EB"
   },
   "0x13ED": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x13E9"
+   ]
   },
   "0x13EE": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x13ED"
   },
   "0x13EF": {
    "kind": "pointer",
@@ -13274,12 +13693,15 @@
    "forward": null
   },
   "0x13F6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x137D"
+   ]
   },
   "0x13F7": {
    "kind": "proc",
-   "return": "0x13F3"
+   "return": "0x13F3",
+   "args": "0x13F6"
   },
   "0x13F8": {
    "kind": "pointer",
@@ -13299,31 +13721,39 @@
   },
   "0x13FC": {
    "kind": "proc",
-   "return": "0x21"
+   "return": "0x21",
+   "args": "0x13F6"
   },
   "0x13FD": {
    "kind": "pointer",
    "referent": "0x13FC"
   },
   "0x13FE": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x137D",
+    "0x13F3"
+   ]
   },
   "0x13FF": {
    "kind": "proc",
-   "return": "0x13F3"
+   "return": "0x13F3",
+   "args": "0x13FE"
   },
   "0x1400": {
    "kind": "pointer",
    "referent": "0x13FF"
   },
   "0x1401": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x21"
+   ]
   },
   "0x1402": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x1401"
   },
   "0x1403": {
    "kind": "pointer",
@@ -13541,12 +13971,16 @@
    "forward": null
   },
   "0x1416": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1409",
+    "0x603"
+   ]
   },
   "0x1417": {
    "kind": "proc",
-   "return": "0x1413"
+   "return": "0x1413",
+   "args": "0x1416"
   },
   "0x1418": {
    "kind": "pointer",
@@ -13614,36 +14048,48 @@
    "referent": "0x1086"
   },
   "0x1422": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x141F",
+    "0x603",
+    "0x22"
+   ]
   },
   "0x1423": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1422"
   },
   "0x1424": {
    "kind": "pointer",
    "referent": "0x1423"
   },
   "0x1425": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x141B",
+    "0x603"
+   ]
   },
   "0x1426": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x1425"
   },
   "0x1427": {
    "kind": "pointer",
    "referent": "0x1426"
   },
   "0x1428": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x13DA"
+   ]
   },
   "0x1429": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1428"
   },
   "0x142A": {
    "kind": "pointer",
@@ -13651,7 +14097,8 @@
   },
   "0x142B": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1428"
   },
   "0x142C": {
    "kind": "pointer",
@@ -13690,12 +14137,15 @@
    "forward": null
   },
   "0x1430": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x142F"
+   ]
   },
   "0x1431": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1430"
   },
   "0x1432": {
    "kind": "pointer",
@@ -13963,24 +14413,33 @@
    "forward": null
   },
   "0x1445": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x22"
+   ]
   },
   "0x1446": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1445"
   },
   "0x1447": {
    "kind": "pointer",
    "referent": "0x1446"
   },
   "0x1448": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1436",
+    "0x603",
+    "0x20"
+   ]
   },
   "0x1449": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1448"
   },
   "0x144A": {
    "kind": "pointer",
@@ -14009,12 +14468,20 @@
    "referent": "0x144D"
   },
   "0x144F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x22",
+    "0x144C",
+    "0x70",
+    "0x10B4",
+    "0x144E"
+   ]
   },
   "0x1450": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x144F"
   },
   "0x1451": {
    "kind": "pointer",
@@ -14044,12 +14511,15 @@
    "forward": null
   },
   "0x1454": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1227"
+   ]
   },
   "0x1455": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x1454"
   },
   "0x1456": {
    "kind": "pointer",
@@ -14101,32 +14571,38 @@
   "0x145E": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 3
+   "bits": 3,
+   "pos": 9
   },
   "0x145F": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 3
+   "bits": 3,
+   "pos": 12
   },
   "0x1460": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 7
+   "bits": 7,
+   "pos": 25
   },
   "0x1461": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 2
   },
   "0x1462": {
    "kind": "bitfield",
    "type": "0x1067",
-   "bits": 1
+   "bits": 1,
+   "pos": 3
   },
   "0x1463": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 3
+   "bits": 3,
+   "pos": 1
   },
   "0x1464": {
    "kind": "struct",
@@ -14925,22 +15401,26 @@
   "0x146C": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 3
+   "bits": 3,
+   "pos": 28
   },
   "0x146D": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 10
   },
   "0x146E": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 3
+   "bits": 3,
+   "pos": 27
   },
   "0x146F": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 3
+   "bits": 3,
+   "pos": 0
   },
   "0x1470": {
    "kind": "pointer",
@@ -15059,12 +15539,14 @@
   "0x1484": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 3
+   "bits": 3,
+   "pos": 0
   },
   "0x1485": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 3
+   "bits": 3,
+   "pos": 3
   },
   "0x1486": {
    "kind": "struct",
@@ -15091,12 +15573,14 @@
   "0x148A": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 61
+   "bits": 61,
+   "pos": 0
   },
   "0x148B": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 3
+   "bits": 3,
+   "pos": 61
   },
   "0x148C": {
    "kind": "union",
@@ -17010,24 +17494,30 @@
    "forward": null
   },
   "0x14A0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1300"
+   ]
   },
   "0x14A1": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x14A0"
   },
   "0x14A2": {
    "kind": "pointer",
    "referent": "0x14A1"
   },
   "0x14A3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x140B"
+   ]
   },
   "0x14A4": {
    "kind": "proc",
-   "return": "0x1300"
+   "return": "0x1300",
+   "args": "0x14A3"
   },
   "0x14A5": {
    "kind": "pointer",
@@ -17035,7 +17525,8 @@
   },
   "0x14A6": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x14A0"
   },
   "0x14A7": {
    "kind": "pointer",
@@ -17043,7 +17534,8 @@
   },
   "0x14A8": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x14A3"
   },
   "0x14A9": {
    "kind": "pointer",
@@ -17051,7 +17543,8 @@
   },
   "0x14AA": {
    "kind": "proc",
-   "return": "0x21"
+   "return": "0x21",
+   "args": "0x14A3"
   },
   "0x14AB": {
    "kind": "pointer",
@@ -17126,7 +17619,8 @@
   },
   "0x14B1": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x14A3"
   },
   "0x14B2": {
    "kind": "pointer",
@@ -18289,12 +18783,17 @@
    "referent": "0x13A9"
   },
   "0x14D9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x14D8",
+    "0x22"
+   ]
   },
   "0x14DA": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x14D9"
   },
   "0x14DB": {
    "kind": "pointer",
@@ -18368,12 +18867,16 @@
    "forward": null
   },
   "0x14E2": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x145C",
+    "0x14D3"
+   ]
   },
   "0x14E3": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x14E2"
   },
   "0x14E4": {
    "kind": "pointer",
@@ -20666,12 +21169,17 @@
    "forward": null
   },
   "0x1565": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x145C",
+    "0x14D3",
+    "0x603"
+   ]
   },
   "0x1566": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1565"
   },
   "0x1567": {
    "kind": "pointer",
@@ -20736,24 +21244,33 @@
    "forward": null
   },
   "0x156A": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x623",
+    "0x623"
+   ]
   },
   "0x156B": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x156A"
   },
   "0x156C": {
    "kind": "pointer",
    "referent": "0x156B"
   },
   "0x156D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1246",
+    "0x1249",
+    "0x603"
+   ]
   },
   "0x156E": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x156D"
   },
   "0x156F": {
    "kind": "pointer",
@@ -20968,12 +21485,18 @@
    "forward": null
   },
   "0x157C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1246",
+    "0x145C",
+    "0x14D3",
+    "0x603"
+   ]
   },
   "0x157D": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x157C"
   },
   "0x157E": {
    "kind": "pointer",
@@ -21052,24 +21575,32 @@
    "forward": null
   },
   "0x1582": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x14D3"
+   ]
   },
   "0x1583": {
    "kind": "proc",
-   "return": "0x14E7"
+   "return": "0x14E7",
+   "args": "0x1582"
   },
   "0x1584": {
    "kind": "pointer",
    "referent": "0x1583"
   },
   "0x1585": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1246",
+    "0x603",
+    "0x603"
+   ]
   },
   "0x1586": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x1585"
   },
   "0x1587": {
    "kind": "pointer",
@@ -21088,12 +21619,17 @@
    "referent": "0x1567"
   },
   "0x158B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x1001",
+    "0x23"
+   ]
   },
   "0x158C": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x158B"
   },
   "0x158D": {
    "kind": "pointer",
@@ -21366,24 +21902,36 @@
    "forward": null
   },
   "0x15A2": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x14D5",
+    "0x70",
+    "0x15A1",
+    "0x603",
+    "0x22",
+    "0x22"
+   ]
   },
   "0x15A3": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x15A2"
   },
   "0x15A4": {
    "kind": "pointer",
    "referent": "0x15A3"
   },
   "0x15A5": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x14D5"
+   ]
   },
   "0x15A6": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x15A5"
   },
   "0x15A7": {
    "kind": "pointer",
@@ -21597,12 +22145,16 @@
    "referent": "0x15B0"
   },
   "0x15B2": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x15B1"
+   ]
   },
   "0x15B3": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x15B2"
   },
   "0x15B4": {
    "kind": "pointer",
@@ -21941,12 +22493,16 @@
    "referent": "0x10BB"
   },
   "0x15D7": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x23"
+   ]
   },
   "0x15D8": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x15D7"
   },
   "0x15D9": {
    "kind": "pointer",
@@ -21954,31 +22510,41 @@
   },
   "0x15DA": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x14A3"
   },
   "0x15DB": {
    "kind": "pointer",
    "referent": "0x15DA"
   },
   "0x15DC": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x140B",
+    "0x22",
+    "0x23",
+    "0x23"
+   ]
   },
   "0x15DD": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x15DC"
   },
   "0x15DE": {
    "kind": "pointer",
    "referent": "0x15DD"
   },
   "0x15DF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1434"
+   ]
   },
   "0x15E0": {
    "kind": "proc",
-   "return": "0x1599"
+   "return": "0x1599",
+   "args": "0x15DF"
   },
   "0x15E1": {
    "kind": "pointer",
@@ -21986,7 +22552,8 @@
   },
   "0x15E2": {
    "kind": "proc",
-   "return": "0x1434"
+   "return": "0x1434",
+   "args": "0x10B7"
   },
   "0x15E3": {
    "kind": "pointer",
@@ -22017,36 +22584,51 @@
    "forward": null
   },
   "0x15E6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x1434",
+    "0x23",
+    "0x23",
+    "0x15E5"
+   ]
   },
   "0x15E7": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x15E6"
   },
   "0x15E8": {
    "kind": "pointer",
    "referent": "0x15E7"
   },
   "0x15E9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A"
+   ]
   },
   "0x15EA": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x15E9"
   },
   "0x15EB": {
    "kind": "pointer",
    "referent": "0x15EA"
   },
   "0x15EC": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x23",
+    "0x22"
+   ]
   },
   "0x15ED": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x15EC"
   },
   "0x15EE": {
    "kind": "pointer",
@@ -22155,12 +22737,21 @@
    "referent": "0x15F6"
   },
   "0x15F8": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22",
+    "0x22",
+    "0x20",
+    "0x15F7",
+    "0x603",
+    "0x20",
+    "0x20"
+   ]
   },
   "0x15F9": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x15F8"
   },
   "0x15FA": {
    "kind": "pointer",
@@ -23103,7 +23694,8 @@
   "0x1627": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 25
+   "bits": 25,
+   "pos": 7
   },
   "0x1628": {
    "kind": "fieldlist",
@@ -23545,12 +24137,17 @@
    "forward": null
   },
   "0x1644": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1001",
+    "0x1001",
+    "0x23"
+   ]
   },
   "0x1645": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x1644"
   },
   "0x1646": {
    "kind": "pointer",
@@ -23561,12 +24158,15 @@
    "referent": "0x11FC"
   },
   "0x1648": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1636"
+   ]
   },
   "0x1649": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x1648"
   },
   "0x164A": {
    "kind": "pointer",
@@ -23577,12 +24177,15 @@
    "referent": "0x1637"
   },
   "0x164C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x164B"
+   ]
   },
   "0x164D": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x164C"
   },
   "0x164E": {
    "kind": "pointer",
@@ -23800,12 +24403,20 @@
    "forward": null
   },
   "0x165B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1636",
+    "0x75",
+    "0x75",
+    "0x1640",
+    "0x1136",
+    "0x603"
+   ]
   },
   "0x165C": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x165B"
   },
   "0x165D": {
    "kind": "pointer",
@@ -23832,72 +24443,93 @@
    "referent": "0x1660"
   },
   "0x1662": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x165F",
+    "0x71"
+   ]
   },
   "0x1663": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1662"
   },
   "0x1664": {
    "kind": "pointer",
    "referent": "0x1663"
   },
   "0x1665": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1661"
+   ]
   },
   "0x1666": {
    "kind": "proc",
-   "return": "0x71"
+   "return": "0x71",
+   "args": "0x1665"
   },
   "0x1667": {
    "kind": "pointer",
    "referent": "0x1666"
   },
   "0x1668": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x107C",
+    "0x75"
+   ]
   },
   "0x1669": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1668"
   },
   "0x166A": {
    "kind": "pointer",
    "referent": "0x1669"
   },
   "0x166B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x107A"
+   ]
   },
   "0x166C": {
    "kind": "proc",
-   "return": "0x75"
+   "return": "0x75",
+   "args": "0x166B"
   },
   "0x166D": {
    "kind": "pointer",
    "referent": "0x166C"
   },
   "0x166E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1078",
+    "0x74"
+   ]
   },
   "0x166F": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x166E"
   },
   "0x1670": {
    "kind": "pointer",
    "referent": "0x166F"
   },
   "0x1671": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1076"
+   ]
   },
   "0x1672": {
    "kind": "proc",
-   "return": "0x74"
+   "return": "0x74",
+   "args": "0x1671"
   },
   "0x1673": {
    "kind": "pointer",
@@ -23914,24 +24546,31 @@
    "referent": "0x1674"
   },
   "0x1676": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1675",
+    "0x10B5"
+   ]
   },
   "0x1677": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1676"
   },
   "0x1678": {
    "kind": "pointer",
    "referent": "0x1677"
   },
   "0x1679": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1396"
+   ]
   },
   "0x167A": {
    "kind": "proc",
-   "return": "0x10B5"
+   "return": "0x10B5",
+   "args": "0x1679"
   },
   "0x167B": {
    "kind": "pointer",
@@ -23948,24 +24587,31 @@
    "referent": "0x167C"
   },
   "0x167E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x167D",
+    "0x10BB"
+   ]
   },
   "0x167F": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x167E"
   },
   "0x1680": {
    "kind": "pointer",
    "referent": "0x167F"
   },
   "0x1681": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x139A"
+   ]
   },
   "0x1682": {
    "kind": "proc",
-   "return": "0x10BB"
+   "return": "0x10BB",
+   "args": "0x1681"
   },
   "0x1683": {
    "kind": "pointer",
@@ -24006,12 +24652,16 @@
    "referent": "0x106D"
   },
   "0x168C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1686",
+    "0x10BC"
+   ]
   },
   "0x168D": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x168C"
   },
   "0x168E": {
    "kind": "pointer",
@@ -24022,12 +24672,15 @@
    "referent": "0x1187"
   },
   "0x1690": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x139E"
+   ]
   },
   "0x1691": {
    "kind": "proc",
-   "return": "0x10BC"
+   "return": "0x10BC",
+   "args": "0x1690"
   },
   "0x1692": {
    "kind": "pointer",
@@ -24051,7 +24704,8 @@
   },
   "0x1697": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x105F"
   },
   "0x1698": {
    "kind": "pointer",
@@ -24059,55 +24713,72 @@
   },
   "0x1699": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x1665"
   },
   "0x169A": {
    "kind": "pointer",
    "referent": "0x1699"
   },
   "0x169B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1010"
+   ]
   },
   "0x169C": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x169B"
   },
   "0x169D": {
    "kind": "pointer",
    "referent": "0x169C"
   },
   "0x169E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1015"
+   ]
   },
   "0x169F": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x169E"
   },
   "0x16A0": {
    "kind": "pointer",
    "referent": "0x169F"
   },
   "0x16A1": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x101A",
+    "0x12",
+    "0x12"
+   ]
   },
   "0x16A2": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16A1"
   },
   "0x16A3": {
    "kind": "pointer",
    "referent": "0x16A2"
   },
   "0x16A4": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x101C",
+    "0x13",
+    "0x13"
+   ]
   },
   "0x16A5": {
    "kind": "proc",
-   "return": "0x13"
+   "return": "0x13",
+   "args": "0x16A4"
   },
   "0x16A6": {
    "kind": "pointer",
@@ -24115,19 +24786,25 @@
   },
   "0x16A7": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x13A6"
   },
   "0x16A8": {
    "kind": "pointer",
    "referent": "0x16A7"
   },
   "0x16A9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x118D",
+    "0x1001",
+    "0x23"
+   ]
   },
   "0x16AA": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x16A9"
   },
   "0x16AB": {
    "kind": "pointer",
@@ -24154,36 +24831,51 @@
    "referent": "0x16AE"
   },
   "0x16B0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x16AD",
+    "0x16AF",
+    "0x23"
+   ]
   },
   "0x16B1": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x16B0"
   },
   "0x16B2": {
    "kind": "pointer",
    "referent": "0x16B1"
   },
   "0x16B3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x12B3",
+    "0x23"
+   ]
   },
   "0x16B4": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x16B3"
   },
   "0x16B5": {
    "kind": "pointer",
    "referent": "0x16B4"
   },
   "0x16B6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x118D",
+    "0x20",
+    "0x23"
+   ]
   },
   "0x16B7": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x16B6"
   },
   "0x16B8": {
    "kind": "pointer",
@@ -24291,12 +24983,17 @@
    "forward": null
   },
   "0x16C0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x623",
+    "0x23",
+    "0x623"
+   ]
   },
   "0x16C1": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x16C0"
   },
   "0x16C2": {
    "kind": "pointer",
@@ -24316,32 +25013,38 @@
   "0x16C5": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 0
   },
   "0x16C6": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 11
+   "bits": 11,
+   "pos": 2
   },
   "0x16C7": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 3
+   "bits": 3,
+   "pos": 13
   },
   "0x16C8": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 4
+   "bits": 4,
+   "pos": 16
   },
   "0x16C9": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 21
   },
   "0x16CA": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 9
+   "bits": 9,
+   "pos": 23
   },
   "0x16CB": {
    "kind": "fieldlist",
@@ -24402,60 +25105,90 @@
    "forward": null
   },
   "0x16CD": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1010",
+    "0x23",
+    "0x1207"
+   ]
   },
   "0x16CE": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16CD"
   },
   "0x16CF": {
    "kind": "pointer",
    "referent": "0x16CE"
   },
   "0x16D0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x670",
+    "0x23",
+    "0x623",
+    "0x1010",
+    "0x23"
+   ]
   },
   "0x16D1": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16D0"
   },
   "0x16D2": {
    "kind": "pointer",
    "referent": "0x16D1"
   },
   "0x16D3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1015",
+    "0x23",
+    "0x1207"
+   ]
   },
   "0x16D4": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16D3"
   },
   "0x16D5": {
    "kind": "pointer",
    "referent": "0x16D4"
   },
   "0x16D6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x671",
+    "0x23",
+    "0x623",
+    "0x1015",
+    "0x23"
+   ]
   },
   "0x16D7": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16D6"
   },
   "0x16D8": {
    "kind": "pointer",
    "referent": "0x16D7"
   },
   "0x16D9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1010",
+    "0x23",
+    "0x1207",
+    "0x22"
+   ]
   },
   "0x16DA": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16D9"
   },
   "0x16DB": {
    "kind": "pointer",
@@ -24466,180 +25199,274 @@
    "referent": "0x1010"
   },
   "0x16DD": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x16DC",
+    "0x623",
+    "0x1207",
+    "0x22"
+   ]
   },
   "0x16DE": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16DD"
   },
   "0x16DF": {
    "kind": "pointer",
    "referent": "0x16DE"
   },
   "0x16E0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x670",
+    "0x23",
+    "0x22"
+   ]
   },
   "0x16E1": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16E0"
   },
   "0x16E2": {
    "kind": "pointer",
    "referent": "0x16E1"
   },
   "0x16E3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x670",
+    "0x23",
+    "0x23",
+    "0x118B",
+    "0x623",
+    "0x22"
+   ]
   },
   "0x16E4": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16E3"
   },
   "0x16E5": {
    "kind": "pointer",
    "referent": "0x16E4"
   },
   "0x16E6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1015",
+    "0x23",
+    "0x1207",
+    "0x22"
+   ]
   },
   "0x16E7": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16E6"
   },
   "0x16E8": {
    "kind": "pointer",
    "referent": "0x16E7"
   },
   "0x16E9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11A7",
+    "0x623",
+    "0x1207",
+    "0x22"
+   ]
   },
   "0x16EA": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16E9"
   },
   "0x16EB": {
    "kind": "pointer",
    "referent": "0x16EA"
   },
   "0x16EC": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x671",
+    "0x23",
+    "0x22"
+   ]
   },
   "0x16ED": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16EC"
   },
   "0x16EE": {
    "kind": "pointer",
    "referent": "0x16ED"
   },
   "0x16EF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x671",
+    "0x23",
+    "0x23",
+    "0x1187",
+    "0x623",
+    "0x22"
+   ]
   },
   "0x16F0": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16EF"
   },
   "0x16F1": {
    "kind": "pointer",
    "referent": "0x16F0"
   },
   "0x16F2": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1010",
+    "0x23",
+    "0x623",
+    "0x1207"
+   ]
   },
   "0x16F3": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16F2"
   },
   "0x16F4": {
    "kind": "pointer",
    "referent": "0x16F3"
   },
   "0x16F5": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1015",
+    "0x23",
+    "0x623",
+    "0x1207"
+   ]
   },
   "0x16F6": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16F5"
   },
   "0x16F7": {
    "kind": "pointer",
    "referent": "0x16F6"
   },
   "0x16F8": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1010",
+    "0x23",
+    "0x623",
+    "0x1207",
+    "0x22"
+   ]
   },
   "0x16F9": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16F8"
   },
   "0x16FA": {
    "kind": "pointer",
    "referent": "0x16F9"
   },
   "0x16FB": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1015",
+    "0x23",
+    "0x623",
+    "0x1207",
+    "0x22"
+   ]
   },
   "0x16FC": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16FB"
   },
   "0x16FD": {
    "kind": "pointer",
    "referent": "0x16FC"
   },
   "0x16FE": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x670",
+    "0x23",
+    "0x623",
+    "0x1010",
+    "0x670"
+   ]
   },
   "0x16FF": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x16FE"
   },
   "0x1700": {
    "kind": "pointer",
    "referent": "0x16FF"
   },
   "0x1701": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x671",
+    "0x23",
+    "0x623",
+    "0x1015",
+    "0x670"
+   ]
   },
   "0x1702": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1701"
   },
   "0x1703": {
    "kind": "pointer",
    "referent": "0x1702"
   },
   "0x1704": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1010",
+    "0x23",
+    "0x623"
+   ]
   },
   "0x1705": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1704"
   },
   "0x1706": {
    "kind": "pointer",
    "referent": "0x1705"
   },
   "0x1707": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1015",
+    "0x23",
+    "0x623"
+   ]
   },
   "0x1708": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1707"
   },
   "0x1709": {
    "kind": "pointer",
@@ -24656,72 +25483,112 @@
    "referent": "0x170A"
   },
   "0x170C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x170B",
+    "0x23",
+    "0x623"
+   ]
   },
   "0x170D": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x170C"
   },
   "0x170E": {
    "kind": "pointer",
    "referent": "0x170D"
   },
   "0x170F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1184",
+    "0x1015",
+    "0x1207",
+    "0x22"
+   ]
   },
   "0x1710": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x170F"
   },
   "0x1711": {
    "kind": "pointer",
    "referent": "0x1710"
   },
   "0x1712": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x10D1",
+    "0x1207",
+    "0x22"
+   ]
   },
   "0x1713": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1712"
   },
   "0x1714": {
    "kind": "pointer",
    "referent": "0x1713"
   },
   "0x1715": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x10D1",
+    "0x1187",
+    "0x623",
+    "0x1207",
+    "0x22"
+   ]
   },
   "0x1716": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1715"
   },
   "0x1717": {
    "kind": "pointer",
    "referent": "0x1716"
   },
   "0x1718": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x10D1",
+    "0x1187",
+    "0x623",
+    "0x623",
+    "0x1207",
+    "0x22"
+   ]
   },
   "0x1719": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1718"
   },
   "0x171A": {
    "kind": "pointer",
    "referent": "0x1719"
   },
   "0x171B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x671",
+    "0x23",
+    "0x23",
+    "0x623",
+    "0x1187",
+    "0x623",
+    "0x22"
+   ]
   },
   "0x171C": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x171B"
   },
   "0x171D": {
    "kind": "pointer",
@@ -24733,192 +25600,260 @@
    "bytes": 1
   },
   "0x171F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x670",
+    "0x23",
+    "0x1010",
+    "0x670"
+   ]
   },
   "0x1720": {
    "kind": "proc",
-   "return": "0x74"
+   "return": "0x74",
+   "args": "0x171F"
   },
   "0x1721": {
    "kind": "pointer",
    "referent": "0x1720"
   },
   "0x1722": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x671",
+    "0x23",
+    "0x1015",
+    "0x670"
+   ]
   },
   "0x1723": {
    "kind": "proc",
-   "return": "0x74"
+   "return": "0x74",
+   "args": "0x1722"
   },
   "0x1724": {
    "kind": "pointer",
    "referent": "0x1723"
   },
   "0x1725": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x20",
+    "0x670"
+   ]
   },
   "0x1726": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1725"
   },
   "0x1727": {
    "kind": "pointer",
    "referent": "0x1726"
   },
   "0x1728": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x11",
+    "0x670"
+   ]
   },
   "0x1729": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1728"
   },
   "0x172A": {
    "kind": "pointer",
    "referent": "0x1729"
   },
   "0x172B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x21",
+    "0x670"
+   ]
   },
   "0x172C": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x172B"
   },
   "0x172D": {
    "kind": "pointer",
    "referent": "0x172C"
   },
   "0x172E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x74",
+    "0x670"
+   ]
   },
   "0x172F": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x172E"
   },
   "0x1730": {
    "kind": "pointer",
    "referent": "0x172F"
   },
   "0x1731": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x13",
+    "0x670"
+   ]
   },
   "0x1732": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1731"
   },
   "0x1733": {
    "kind": "pointer",
    "referent": "0x1732"
   },
   "0x1734": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x75",
+    "0x670"
+   ]
   },
   "0x1735": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1734"
   },
   "0x1736": {
    "kind": "pointer",
    "referent": "0x1735"
   },
   "0x1737": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x670"
+   ]
   },
   "0x1738": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1737"
   },
   "0x1739": {
    "kind": "pointer",
    "referent": "0x1738"
   },
   "0x173A": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x12",
+    "0x670"
+   ]
   },
   "0x173B": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x173A"
   },
   "0x173C": {
    "kind": "pointer",
    "referent": "0x173B"
   },
   "0x173D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22",
+    "0x670"
+   ]
   },
   "0x173E": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x173D"
   },
   "0x173F": {
    "kind": "pointer",
    "referent": "0x173E"
   },
   "0x1740": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x75",
+    "0x620"
+   ]
   },
   "0x1741": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1740"
   },
   "0x1742": {
    "kind": "pointer",
    "referent": "0x1741"
   },
   "0x1743": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22",
+    "0x621"
+   ]
   },
   "0x1744": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1743"
   },
   "0x1745": {
    "kind": "pointer",
    "referent": "0x1744"
   },
   "0x1746": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x675"
+   ]
   },
   "0x1747": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1746"
   },
   "0x1748": {
    "kind": "pointer",
    "referent": "0x1747"
   },
   "0x1749": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x622"
+   ]
   },
   "0x174A": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1749"
   },
   "0x174B": {
    "kind": "pointer",
    "referent": "0x174A"
   },
   "0x174C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x23"
+   ]
   },
   "0x174D": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x174C"
   },
   "0x174E": {
    "kind": "pointer",
@@ -24957,72 +25892,102 @@
    "forward": null
   },
   "0x1752": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x603",
+    "0x23",
+    "0x603",
+    "0x23",
+    "0x22",
+    "0x22",
+    "0x22"
+   ]
   },
   "0x1753": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x1752"
   },
   "0x1754": {
    "kind": "pointer",
    "referent": "0x1753"
   },
   "0x1755": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1103"
+   ]
   },
   "0x1756": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1755"
   },
   "0x1757": {
    "kind": "pointer",
    "referent": "0x1756"
   },
   "0x1758": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1103",
+    "0x1105"
+   ]
   },
   "0x1759": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1758"
   },
   "0x175A": {
    "kind": "pointer",
    "referent": "0x1759"
   },
   "0x175B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1103",
+    "0x1107",
+    "0x110A"
+   ]
   },
   "0x175C": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x175B"
   },
   "0x175D": {
    "kind": "pointer",
    "referent": "0x175C"
   },
   "0x175E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1103",
+    "0x603"
+   ]
   },
   "0x175F": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x175E"
   },
   "0x1760": {
    "kind": "pointer",
    "referent": "0x175F"
   },
   "0x1761": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1103",
+    "0x1118"
+   ]
   },
   "0x1762": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1761"
   },
   "0x1763": {
    "kind": "pointer",
@@ -25030,19 +25995,23 @@
   },
   "0x1764": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x115A"
   },
   "0x1765": {
    "kind": "pointer",
    "referent": "0x1764"
   },
   "0x1766": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x671"
+   ]
   },
   "0x1767": {
    "kind": "proc",
-   "return": "0x671"
+   "return": "0x671",
+   "args": "0x1766"
   },
   "0x1768": {
    "kind": "pointer",
@@ -25059,36 +26028,47 @@
    "referent": "0x1769"
   },
   "0x176B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x176A"
+   ]
   },
   "0x176C": {
    "kind": "proc",
-   "return": "0x176A"
+   "return": "0x176A",
+   "args": "0x176B"
   },
   "0x176D": {
    "kind": "pointer",
    "referent": "0x176C"
   },
   "0x176E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1015",
+    "0x1015"
+   ]
   },
   "0x176F": {
    "kind": "proc",
-   "return": "0x74"
+   "return": "0x74",
+   "args": "0x176E"
   },
   "0x1770": {
    "kind": "pointer",
    "referent": "0x176F"
   },
   "0x1771": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x170B",
+    "0x170B"
+   ]
   },
   "0x1772": {
    "kind": "proc",
-   "return": "0x74"
+   "return": "0x74",
+   "args": "0x1771"
   },
   "0x1773": {
    "kind": "pointer",
@@ -25096,79 +26076,104 @@
   },
   "0x1774": {
    "kind": "proc",
-   "return": "0x74"
+   "return": "0x74",
+   "args": "0x169E"
   },
   "0x1775": {
    "kind": "pointer",
    "referent": "0x1774"
   },
   "0x1776": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x170B"
+   ]
   },
   "0x1777": {
    "kind": "proc",
-   "return": "0x74"
+   "return": "0x74",
+   "args": "0x1776"
   },
   "0x1778": {
    "kind": "pointer",
    "referent": "0x1777"
   },
   "0x1779": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1015",
+    "0x71"
+   ]
   },
   "0x177A": {
    "kind": "proc",
-   "return": "0x671"
+   "return": "0x671",
+   "args": "0x1779"
   },
   "0x177B": {
    "kind": "pointer",
    "referent": "0x177A"
   },
   "0x177C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x170B",
+    "0x71"
+   ]
   },
   "0x177D": {
    "kind": "proc",
-   "return": "0x176A"
+   "return": "0x176A",
+   "args": "0x177C"
   },
   "0x177E": {
    "kind": "pointer",
    "referent": "0x177D"
   },
   "0x177F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x671",
+    "0x1015"
+   ]
   },
   "0x1780": {
    "kind": "proc",
-   "return": "0x671"
+   "return": "0x671",
+   "args": "0x177F"
   },
   "0x1781": {
    "kind": "pointer",
    "referent": "0x1780"
   },
   "0x1782": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x176A",
+    "0x170B"
+   ]
   },
   "0x1783": {
    "kind": "proc",
-   "return": "0x176A"
+   "return": "0x176A",
+   "args": "0x1782"
   },
   "0x1784": {
    "kind": "pointer",
    "referent": "0x1783"
   },
   "0x1785": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x671",
+    "0x23",
+    "0x1015"
+   ]
   },
   "0x1786": {
    "kind": "proc",
-   "return": "0x74"
+   "return": "0x74",
+   "args": "0x1785"
   },
   "0x1787": {
    "kind": "pointer",
@@ -25176,7 +26181,8 @@
   },
   "0x1788": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x1776"
   },
   "0x1789": {
    "kind": "pointer",
@@ -25273,12 +26279,16 @@
    "forward": null
   },
   "0x1792": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x178A",
+    "0x178A"
+   ]
   },
   "0x1793": {
    "kind": "proc",
-   "return": "0x178A"
+   "return": "0x178A",
+   "args": "0x1792"
   },
   "0x1794": {
    "kind": "pointer",
@@ -25286,7 +26296,8 @@
   },
   "0x1795": {
    "kind": "proc",
-   "return": "0x178A"
+   "return": "0x178A",
+   "args": "0x10B7"
   },
   "0x1796": {
    "kind": "pointer",
@@ -25398,36 +26409,46 @@
    "forward": null
   },
   "0x17A2": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1797",
+    "0x178A"
+   ]
   },
   "0x17A3": {
    "kind": "proc",
-   "return": "0x1797"
+   "return": "0x1797",
+   "args": "0x17A2"
   },
   "0x17A4": {
    "kind": "pointer",
    "referent": "0x17A3"
   },
   "0x17A5": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1797"
+   ]
   },
   "0x17A6": {
    "kind": "proc",
-   "return": "0x178A"
+   "return": "0x178A",
+   "args": "0x17A5"
   },
   "0x17A7": {
    "kind": "pointer",
    "referent": "0x17A6"
   },
   "0x17A8": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x178A"
+   ]
   },
   "0x17A9": {
    "kind": "proc",
-   "return": "0x1797"
+   "return": "0x1797",
+   "args": "0x17A8"
   },
   "0x17AA": {
    "kind": "pointer",
@@ -25479,12 +26500,18 @@
    "bytes": 24
   },
   "0x17AE": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x603",
+    "0x22",
+    "0x603"
+   ]
   },
   "0x17AF": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x17AE"
   },
   "0x17B0": {
    "kind": "pointer",
@@ -25525,24 +26552,32 @@
    "forward": null
   },
   "0x17B5": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x17B2"
+   ]
   },
   "0x17B6": {
    "kind": "proc",
-   "return": "0x670"
+   "return": "0x670",
+   "args": "0x17B5"
   },
   "0x17B7": {
    "kind": "pointer",
    "referent": "0x17B6"
   },
   "0x17B8": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x10B4",
+    "0x623"
+   ]
   },
   "0x17B9": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x17B8"
   },
   "0x17BA": {
    "kind": "pointer",
@@ -25603,36 +26638,53 @@
    "forward": null
   },
   "0x17BF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x22",
+    "0x622",
+    "0x622"
+   ]
   },
   "0x17C0": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x17BF"
   },
   "0x17C1": {
    "kind": "pointer",
    "referent": "0x17C0"
   },
   "0x17C2": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x603",
+    "0x22"
+   ]
   },
   "0x17C3": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x17C2"
   },
   "0x17C4": {
    "kind": "pointer",
    "referent": "0x17C3"
   },
   "0x17C5": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x603",
+    "0x22",
+    "0x612"
+   ]
   },
   "0x17C6": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x17C5"
   },
   "0x17C7": {
    "kind": "pointer",
@@ -25640,7 +26692,8 @@
   },
   "0x17C8": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x174C"
   },
   "0x17C9": {
    "kind": "pointer",
@@ -25660,12 +26713,14 @@
   "0x17CC": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 4
+   "bits": 4,
+   "pos": 0
   },
   "0x17CD": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 4
+   "bits": 4,
+   "pos": 4
   },
   "0x17CE": {
    "kind": "fieldlist",
@@ -25755,24 +26810,32 @@
    "forward": null
   },
   "0x17D4": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x17D1",
+    "0x22"
+   ]
   },
   "0x17D5": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x17D4"
   },
   "0x17D6": {
    "kind": "pointer",
    "referent": "0x17D5"
   },
   "0x17D7": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x623",
+    "0x23"
+   ]
   },
   "0x17D8": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x17D7"
   },
   "0x17D9": {
    "kind": "pointer",
@@ -26035,12 +27098,15 @@
    "forward": null
   },
   "0x17EB": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x17AC"
+   ]
   },
   "0x17EC": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x17EB"
   },
   "0x17ED": {
    "kind": "pointer",
@@ -26206,12 +27272,16 @@
    "forward": null
   },
   "0x17F7": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x17E2",
+    "0x23"
+   ]
   },
   "0x17F8": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x17F7"
   },
   "0x17F9": {
    "kind": "pointer",
@@ -26222,12 +27292,16 @@
    "referent": "0x17E2"
   },
   "0x17FB": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x17E2",
+    "0x603"
+   ]
   },
   "0x17FC": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x17FB"
   },
   "0x17FD": {
    "kind": "pointer",
@@ -26238,24 +27312,31 @@
    "referent": "0x17E8"
   },
   "0x17FF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x17E6",
+    "0x17EF"
+   ]
   },
   "0x1800": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x17FF"
   },
   "0x1801": {
    "kind": "pointer",
    "referent": "0x1800"
   },
   "0x1802": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x17EF"
+   ]
   },
   "0x1803": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x1802"
   },
   "0x1804": {
    "kind": "pointer",
@@ -26263,19 +27344,25 @@
   },
   "0x1805": {
    "kind": "proc",
-   "return": "0x17B2"
+   "return": "0x17B2",
+   "args": "0x17FF"
   },
   "0x1806": {
    "kind": "pointer",
    "referent": "0x1805"
   },
   "0x1807": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x17E2",
+    "0x23",
+    "0x603"
+   ]
   },
   "0x1808": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x1807"
   },
   "0x1809": {
    "kind": "pointer",
@@ -26283,7 +27370,8 @@
   },
   "0x180A": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x17F7"
   },
   "0x180B": {
    "kind": "pointer",
@@ -26314,24 +27402,33 @@
    "forward": null
   },
   "0x180E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x623",
+    "0x180D"
+   ]
   },
   "0x180F": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x180E"
   },
   "0x1810": {
    "kind": "pointer",
    "referent": "0x180F"
   },
   "0x1811": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x623",
+    "0x180D",
+    "0x20"
+   ]
   },
   "0x1812": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1811"
   },
   "0x1813": {
    "kind": "pointer",
@@ -26349,12 +27446,15 @@
    "referent": "0x1814"
   },
   "0x1816": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1815"
+   ]
   },
   "0x1817": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1816"
   },
   "0x1818": {
    "kind": "pointer",
@@ -26479,12 +27579,16 @@
    "forward": null
   },
   "0x1826": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1815",
+    "0x22"
+   ]
   },
   "0x1827": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1826"
   },
   "0x1828": {
    "kind": "pointer",
@@ -26564,12 +27668,17 @@
    "referent": "0x182A"
   },
   "0x182E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x182A",
+    "0x23",
+    "0x623"
+   ]
   },
   "0x182F": {
    "kind": "proc",
-   "return": "0x182A"
+   "return": "0x182A",
+   "args": "0x182E"
   },
   "0x1830": {
    "kind": "pointer",
@@ -26999,24 +28108,32 @@
    "forward": null
   },
   "0x1843": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1832"
+   ]
   },
   "0x1844": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1843"
   },
   "0x1845": {
    "kind": "pointer",
    "referent": "0x1844"
   },
   "0x1846": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x10AD",
+    "0x22",
+    "0x22"
+   ]
   },
   "0x1847": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1846"
   },
   "0x1848": {
    "kind": "pointer",
@@ -27077,12 +28194,15 @@
    "forward": null
   },
   "0x184D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x10AD"
+   ]
   },
   "0x184E": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x184D"
   },
   "0x184F": {
    "kind": "pointer",
@@ -27090,7 +28210,8 @@
   },
   "0x1850": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x184D"
   },
   "0x1851": {
    "kind": "pointer",
@@ -27138,19 +28259,24 @@
   },
   "0x1857": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x13C9"
   },
   "0x1858": {
    "kind": "pointer",
    "referent": "0x1857"
   },
   "0x1859": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1832",
+    "0x22"
+   ]
   },
   "0x185A": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1859"
   },
   "0x185B": {
    "kind": "pointer",
@@ -27158,7 +28284,8 @@
   },
   "0x185C": {
    "kind": "proc",
-   "return": "0x1122"
+   "return": "0x1122",
+   "args": "0x10B7"
   },
   "0x185D": {
    "kind": "pointer",
@@ -27166,7 +28293,8 @@
   },
   "0x185E": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1386"
   },
   "0x185F": {
    "kind": "pointer",
@@ -27417,12 +28545,15 @@
    "forward": null
   },
   "0x1867": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1835"
+   ]
   },
   "0x1868": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1867"
   },
   "0x1869": {
    "kind": "pointer",
@@ -27485,12 +28616,16 @@
    "forward": null
   },
   "0x186F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1832",
+    "0x1835"
+   ]
   },
   "0x1870": {
    "kind": "proc",
-   "return": "0x1864"
+   "return": "0x1864",
+   "args": "0x186F"
   },
   "0x1871": {
    "kind": "pointer",
@@ -27501,12 +28636,17 @@
    "referent": "0x1832"
   },
   "0x1873": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1832",
+    "0x1835",
+    "0x20"
+   ]
   },
   "0x1874": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1873"
   },
   "0x1875": {
    "kind": "pointer",
@@ -27518,7 +28658,8 @@
   },
   "0x1877": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x1867"
   },
   "0x1878": {
    "kind": "pointer",
@@ -27633,12 +28774,20 @@
    "forward": null
   },
   "0x187B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x187A",
+    "0x603",
+    "0x603",
+    "0x603",
+    "0x603",
+    "0x603"
+   ]
   },
   "0x187C": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x187B"
   },
   "0x187D": {
    "kind": "pointer",
@@ -27809,36 +28958,53 @@
    "forward": null
   },
   "0x1882": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1832",
+    "0x182A",
+    "0x20",
+    "0x1152",
+    "0x22",
+    "0x23"
+   ]
   },
   "0x1883": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1882"
   },
   "0x1884": {
    "kind": "pointer",
    "referent": "0x1883"
   },
   "0x1885": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x23",
+    "0x22"
+   ]
   },
   "0x1886": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1885"
   },
   "0x1887": {
    "kind": "pointer",
    "referent": "0x1886"
   },
   "0x1888": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1832",
+    "0x23"
+   ]
   },
   "0x1889": {
    "kind": "proc",
-   "return": "0x1152"
+   "return": "0x1152",
+   "args": "0x1888"
   },
   "0x188A": {
    "kind": "pointer",
@@ -27846,31 +29012,40 @@
   },
   "0x188B": {
    "kind": "proc",
-   "return": "0x21"
+   "return": "0x21",
+   "args": "0x186F"
   },
   "0x188C": {
    "kind": "pointer",
    "referent": "0x188B"
   },
   "0x188D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1152",
+    "0x1152"
+   ]
   },
   "0x188E": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x188D"
   },
   "0x188F": {
    "kind": "pointer",
    "referent": "0x188E"
   },
   "0x1890": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1832",
+    "0x187F"
+   ]
   },
   "0x1891": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1890"
   },
   "0x1892": {
    "kind": "pointer",
@@ -27878,7 +29053,8 @@
   },
   "0x1893": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x186F"
   },
   "0x1894": {
    "kind": "pointer",
@@ -27886,7 +29062,8 @@
   },
   "0x1895": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x1885"
   },
   "0x1896": {
    "kind": "pointer",
@@ -27968,7 +29145,8 @@
   "0x189C": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 29
   },
   "0x189D": {
    "kind": "struct",
@@ -28423,12 +29601,15 @@
    "forward": null
   },
   "0x18A7": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1010"
+   ]
   },
   "0x18A8": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x18A7"
   },
   "0x18A9": {
    "kind": "pointer",
@@ -28450,31 +29631,41 @@
   },
   "0x18AD": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x1890"
   },
   "0x18AE": {
    "kind": "pointer",
    "referent": "0x18AD"
   },
   "0x18AF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1832",
+    "0x187F",
+    "0x23",
+    "0x20"
+   ]
   },
   "0x18B0": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x18AF"
   },
   "0x18B1": {
    "kind": "pointer",
    "referent": "0x18B0"
   },
   "0x18B2": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x187F"
+   ]
   },
   "0x18B3": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x18B2"
   },
   "0x18B4": {
    "kind": "pointer",
@@ -28482,19 +29673,24 @@
   },
   "0x18B5": {
    "kind": "proc",
-   "return": "0x1835"
+   "return": "0x1835",
+   "args": "0x13C9"
   },
   "0x18B6": {
    "kind": "pointer",
    "referent": "0x18B5"
   },
   "0x18B7": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1832",
+    "0x603"
+   ]
   },
   "0x18B8": {
    "kind": "proc",
-   "return": "0x1835"
+   "return": "0x1835",
+   "args": "0x18B7"
   },
   "0x18B9": {
    "kind": "pointer",
@@ -28706,12 +29902,16 @@
    "referent": "0x18BB"
   },
   "0x18C9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1835",
+    "0x22"
+   ]
   },
   "0x18CA": {
    "kind": "proc",
-   "return": "0x18BB"
+   "return": "0x18BB",
+   "args": "0x18C9"
   },
   "0x18CB": {
    "kind": "pointer",
@@ -28719,7 +29919,8 @@
   },
   "0x18CC": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x10B7"
   },
   "0x18CD": {
    "kind": "pointer",
@@ -28734,12 +29935,16 @@
    "referent": "0x17BA"
   },
   "0x18D0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x1835"
+   ]
   },
   "0x18D1": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x18D0"
   },
   "0x18D2": {
    "kind": "pointer",
@@ -28747,7 +29952,8 @@
   },
   "0x18D3": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x186F"
   },
   "0x18D4": {
    "kind": "pointer",
@@ -28755,7 +29961,8 @@
   },
   "0x18D5": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x186F"
   },
   "0x18D6": {
    "kind": "pointer",
@@ -28763,19 +29970,24 @@
   },
   "0x18D7": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x186F"
   },
   "0x18D8": {
    "kind": "pointer",
    "referent": "0x18D7"
   },
   "0x18D9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1835",
+    "0x1864"
+   ]
   },
   "0x18DA": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x18D9"
   },
   "0x18DB": {
    "kind": "pointer",
@@ -28783,67 +29995,90 @@
   },
   "0x18DC": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x115A"
   },
   "0x18DD": {
    "kind": "pointer",
    "referent": "0x18DC"
   },
   "0x18DE": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22",
+    "0x22"
+   ]
   },
   "0x18DF": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x18DE"
   },
   "0x18E0": {
    "kind": "pointer",
    "referent": "0x18DF"
   },
   "0x18E1": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1001",
+    "0x23",
+    "0x23",
+    "0x23"
+   ]
   },
   "0x18E2": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x18E1"
   },
   "0x18E3": {
    "kind": "pointer",
    "referent": "0x18E2"
   },
   "0x18E4": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1001",
+    "0x23",
+    "0x23"
+   ]
   },
   "0x18E5": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x18E4"
   },
   "0x18E6": {
    "kind": "pointer",
    "referent": "0x18E5"
   },
   "0x18E7": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1001",
+    "0x23"
+   ]
   },
   "0x18E8": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x18E7"
   },
   "0x18E9": {
    "kind": "pointer",
    "referent": "0x18E8"
   },
   "0x18EA": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x71"
+   ]
   },
   "0x18EB": {
    "kind": "proc",
-   "return": "0x71"
+   "return": "0x71",
+   "args": "0x18EA"
   },
   "0x18EC": {
    "kind": "pointer",
@@ -28852,12 +30087,14 @@
   "0x18ED": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 5
+   "bits": 5,
+   "pos": 0
   },
   "0x18EE": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 27
+   "bits": 27,
+   "pos": 5
   },
   "0x18EF": {
    "kind": "fieldlist",
@@ -28893,12 +30130,15 @@
    "forward": null
   },
   "0x18F1": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23"
+   ]
   },
   "0x18F2": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x18F1"
   },
   "0x18F3": {
    "kind": "pointer",
@@ -28943,60 +30183,81 @@
    "forward": null
   },
   "0x18F9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22",
+    "0x23"
+   ]
   },
   "0x18FA": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x18F9"
   },
   "0x18FB": {
    "kind": "pointer",
    "referent": "0x18FA"
   },
   "0x18FC": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1164",
+    "0x1164"
+   ]
   },
   "0x18FD": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x18FC"
   },
   "0x18FE": {
    "kind": "pointer",
    "referent": "0x18FD"
   },
   "0x18FF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1244",
+    "0x18F6",
+    "0x22"
+   ]
   },
   "0x1900": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x18FF"
   },
   "0x1901": {
    "kind": "pointer",
    "referent": "0x1900"
   },
   "0x1902": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1164"
+   ]
   },
   "0x1903": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1902"
   },
   "0x1904": {
    "kind": "pointer",
    "referent": "0x1903"
   },
   "0x1905": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1244",
+    "0x22",
+    "0x10B4"
+   ]
   },
   "0x1906": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1905"
   },
   "0x1907": {
    "kind": "pointer",
@@ -29021,84 +30282,123 @@
    "referent": "0x190A"
   },
   "0x190C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1909",
+    "0x23",
+    "0x18F6"
+   ]
   },
   "0x190D": {
    "kind": "proc",
-   "return": "0x18F6"
+   "return": "0x18F6",
+   "args": "0x190C"
   },
   "0x190E": {
    "kind": "pointer",
    "referent": "0x190D"
   },
   "0x190F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x18F6",
+    "0x603"
+   ]
   },
   "0x1910": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x190F"
   },
   "0x1911": {
    "kind": "pointer",
    "referent": "0x1910"
   },
   "0x1912": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22",
+    "0x22",
+    "0x622"
+   ]
   },
   "0x1913": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1912"
   },
   "0x1914": {
    "kind": "pointer",
    "referent": "0x1913"
   },
   "0x1915": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1244",
+    "0x22",
+    "0x22",
+    "0x22",
+    "0x622"
+   ]
   },
   "0x1916": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x1915"
   },
   "0x1917": {
    "kind": "pointer",
    "referent": "0x1916"
   },
   "0x1918": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x603"
+   ]
   },
   "0x1919": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x1918"
   },
   "0x191A": {
    "kind": "pointer",
    "referent": "0x1919"
   },
   "0x191B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1244",
+    "0x22",
+    "0x1164"
+   ]
   },
   "0x191C": {
    "kind": "proc",
-   "return": "0x1164"
+   "return": "0x1164",
+   "args": "0x191B"
   },
   "0x191D": {
    "kind": "pointer",
    "referent": "0x191C"
   },
   "0x191E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1244",
+    "0x191A",
+    "0x110A",
+    "0x603",
+    "0x622",
+    "0x622",
+    "0x622"
+   ]
   },
   "0x191F": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x191E"
   },
   "0x1920": {
    "kind": "pointer",
@@ -29152,36 +30452,48 @@
    "referent": "0x18F6"
   },
   "0x1927": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1922",
+    "0x1244",
+    "0x18F6"
+   ]
   },
   "0x1928": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1927"
   },
   "0x1929": {
    "kind": "pointer",
    "referent": "0x1928"
   },
   "0x192A": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1922"
+   ]
   },
   "0x192B": {
    "kind": "proc",
-   "return": "0x18F6"
+   "return": "0x18F6",
+   "args": "0x192A"
   },
   "0x192C": {
    "kind": "pointer",
    "referent": "0x192B"
   },
   "0x192D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1922",
+    "0x1244"
+   ]
   },
   "0x192E": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x192D"
   },
   "0x192F": {
    "kind": "pointer",
@@ -29265,48 +30577,72 @@
    "forward": null
   },
   "0x1939": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1931",
+    "0x22",
+    "0x22",
+    "0x603"
+   ]
   },
   "0x193A": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1939"
   },
   "0x193B": {
    "kind": "pointer",
    "referent": "0x193A"
   },
   "0x193C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1931",
+    "0x23",
+    "0x1936"
+   ]
   },
   "0x193D": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x193C"
   },
   "0x193E": {
    "kind": "pointer",
    "referent": "0x193D"
   },
   "0x193F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1931",
+    "0x1933",
+    "0x1933",
+    "0x22"
+   ]
   },
   "0x1940": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x193F"
   },
   "0x1941": {
    "kind": "pointer",
    "referent": "0x1940"
   },
   "0x1942": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1931",
+    "0x22",
+    "0x1933",
+    "0x22",
+    "0x1933"
+   ]
   },
   "0x1943": {
    "kind": "proc",
-   "return": "0x1933"
+   "return": "0x1933",
+   "args": "0x1942"
   },
   "0x1944": {
    "kind": "pointer",
@@ -29388,17 +30724,20 @@
   "0x194B": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 8
   },
   "0x194C": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 12
   },
   "0x194D": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 2
+   "bits": 2,
+   "pos": 14
   },
   "0x194E": {
    "kind": "fieldlist",
@@ -29523,12 +30862,15 @@
    "forward": null
   },
   "0x1954": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1951"
+   ]
   },
   "0x1955": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x1954"
   },
   "0x1956": {
    "kind": "pointer",
@@ -29570,19 +30912,26 @@
   },
   "0x195B": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x1445"
   },
   "0x195C": {
    "kind": "pointer",
    "referent": "0x195B"
   },
   "0x195D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1958",
+    "0x603",
+    "0x22",
+    "0x22"
+   ]
   },
   "0x195E": {
    "kind": "proc",
-   "return": "0x1958"
+   "return": "0x1958",
+   "args": "0x195D"
   },
   "0x195F": {
    "kind": "pointer",
@@ -29590,7 +30939,8 @@
   },
   "0x1960": {
    "kind": "proc",
-   "return": "0x21"
+   "return": "0x21",
+   "args": "0x1108"
   },
   "0x1961": {
    "kind": "pointer",
@@ -29610,12 +30960,14 @@
   "0x1964": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 7
+   "bits": 7,
+   "pos": 1
   },
   "0x1965": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 12
+   "bits": 12,
+   "pos": 0
   },
   "0x1966": {
    "kind": "fieldlist",
@@ -29706,12 +31058,15 @@
    "forward": null
   },
   "0x1968": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1963"
+   ]
   },
   "0x1969": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x1968"
   },
   "0x196A": {
    "kind": "pointer",
@@ -29752,12 +31107,15 @@
    "forward": null
   },
   "0x196F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x196C"
+   ]
   },
   "0x1970": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x196F"
   },
   "0x1971": {
    "kind": "pointer",
@@ -30036,12 +31394,16 @@
    "referent": "0x120D"
   },
   "0x1989": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1978",
+    "0x22"
+   ]
   },
   "0x198A": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1989"
   },
   "0x198B": {
    "kind": "pointer",
@@ -30065,7 +31427,8 @@
   "0x198F": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 14
+   "bits": 14,
+   "pos": 2
   },
   "0x1990": {
    "kind": "fieldlist",
@@ -30261,7 +31624,8 @@
   },
   "0x199F": {
    "kind": "proc",
-   "return": "0x21"
+   "return": "0x21",
+   "args": "0x115A"
   },
   "0x19A0": {
    "kind": "pointer",
@@ -30269,7 +31633,8 @@
   },
   "0x19A1": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1401"
   },
   "0x19A2": {
    "kind": "pointer",
@@ -30458,12 +31823,15 @@
    "forward": null
   },
   "0x19AD": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x19A7"
+   ]
   },
   "0x19AE": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x19AD"
   },
   "0x19AF": {
    "kind": "pointer",
@@ -30502,12 +31870,16 @@
    "forward": null
   },
   "0x19B3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x19B0",
+    "0x19A7"
+   ]
   },
   "0x19B4": {
    "kind": "proc",
-   "return": "0x19A9"
+   "return": "0x19A9",
+   "args": "0x19B3"
   },
   "0x19B5": {
    "kind": "pointer",
@@ -30576,24 +31948,32 @@
    "forward": null
   },
   "0x19BC": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22",
+    "0x603"
+   ]
   },
   "0x19BD": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x19BC"
   },
   "0x19BE": {
    "kind": "pointer",
    "referent": "0x19BD"
   },
   "0x19BF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1978",
+    "0x19B9"
+   ]
   },
   "0x19C0": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x19BF"
   },
   "0x19C1": {
    "kind": "pointer",
@@ -30601,19 +31981,23 @@
   },
   "0x19C2": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x115A"
   },
   "0x19C3": {
    "kind": "pointer",
    "referent": "0x19C2"
   },
   "0x19C4": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1978"
+   ]
   },
   "0x19C5": {
    "kind": "proc",
-   "return": "0x19B9"
+   "return": "0x19B9",
+   "args": "0x19C4"
   },
   "0x19C6": {
    "kind": "pointer",
@@ -30680,24 +32064,31 @@
    "forward": null
   },
   "0x19CC": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x19C9"
+   ]
   },
   "0x19CD": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x19CC"
   },
   "0x19CE": {
    "kind": "pointer",
    "referent": "0x19CD"
   },
   "0x19CF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22",
+    "0x19A7"
+   ]
   },
   "0x19D0": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x19CF"
   },
   "0x19D1": {
    "kind": "pointer",
@@ -30717,12 +32108,14 @@
   "0x19D4": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 10
+   "bits": 10,
+   "pos": 0
   },
   "0x19D5": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 4
+   "bits": 4,
+   "pos": 10
   },
   "0x19D6": {
    "kind": "fieldlist",
@@ -30763,12 +32156,17 @@
    "forward": null
   },
   "0x19D8": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x19A7",
+    "0x603",
+    "0x22"
+   ]
   },
   "0x19D9": {
    "kind": "proc",
-   "return": "0x19D3"
+   "return": "0x19D3",
+   "args": "0x19D8"
   },
   "0x19DA": {
    "kind": "pointer",
@@ -30776,31 +32174,41 @@
   },
   "0x19DB": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x18F1"
   },
   "0x19DC": {
    "kind": "pointer",
    "referent": "0x19DB"
   },
   "0x19DD": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x623",
+    "0x22",
+    "0x22"
+   ]
   },
   "0x19DE": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x19DD"
   },
   "0x19DF": {
    "kind": "pointer",
    "referent": "0x19DE"
   },
   "0x19E0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x623",
+    "0x22"
+   ]
   },
   "0x19E1": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x19E0"
   },
   "0x19E2": {
    "kind": "pointer",
@@ -30831,36 +32239,50 @@
    "forward": null
   },
   "0x19E5": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x19A7",
+    "0x1978"
+   ]
   },
   "0x19E6": {
    "kind": "proc",
-   "return": "0x197D"
+   "return": "0x197D",
+   "args": "0x19E5"
   },
   "0x19E7": {
    "kind": "pointer",
    "referent": "0x19E6"
   },
   "0x19E8": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x197D",
+    "0x22",
+    "0x22",
+    "0x622"
+   ]
   },
   "0x19E9": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x19E8"
   },
   "0x19EA": {
    "kind": "pointer",
    "referent": "0x19E9"
   },
   "0x19EB": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1951",
+    "0x603"
+   ]
   },
   "0x19EC": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x19EB"
   },
   "0x19ED": {
    "kind": "pointer",
@@ -30968,12 +32390,17 @@
    "referent": "0x19F4"
   },
   "0x19F6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x623",
+    "0x180D",
+    "0x19F5"
+   ]
   },
   "0x19F7": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x19F6"
   },
   "0x19F8": {
    "kind": "pointer",
@@ -31065,19 +32492,24 @@
   },
   "0x1A00": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x19F6"
   },
   "0x1A01": {
    "kind": "pointer",
    "referent": "0x1A00"
   },
   "0x1A02": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x180D",
+    "0x19F5"
+   ]
   },
   "0x1A03": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1A02"
   },
   "0x1A04": {
    "kind": "pointer",
@@ -31162,12 +32594,15 @@
    "forward": null
   },
   "0x1A0D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x19F0"
+   ]
   },
   "0x1A0E": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1A0D"
   },
   "0x1A0F": {
    "kind": "pointer",
@@ -31194,7 +32629,8 @@
   "0x1A13": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 22
+   "bits": 22,
+   "pos": 10
   },
   "0x1A14": {
    "kind": "fieldlist",
@@ -31242,12 +32678,14 @@
   "0x1A16": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 16
+   "bits": 16,
+   "pos": 0
   },
   "0x1A17": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 8
+   "bits": 8,
+   "pos": 16
   },
   "0x1A18": {
    "kind": "fieldlist",
@@ -31298,12 +32736,15 @@
    "forward": null
   },
   "0x1A1A": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A11"
+   ]
   },
   "0x1A1B": {
    "kind": "proc",
-   "return": "0x1A12"
+   "return": "0x1A12",
+   "args": "0x1A1A"
   },
   "0x1A1C": {
    "kind": "pointer",
@@ -31311,19 +32752,24 @@
   },
   "0x1A1D": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1A1A"
   },
   "0x1A1E": {
    "kind": "pointer",
    "referent": "0x1A1D"
   },
   "0x1A1F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A12",
+    "0x1A11"
+   ]
   },
   "0x1A20": {
    "kind": "proc",
-   "return": "0x1A12"
+   "return": "0x1A12",
+   "args": "0x1A1F"
   },
   "0x1A21": {
    "kind": "pointer",
@@ -31373,24 +32819,31 @@
    "referent": "0x1A11"
   },
   "0x1A27": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x19F0",
+    "0x1A11"
+   ]
   },
   "0x1A28": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1A27"
   },
   "0x1A29": {
    "kind": "pointer",
    "referent": "0x1A28"
   },
   "0x1A2A": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A23"
+   ]
   },
   "0x1A2B": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1A2A"
   },
   "0x1A2C": {
    "kind": "pointer",
@@ -31410,7 +32863,8 @@
   "0x1A2F": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 15
+   "bits": 15,
+   "pos": 0
   },
   "0x1A30": {
    "kind": "fieldlist",
@@ -31539,24 +32993,32 @@
    "forward": null
   },
   "0x1A39": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A11",
+    "0x1A2E"
+   ]
   },
   "0x1A3A": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1A39"
   },
   "0x1A3B": {
    "kind": "pointer",
    "referent": "0x1A3A"
   },
   "0x1A3C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A11",
+    "0x22"
+   ]
   },
   "0x1A3D": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1A3C"
   },
   "0x1A3E": {
    "kind": "pointer",
@@ -31564,7 +33026,8 @@
   },
   "0x1A3F": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1A39"
   },
   "0x1A40": {
    "kind": "pointer",
@@ -31572,7 +33035,8 @@
   },
   "0x1A41": {
    "kind": "proc",
-   "return": "0x1A11"
+   "return": "0x1A11",
+   "args": "0x1A1A"
   },
   "0x1A42": {
    "kind": "pointer",
@@ -31592,7 +33056,8 @@
   "0x1A45": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 13
+   "bits": 13,
+   "pos": 0
   },
   "0x1A46": {
    "kind": "fieldlist",
@@ -31678,7 +33143,8 @@
   "0x1A4C": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 15
+   "bits": 15,
+   "pos": 1
   },
   "0x1A4D": {
    "kind": "struct",
@@ -31762,7 +33228,8 @@
   },
   "0x1A50": {
    "kind": "proc",
-   "return": "0x1A49"
+   "return": "0x1A49",
+   "args": "0x129F"
   },
   "0x1A51": {
    "kind": "pointer",
@@ -32007,36 +33474,50 @@
    "forward": null
   },
   "0x1A62": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A5B",
+    "0x1A53",
+    "0x23"
+   ]
   },
   "0x1A63": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x1A62"
   },
   "0x1A64": {
    "kind": "pointer",
    "referent": "0x1A63"
   },
   "0x1A65": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A5B",
+    "0x603"
+   ]
   },
   "0x1A66": {
    "kind": "proc",
-   "return": "0x1A53"
+   "return": "0x1A53",
+   "args": "0x1A65"
   },
   "0x1A67": {
    "kind": "pointer",
    "referent": "0x1A66"
   },
   "0x1A68": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A5B",
+    "0x1A53",
+    "0x1A4B"
+   ]
   },
   "0x1A69": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x1A68"
   },
   "0x1A6A": {
    "kind": "pointer",
@@ -32044,19 +33525,25 @@
   },
   "0x1A6B": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x13C9"
   },
   "0x1A6C": {
    "kind": "pointer",
    "referent": "0x1A6B"
   },
   "0x1A6D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A5B",
+    "0x623",
+    "0x623"
+   ]
   },
   "0x1A6E": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x1A6D"
   },
   "0x1A6F": {
    "kind": "pointer",
@@ -32128,12 +33615,15 @@
    "forward": null
   },
   "0x1A74": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A5E"
+   ]
   },
   "0x1A75": {
    "kind": "proc",
-   "return": "0x181A"
+   "return": "0x181A",
+   "args": "0x1A74"
   },
   "0x1A76": {
    "kind": "pointer",
@@ -32158,24 +33648,32 @@
    "forward": null
   },
   "0x1A79": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A73"
+   ]
   },
   "0x1A7A": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x1A79"
   },
   "0x1A7B": {
    "kind": "pointer",
    "referent": "0x1A7A"
   },
   "0x1A7C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x17DB",
+    "0x23",
+    "0x23"
+   ]
   },
   "0x1A7D": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1A7C"
   },
   "0x1A7E": {
    "kind": "pointer",
@@ -32186,12 +33684,18 @@
    "referent": "0x17DB"
   },
   "0x1A80": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x17DB",
+    "0x23",
+    "0x23",
+    "0x23"
+   ]
   },
   "0x1A81": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1A80"
   },
   "0x1A82": {
    "kind": "pointer",
@@ -32199,7 +33703,8 @@
   },
   "0x1A83": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x1A7C"
   },
   "0x1A84": {
    "kind": "pointer",
@@ -32207,7 +33712,8 @@
   },
   "0x1A85": {
    "kind": "proc",
-   "return": "0x1A73"
+   "return": "0x1A73",
+   "args": "0x18F1"
   },
   "0x1A86": {
    "kind": "pointer",
@@ -32390,12 +33896,18 @@
    "forward": null
   },
   "0x1A8D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x22",
+    "0x17AC",
+    "0x603"
+   ]
   },
   "0x1A8E": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1A8D"
   },
   "0x1A8F": {
    "kind": "pointer",
@@ -32403,7 +33915,8 @@
   },
   "0x1A90": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x1A74"
   },
   "0x1A91": {
    "kind": "pointer",
@@ -32415,19 +33928,24 @@
   },
   "0x1A93": {
    "kind": "proc",
-   "return": "0x17AC"
+   "return": "0x17AC",
+   "args": "0x1A74"
   },
   "0x1A94": {
    "kind": "pointer",
    "referent": "0x1A93"
   },
   "0x1A95": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22",
+    "0x12"
+   ]
   },
   "0x1A96": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x1A95"
   },
   "0x1A97": {
    "kind": "pointer",
@@ -32435,43 +33953,55 @@
   },
   "0x1A98": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x135C"
   },
   "0x1A99": {
    "kind": "pointer",
    "referent": "0x1A98"
   },
   "0x1A9A": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A88"
+   ]
   },
   "0x1A9B": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1A9A"
   },
   "0x1A9C": {
    "kind": "pointer",
    "referent": "0x1A9B"
   },
   "0x1A9D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x622",
+    "0x22"
+   ]
   },
   "0x1A9E": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1A9D"
   },
   "0x1A9F": {
    "kind": "pointer",
    "referent": "0x1A9E"
   },
   "0x1AA0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1A88",
+    "0x22"
+   ]
   },
   "0x1AA1": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1AA0"
   },
   "0x1AA2": {
    "kind": "pointer",
@@ -32809,7 +34339,8 @@
   "0x1AC0": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 2
+   "bits": 2,
+   "pos": 1
   },
   "0x1AC1": {
    "kind": "fieldlist",
@@ -32871,12 +34402,14 @@
   "0x1AC7": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 6
+   "bits": 6,
+   "pos": 2
   },
   "0x1AC8": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 4
+   "bits": 4,
+   "pos": 8
   },
   "0x1AC9": {
    "kind": "fieldlist",
@@ -34440,7 +35973,8 @@
   },
   "0x1AEB": {
    "kind": "proc",
-   "return": "0x23"
+   "return": "0x23",
+   "args": "0x115A"
   },
   "0x1AEC": {
    "kind": "pointer",
@@ -34448,7 +35982,8 @@
   },
   "0x1AED": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x18F9"
   },
   "0x1AEE": {
    "kind": "pointer",
@@ -34456,7 +35991,8 @@
   },
   "0x1AEF": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16CD"
   },
   "0x1AF0": {
    "kind": "pointer",
@@ -34464,7 +36000,8 @@
   },
   "0x1AF1": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16D0"
   },
   "0x1AF2": {
    "kind": "pointer",
@@ -34472,7 +36009,8 @@
   },
   "0x1AF3": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16D3"
   },
   "0x1AF4": {
    "kind": "pointer",
@@ -34480,7 +36018,8 @@
   },
   "0x1AF5": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16D6"
   },
   "0x1AF6": {
    "kind": "pointer",
@@ -34488,7 +36027,8 @@
   },
   "0x1AF7": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16D9"
   },
   "0x1AF8": {
    "kind": "pointer",
@@ -34496,7 +36036,8 @@
   },
   "0x1AF9": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16DD"
   },
   "0x1AFA": {
    "kind": "pointer",
@@ -34504,7 +36045,8 @@
   },
   "0x1AFB": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16E0"
   },
   "0x1AFC": {
    "kind": "pointer",
@@ -34512,7 +36054,8 @@
   },
   "0x1AFD": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16E3"
   },
   "0x1AFE": {
    "kind": "pointer",
@@ -34520,7 +36063,8 @@
   },
   "0x1AFF": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16E6"
   },
   "0x1B00": {
    "kind": "pointer",
@@ -34528,7 +36072,8 @@
   },
   "0x1B01": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16E9"
   },
   "0x1B02": {
    "kind": "pointer",
@@ -34536,7 +36081,8 @@
   },
   "0x1B03": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16EC"
   },
   "0x1B04": {
    "kind": "pointer",
@@ -34544,7 +36090,8 @@
   },
   "0x1B05": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16EF"
   },
   "0x1B06": {
    "kind": "pointer",
@@ -34552,7 +36099,8 @@
   },
   "0x1B07": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16F2"
   },
   "0x1B08": {
    "kind": "pointer",
@@ -34560,7 +36108,8 @@
   },
   "0x1B09": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16F5"
   },
   "0x1B0A": {
    "kind": "pointer",
@@ -34568,7 +36117,8 @@
   },
   "0x1B0B": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16F8"
   },
   "0x1B0C": {
    "kind": "pointer",
@@ -34576,7 +36126,8 @@
   },
   "0x1B0D": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16FB"
   },
   "0x1B0E": {
    "kind": "pointer",
@@ -34584,7 +36135,8 @@
   },
   "0x1B0F": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x16FE"
   },
   "0x1B10": {
    "kind": "pointer",
@@ -34592,31 +36144,42 @@
   },
   "0x1B11": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x1701"
   },
   "0x1B12": {
    "kind": "pointer",
    "referent": "0x1B11"
   },
   "0x1B13": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x670",
+    "0x23",
+    "0x623"
+   ]
   },
   "0x1B14": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x1B13"
   },
   "0x1B15": {
    "kind": "pointer",
    "referent": "0x1B14"
   },
   "0x1B16": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x671",
+    "0x23",
+    "0x623"
+   ]
   },
   "0x1B17": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x1B16"
   },
   "0x1B18": {
    "kind": "pointer",
@@ -34624,7 +36187,8 @@
   },
   "0x1B19": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x1704"
   },
   "0x1B1A": {
    "kind": "pointer",
@@ -34632,7 +36196,8 @@
   },
   "0x1B1B": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x1707"
   },
   "0x1B1C": {
    "kind": "pointer",
@@ -34640,7 +36205,8 @@
   },
   "0x1B1D": {
    "kind": "proc",
-   "return": "0x8"
+   "return": "0x8",
+   "args": "0x170C"
   },
   "0x1B1E": {
    "kind": "pointer",
@@ -34658,12 +36224,15 @@
    "referent": "0x1B1F"
   },
   "0x1B21": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1B20"
+   ]
   },
   "0x1B22": {
    "kind": "proc",
-   "return": "0x74"
+   "return": "0x74",
+   "args": "0x1B21"
   },
   "0x1B23": {
    "kind": "pointer",
@@ -34723,12 +36292,15 @@
    "forward": null
   },
   "0x1B26": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1005"
+   ]
   },
   "0x1B27": {
    "kind": "proc",
-   "return": "0x1B20"
+   "return": "0x1B20",
+   "args": "0x1B26"
   },
   "0x1B28": {
    "kind": "pointer",
@@ -34736,7 +36308,8 @@
   },
   "0x1B29": {
    "kind": "proc",
-   "return": "0x21"
+   "return": "0x21",
+   "args": "0x1B21"
   },
   "0x1B2A": {
    "kind": "pointer",
@@ -34831,12 +36404,15 @@
    "forward": null
   },
   "0x1B36": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1B2C"
+   ]
   },
   "0x1B37": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1B36"
   },
   "0x1B38": {
    "kind": "pointer",
@@ -34895,12 +36471,15 @@
    "referent": "0x1B2C"
   },
   "0x1B3C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1107"
+   ]
   },
   "0x1B3D": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B3C"
   },
   "0x1B3E": {
    "kind": "pointer",
@@ -34908,19 +36487,25 @@
   },
   "0x1B3F": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B36"
   },
   "0x1B40": {
    "kind": "pointer",
    "referent": "0x1B3F"
   },
   "0x1B41": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1B30",
+    "0x12",
+    "0x22"
+   ]
   },
   "0x1B42": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B41"
   },
   "0x1B43": {
    "kind": "pointer",
@@ -34970,12 +36555,17 @@
    "referent": "0x1B4A"
   },
   "0x1B4C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x110E",
+    "0x603",
+    "0x1B4B"
+   ]
   },
   "0x1B4D": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B4C"
   },
   "0x1B4E": {
    "kind": "pointer",
@@ -34993,12 +36583,17 @@
    "referent": "0x1B4F"
   },
   "0x1B51": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x110E",
+    "0x603",
+    "0x1B50"
+   ]
   },
   "0x1B52": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B51"
   },
   "0x1B53": {
    "kind": "pointer",
@@ -35016,12 +36611,18 @@
    "referent": "0x1B54"
   },
   "0x1B56": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x110E",
+    "0x603",
+    "0x1B55",
+    "0x12"
+   ]
   },
   "0x1B57": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B56"
   },
   "0x1B58": {
    "kind": "pointer",
@@ -35039,12 +36640,19 @@
    "referent": "0x1B59"
   },
   "0x1B5B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x110E",
+    "0x603",
+    "0x603",
+    "0x14D8",
+    "0x1B5A"
+   ]
   },
   "0x1B5C": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B5B"
   },
   "0x1B5D": {
    "kind": "pointer",
@@ -35062,24 +36670,35 @@
    "referent": "0x1B5E"
   },
   "0x1B60": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x110E",
+    "0x603",
+    "0x1B5F"
+   ]
   },
   "0x1B61": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B60"
   },
   "0x1B62": {
    "kind": "pointer",
    "referent": "0x1B61"
   },
   "0x1B63": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x110E",
+    "0x603",
+    "0x1B5F",
+    "0x603"
+   ]
   },
   "0x1B64": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B63"
   },
   "0x1B65": {
    "kind": "pointer",
@@ -35097,12 +36716,20 @@
    "referent": "0x1B66"
   },
   "0x1B68": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x110E",
+    "0x603",
+    "0x1B67",
+    "0x23",
+    "0x603",
+    "0x12"
+   ]
   },
   "0x1B69": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B68"
   },
   "0x1B6A": {
    "kind": "pointer",
@@ -35118,12 +36745,14 @@
   "0x1B6C": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 14
+   "bits": 14,
+   "pos": 2
   },
   "0x1B6D": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 13
+   "bits": 13,
+   "pos": 19
   },
   "0x1B6E": {
    "kind": "struct",
@@ -35321,12 +36950,16 @@
    "forward": null
   },
   "0x1B71": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1B2C",
+    "0x22"
+   ]
   },
   "0x1B72": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B71"
   },
   "0x1B73": {
    "kind": "pointer",
@@ -35337,24 +36970,31 @@
    "referent": "0x1B49"
   },
   "0x1B75": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1B46"
+   ]
   },
   "0x1B76": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B75"
   },
   "0x1B77": {
    "kind": "pointer",
    "referent": "0x1B76"
   },
   "0x1B78": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1B46",
+    "0x22"
+   ]
   },
   "0x1B79": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B78"
   },
   "0x1B7A": {
    "kind": "pointer",
@@ -35402,24 +37042,32 @@
    "referent": "0x1B7D"
   },
   "0x1B7F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1B2C",
+    "0x12"
+   ]
   },
   "0x1B80": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1B7F"
   },
   "0x1B81": {
    "kind": "pointer",
    "referent": "0x1B80"
   },
   "0x1B82": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1B46",
+    "0x1103"
+   ]
   },
   "0x1B83": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B82"
   },
   "0x1B84": {
    "kind": "pointer",
@@ -35479,7 +37127,8 @@
   },
   "0x1B8B": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1B75"
   },
   "0x1B8C": {
    "kind": "pointer",
@@ -35490,12 +37139,15 @@
    "referent": "0x1947"
   },
   "0x1B8E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1B8D"
+   ]
   },
   "0x1B8F": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B8E"
   },
   "0x1B90": {
    "kind": "pointer",
@@ -35663,12 +37315,18 @@
    "referent": "0x1B99"
   },
   "0x1B9B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x110E",
+    "0x1B9A",
+    "0x603",
+    "0x14D8"
+   ]
   },
   "0x1B9C": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B9B"
   },
   "0x1B9D": {
    "kind": "pointer",
@@ -35679,12 +37337,16 @@
    "referent": "0x1B85"
   },
   "0x1B9F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x110E",
+    "0x1B9E"
+   ]
   },
   "0x1BA0": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1B9F"
   },
   "0x1BA1": {
    "kind": "pointer",
@@ -35999,12 +37661,14 @@
   "0x1BAE": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 11
+   "bits": 11,
+   "pos": 1
   },
   "0x1BAF": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 11
+   "bits": 11,
+   "pos": 12
   },
   "0x1BB0": {
    "kind": "struct",
@@ -36172,12 +37836,13 @@
    "forward": null
   },
   "0x1BB3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": []
   },
   "0x1BB4": {
    "kind": "proc",
-   "return": "0x74"
+   "return": "0x74",
+   "args": "0x1BB3"
   },
   "0x1BB5": {
    "kind": "fieldlist",
@@ -37102,47 +38767,56 @@
   "0x1BD2": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 8
+   "bits": 8,
+   "pos": 0
   },
   "0x1BD3": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 8
+   "bits": 8,
+   "pos": 8
   },
   "0x1BD4": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 8
+   "bits": 8,
+   "pos": 16
   },
   "0x1BD5": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 1
+   "bits": 1,
+   "pos": 24
   },
   "0x1BD6": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 7
+   "bits": 7,
+   "pos": 25
   },
   "0x1BD7": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 8
+   "bits": 8,
+   "pos": 32
   },
   "0x1BD8": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 8
+   "bits": 8,
+   "pos": 40
   },
   "0x1BD9": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 8
+   "bits": 8,
+   "pos": 48
   },
   "0x1BDA": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 8
+   "bits": 8,
+   "pos": 56
   },
   "0x1BDB": {
    "kind": "fieldlist",
@@ -38644,7 +40318,8 @@
   "0x1C27": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 9
+   "bits": 9,
+   "pos": 3
   },
   "0x1C28": {
    "kind": "fieldlist",
@@ -38823,27 +40498,32 @@
   "0x1C37": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 16
+   "bits": 16,
+   "pos": 1
   },
   "0x1C38": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 3
+   "bits": 3,
+   "pos": 17
   },
   "0x1C39": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 44
+   "bits": 44,
+   "pos": 20
   },
   "0x1C3A": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 25
+   "bits": 25,
+   "pos": 0
   },
   "0x1C3B": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 6
+   "bits": 6,
+   "pos": 26
   },
   "0x1C3C": {
    "kind": "fieldlist",
@@ -39074,12 +40754,16 @@
    "referent": "0x1C47"
   },
   "0x1C49": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22",
+    "0x10B4"
+   ]
   },
   "0x1C4A": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1C49"
   },
   "0x1C4B": {
    "kind": "pointer",
@@ -39871,7 +41555,8 @@
   "0x1C6F": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 30
+   "bits": 30,
+   "pos": 0
   },
   "0x1C70": {
    "kind": "array",
@@ -39942,7 +41627,8 @@
   "0x1C75": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 12
+   "bits": 12,
+   "pos": 4
   },
   "0x1C76": {
    "kind": "fieldlist",
@@ -40259,7 +41945,8 @@
   "0x1C86": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 2
+   "bits": 2,
+   "pos": 0
   },
   "0x1C87": {
    "kind": "fieldlist",
@@ -41362,22 +43049,26 @@
   "0x1CC1": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 6
+   "bits": 6,
+   "pos": 2
   },
   "0x1CC2": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 6
+   "bits": 6,
+   "pos": 0
   },
   "0x1CC3": {
    "kind": "bitfield",
    "type": "0x1067",
-   "bits": 1
+   "bits": 1,
+   "pos": 7
   },
   "0x1CC4": {
    "kind": "bitfield",
    "type": "0x20",
-   "bits": 2
+   "bits": 2,
+   "pos": 3
   },
   "0x1CC5": {
    "kind": "fieldlist",
@@ -41798,7 +43489,8 @@
   "0x1CD0": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 23
+   "bits": 23,
+   "pos": 9
   },
   "0x1CD1": {
    "kind": "fieldlist",
@@ -41998,12 +43690,16 @@
    "forward": null
   },
   "0x1CD9": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1B9E",
+    "0x1105"
+   ]
   },
   "0x1CDA": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1CD9"
   },
   "0x1CDB": {
    "kind": "pointer",
@@ -42279,12 +43975,18 @@
    "forward": null
   },
   "0x1CF0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x603",
+    "0x603",
+    "0x603"
+   ]
   },
   "0x1CF1": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1CF0"
   },
   "0x1CF2": {
    "kind": "pointer",
@@ -42354,7 +44056,8 @@
   "0x1CF8": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 3
+   "bits": 3,
+   "pos": 5
   },
   "0x1CF9": {
    "kind": "fieldlist",
@@ -42920,12 +44623,16 @@
    "forward": null
   },
   "0x1D18": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x145C",
+    "0x603"
+   ]
   },
   "0x1D19": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1D18"
   },
   "0x1D1A": {
    "kind": "pointer",
@@ -42977,7 +44684,8 @@
   "0x1D1D": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 6
+   "bits": 6,
+   "pos": 10
   },
   "0x1D1E": {
    "kind": "fieldlist",
@@ -43190,12 +44898,14 @@
   "0x1D2A": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 11
+   "bits": 11,
+   "pos": 0
   },
   "0x1D2B": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 5
+   "bits": 5,
+   "pos": 11
   },
   "0x1D2C": {
    "kind": "array",
@@ -43434,12 +45144,14 @@
   "0x1D39": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 9
+   "bits": 9,
+   "pos": 3
   },
   "0x1D3A": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 20
+   "bits": 20,
+   "pos": 12
   },
   "0x1D3B": {
    "kind": "fieldlist",
@@ -43466,12 +45178,18 @@
    "forward": null
   },
   "0x1D3D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x145C",
+    "0x14D3",
+    "0x603",
+    "0x603"
+   ]
   },
   "0x1D3E": {
    "kind": "proc",
-   "return": "0x1D3C"
+   "return": "0x1D3C",
+   "args": "0x1D3D"
   },
   "0x1D3F": {
    "kind": "pointer",
@@ -45327,7 +47045,8 @@
   "0x1D87": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 11
+   "bits": 11,
+   "pos": 5
   },
   "0x1D88": {
    "kind": "fieldlist",
@@ -45418,7 +47137,8 @@
   "0x1D8C": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 3
+   "bits": 3,
+   "pos": 11
   },
   "0x1D8D": {
    "kind": "fieldlist",
@@ -45538,12 +47258,14 @@
   "0x1D95": {
    "kind": "bitfield",
    "type": "0x13",
-   "bits": 8
+   "bits": 8,
+   "pos": 0
   },
   "0x1D96": {
    "kind": "bitfield",
    "type": "0x13",
-   "bits": 56
+   "bits": 56,
+   "pos": 8
   },
   "0x1D97": {
    "kind": "fieldlist",
@@ -45629,7 +47351,8 @@
   "0x1D9B": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 5
+   "bits": 5,
+   "pos": 8
   },
   "0x1D9C": {
    "kind": "fieldlist",
@@ -45750,7 +47473,8 @@
   "0x1DA0": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 3
+   "bits": 3,
+   "pos": 0
   },
   "0x1DA1": {
    "kind": "fieldlist",
@@ -46305,24 +48029,34 @@
    "referent": "0x115F"
   },
   "0x1DBF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1DBD",
+    "0x1DBE",
+    "0x10B4",
+    "0x10B4",
+    "0x10B4"
+   ]
   },
   "0x1DC0": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1DBF"
   },
   "0x1DC1": {
    "kind": "pointer",
    "referent": "0x1DC0"
   },
   "0x1DC2": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1DBD"
+   ]
   },
   "0x1DC3": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1DC2"
   },
   "0x1DC4": {
    "kind": "pointer",
@@ -46592,12 +48326,14 @@
   "0x1DCD": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 4
+   "bits": 4,
+   "pos": 8
   },
   "0x1DCE": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 4
+   "bits": 4,
+   "pos": 12
   },
   "0x1DCF": {
    "kind": "fieldlist",
@@ -46665,27 +48401,32 @@
   "0x1DD1": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 24
+   "bits": 24,
+   "pos": 16
   },
   "0x1DD2": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 16
+   "bits": 16,
+   "pos": 40
   },
   "0x1DD3": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 2
+   "bits": 2,
+   "pos": 56
   },
   "0x1DD4": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 1
+   "bits": 1,
+   "pos": 58
   },
   "0x1DD5": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 5
+   "bits": 5,
+   "pos": 59
   },
   "0x1DD6": {
    "kind": "fieldlist",
@@ -47088,22 +48829,26 @@
   "0x1DDB": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 3
+   "bits": 3,
+   "pos": 0
   },
   "0x1DDC": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 5
+   "bits": 5,
+   "pos": 3
   },
   "0x1DDD": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 5
+   "bits": 5,
+   "pos": 8
   },
   "0x1DDE": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 2
+   "bits": 2,
+   "pos": 13
   },
   "0x1DDF": {
    "kind": "fieldlist",
@@ -49155,32 +50900,38 @@
   "0x1E55": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 30
+   "bits": 30,
+   "pos": 0
   },
   "0x1E56": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 30
+   "bits": 30,
+   "pos": 30
   },
   "0x1E57": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 1
+   "bits": 1,
+   "pos": 60
   },
   "0x1E58": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 1
+   "bits": 1,
+   "pos": 61
   },
   "0x1E59": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 1
+   "bits": 1,
+   "pos": 62
   },
   "0x1E5A": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 1
+   "bits": 1,
+   "pos": 63
   },
   "0x1E5B": {
    "kind": "fieldlist",
@@ -49410,12 +51161,18 @@
    "referent": "0x1E65"
   },
   "0x1E67": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1E66",
+    "0x603",
+    "0x1272",
+    "0x603"
+   ]
   },
   "0x1E68": {
    "kind": "proc",
-   "return": "0x1E64"
+   "return": "0x1E64",
+   "args": "0x1E67"
   },
   "0x1E69": {
    "kind": "pointer",
@@ -49522,7 +51279,8 @@
   "0x1E70": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 9
+   "bits": 9,
+   "pos": 7
   },
   "0x1E71": {
    "kind": "fieldlist",
@@ -50296,7 +52054,8 @@
   "0x1E99": {
    "kind": "bitfield",
    "type": "0x12",
-   "bits": 16
+   "bits": 16,
+   "pos": 0
   },
   "0x1E9A": {
    "kind": "fieldlist",
@@ -53760,19 +55519,26 @@
   },
   "0x1F37": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1749"
   },
   "0x1F38": {
    "kind": "pointer",
    "referent": "0x1F37"
   },
   "0x1F39": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x20",
+    "0x623",
+    "0x623"
+   ]
   },
   "0x1F3A": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1F39"
   },
   "0x1F3B": {
    "kind": "pointer",
@@ -55230,19 +56996,24 @@
   },
   "0x1F51": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1445"
   },
   "0x1F52": {
    "kind": "pointer",
    "referent": "0x1F51"
   },
   "0x1F53": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x622"
+   ]
   },
   "0x1F54": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1F53"
   },
   "0x1F55": {
    "kind": "pointer",
@@ -55987,12 +57758,14 @@
   "0x1F72": {
    "kind": "bitfield",
    "type": "0x13",
-   "bits": 1
+   "bits": 1,
+   "pos": 0
   },
   "0x1F73": {
    "kind": "bitfield",
    "type": "0x13",
-   "bits": 63
+   "bits": 63,
+   "pos": 1
   },
   "0x1F74": {
    "kind": "fieldlist",
@@ -56123,12 +57896,14 @@
   "0x1F7B": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 60
+   "bits": 60,
+   "pos": 0
   },
   "0x1F7C": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 4
+   "bits": 4,
+   "pos": 60
   },
   "0x1F7D": {
    "kind": "fieldlist",
@@ -56451,7 +58226,8 @@
   "0x1F94": {
    "kind": "bitfield",
    "type": "0x12",
-   "bits": 24
+   "bits": 24,
+   "pos": 0
   },
   "0x1F95": {
    "kind": "fieldlist",
@@ -57108,12 +58884,16 @@
    "referent": "0x1FB6"
   },
   "0x1FB8": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x1FB7"
+   ]
   },
   "0x1FB9": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1FB8"
   },
   "0x1FBA": {
    "kind": "pointer",
@@ -57152,36 +58932,62 @@
    "forward": null
   },
   "0x1FBD": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1FBC",
+    "0x70",
+    "0x140B",
+    "0x603",
+    "0x622",
+    "0x22"
+   ]
   },
   "0x1FBE": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1FBD"
   },
   "0x1FBF": {
    "kind": "pointer",
    "referent": "0x1FBE"
   },
   "0x1FC0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x140B",
+    "0x603",
+    "0x23",
+    "0x23"
+   ]
   },
   "0x1FC1": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x1FC0"
   },
   "0x1FC2": {
    "kind": "pointer",
    "referent": "0x1FC1"
   },
   "0x1FC3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x603",
+    "0x1436",
+    "0x70",
+    "0x22",
+    "0x1184",
+    "0x1184",
+    "0x603",
+    "0x1E23",
+    "0x10B4"
+   ]
   },
   "0x1FC4": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1FC3"
   },
   "0x1FC5": {
    "kind": "pointer",
@@ -57199,12 +59005,25 @@
    "referent": "0x1FC6"
   },
   "0x1FC8": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x603",
+    "0x1436",
+    "0x70",
+    "0x22",
+    "0x1184",
+    "0x1184",
+    "0x603",
+    "0x1E23",
+    "0x1FC7",
+    "0x10B4"
+   ]
   },
   "0x1FC9": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1FC8"
   },
   "0x1FCA": {
    "kind": "pointer",
@@ -57243,36 +59062,61 @@
    "referent": "0x1441"
   },
   "0x1FCE": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x1FCC",
+    "0x622",
+    "0x603",
+    "0x622",
+    "0x10B4",
+    "0x1366",
+    "0x1FCD",
+    "0x70"
+   ]
   },
   "0x1FCF": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1FCE"
   },
   "0x1FD0": {
    "kind": "pointer",
    "referent": "0x1FCF"
   },
   "0x1FD1": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x20",
+    "0x1EBC",
+    "0x22",
+    "0x622",
+    "0x70"
+   ]
   },
   "0x1FD2": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x1FD1"
   },
   "0x1FD3": {
    "kind": "pointer",
    "referent": "0x1FD2"
   },
   "0x1FD4": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x140B",
+    "0x603",
+    "0x603",
+    "0x70"
+   ]
   },
   "0x1FD5": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x1FD4"
   },
   "0x1FD6": {
    "kind": "pointer",
@@ -58074,36 +59918,49 @@
    "referent": "0x1EFD"
   },
   "0x1FFF": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1FFE",
+    "0x603",
+    "0x603"
+   ]
   },
   "0x2000": {
    "kind": "proc",
-   "return": "0x1FFD"
+   "return": "0x1FFD",
+   "args": "0x1FFF"
   },
   "0x2001": {
    "kind": "pointer",
    "referent": "0x2000"
   },
   "0x2002": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1FFE",
+    "0x22"
+   ]
   },
   "0x2003": {
    "kind": "proc",
-   "return": "0x603"
+   "return": "0x603",
+   "args": "0x2002"
   },
   "0x2004": {
    "kind": "pointer",
    "referent": "0x2003"
   },
   "0x2005": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1FFE",
+    "0x603"
+   ]
   },
   "0x2006": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x2005"
   },
   "0x2007": {
    "kind": "pointer",
@@ -58278,7 +60135,8 @@
   "0x2012": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 28
+   "bits": 28,
+   "pos": 4
   },
   "0x2013": {
    "kind": "fieldlist",
@@ -58610,7 +60468,8 @@
   },
   "0x202A": {
    "kind": "proc",
-   "return": "0x16BA"
+   "return": "0x16BA",
+   "args": "0x1918"
   },
   "0x202B": {
    "kind": "pointer",
@@ -58894,24 +60753,31 @@
    "referent": "0x203A"
   },
   "0x203C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1571",
+    "0x1184"
+   ]
   },
   "0x203D": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x203C"
   },
   "0x203E": {
    "kind": "pointer",
    "referent": "0x203D"
   },
   "0x203F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1571"
+   ]
   },
   "0x2040": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x203F"
   },
   "0x2041": {
    "kind": "pointer",
@@ -58919,7 +60785,8 @@
   },
   "0x2042": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x14E2"
   },
   "0x2043": {
    "kind": "pointer",
@@ -59141,24 +61008,31 @@
    "forward": null
   },
   "0x2050": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x623"
+   ]
   },
   "0x2051": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x2050"
   },
   "0x2052": {
    "kind": "pointer",
    "referent": "0x2051"
   },
   "0x2053": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x22"
+   ]
   },
   "0x2054": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x2053"
   },
   "0x2055": {
    "kind": "pointer",
@@ -59166,31 +61040,50 @@
   },
   "0x2056": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x18F1"
   },
   "0x2057": {
    "kind": "pointer",
    "referent": "0x2056"
   },
   "0x2058": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x22",
+    "0x22",
+    "0x22",
+    "0x22",
+    "0x22",
+    "0x22",
+    "0x22",
+    "0x622",
+    "0x623",
+    "0x623"
+   ]
   },
   "0x2059": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x2058"
   },
   "0x205A": {
    "kind": "pointer",
    "referent": "0x2059"
   },
   "0x205B": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x22",
+    "0x623"
+   ]
   },
   "0x205C": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x205B"
   },
   "0x205D": {
    "kind": "pointer",
@@ -59208,36 +61101,53 @@
    "referent": "0x205E"
   },
   "0x2060": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x205F",
+    "0x20",
+    "0x20"
+   ]
   },
   "0x2061": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x2060"
   },
   "0x2062": {
    "kind": "pointer",
    "referent": "0x2061"
   },
   "0x2063": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x23",
+    "0x23",
+    "0x20"
+   ]
   },
   "0x2064": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x2063"
   },
   "0x2065": {
    "kind": "pointer",
    "referent": "0x2064"
   },
   "0x2066": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x22",
+    "0x622",
+    "0x603",
+    "0x22"
+   ]
   },
   "0x2067": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x2066"
   },
   "0x2068": {
    "kind": "pointer",
@@ -59697,7 +61607,8 @@
   "0x2073": {
    "kind": "bitfield",
    "type": "0x21",
-   "bits": 7
+   "bits": 7,
+   "pos": 1
   },
   "0x2074": {
    "kind": "fieldlist",
@@ -60092,12 +62003,16 @@
    "forward": null
   },
   "0x2092": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x1571",
+    "0x145C"
+   ]
   },
   "0x2093": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x2092"
   },
   "0x2094": {
    "kind": "pointer",
@@ -60625,24 +62540,40 @@
    "forward": null
   },
   "0x20B3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x22",
+    "0x22",
+    "0x22",
+    "0x622"
+   ]
   },
   "0x20B4": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x20B3"
   },
   "0x20B5": {
    "kind": "pointer",
    "referent": "0x20B4"
   },
   "0x20B6": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x23",
+    "0x22",
+    "0x22",
+    "0x22",
+    "0x22",
+    "0x622"
+   ]
   },
   "0x20B7": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x20B6"
   },
   "0x20B8": {
    "kind": "pointer",
@@ -60660,24 +62591,33 @@
    "referent": "0x20B9"
   },
   "0x20BB": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x20BA"
+   ]
   },
   "0x20BC": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x20BB"
   },
   "0x20BD": {
    "kind": "pointer",
    "referent": "0x20BC"
   },
   "0x20BE": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x603",
+    "0x22",
+    "0x22"
+   ]
   },
   "0x20BF": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x20BE"
   },
   "0x20C0": {
    "kind": "pointer",
@@ -60685,7 +62625,8 @@
   },
   "0x20C1": {
    "kind": "proc",
-   "return": "0x22"
+   "return": "0x22",
+   "args": "0x1445"
   },
   "0x20C2": {
    "kind": "pointer",
@@ -60693,7 +62634,8 @@
   },
   "0x20C3": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x20B3"
   },
   "0x20C4": {
    "kind": "pointer",
@@ -60701,7 +62643,8 @@
   },
   "0x20C5": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x13C9"
   },
   "0x20C6": {
    "kind": "pointer",
@@ -62237,7 +64180,8 @@
   "0x20FF": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 63
+   "bits": 63,
+   "pos": 1
   },
   "0x2100": {
    "kind": "fieldlist",
@@ -62419,12 +64363,16 @@
    "forward": null
   },
   "0x2106": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x14BB",
+    "0x603"
+   ]
   },
   "0x2107": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x2106"
   },
   "0x2108": {
    "kind": "pointer",
@@ -63463,7 +65411,8 @@
   "0x2137": {
    "kind": "bitfield",
    "type": "0x22",
-   "bits": 7
+   "bits": 7,
+   "pos": 8
   },
   "0x2138": {
    "kind": "fieldlist",
@@ -64217,24 +66166,44 @@
    "forward": null
   },
   "0x2161": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x119B",
+    "0x22",
+    "0x20",
+    "0x22",
+    "0x20",
+    "0x14D8",
+    "0x145C"
+   ]
   },
   "0x2162": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x2161"
   },
   "0x2163": {
    "kind": "pointer",
    "referent": "0x2162"
   },
   "0x2164": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x119B",
+    "0x22",
+    "0x20",
+    "0x22",
+    "0x603",
+    "0x14D8",
+    "0x145C"
+   ]
   },
   "0x2165": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x2164"
   },
   "0x2166": {
    "kind": "pointer",
@@ -64252,12 +66221,19 @@
    "referent": "0x2167"
   },
   "0x2169": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x20",
+    "0x2168",
+    "0x14D8",
+    "0x145C"
+   ]
   },
   "0x216A": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x2169"
   },
   "0x216B": {
    "kind": "pointer",
@@ -64275,72 +66251,123 @@
    "referent": "0x216C"
   },
   "0x216E": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x20",
+    "0x216D",
+    "0x14D8",
+    "0x145C"
+   ]
   },
   "0x216F": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x216E"
   },
   "0x2170": {
    "kind": "pointer",
    "referent": "0x216F"
   },
   "0x2171": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x119B",
+    "0x119B",
+    "0x140B",
+    "0x22",
+    "0x20",
+    "0x20",
+    "0x14D8",
+    "0x145C"
+   ]
   },
   "0x2172": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x2171"
   },
   "0x2173": {
    "kind": "pointer",
    "referent": "0x2172"
   },
   "0x2174": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x119B",
+    "0x119B",
+    "0x140B",
+    "0x22",
+    "0x14D8",
+    "0x145C"
+   ]
   },
   "0x2175": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x2174"
   },
   "0x2176": {
    "kind": "pointer",
    "referent": "0x2175"
   },
   "0x2177": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x140B",
+    "0x14D8",
+    "0x145C"
+   ]
   },
   "0x2178": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x2177"
   },
   "0x2179": {
    "kind": "pointer",
    "referent": "0x2178"
   },
   "0x217A": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x603",
+    "0x22",
+    "0x14D8",
+    "0x145C"
+   ]
   },
   "0x217B": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x217A"
   },
   "0x217C": {
    "kind": "pointer",
    "referent": "0x217B"
   },
   "0x217D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x20",
+    "0x603",
+    "0x22",
+    "0x603",
+    "0x22",
+    "0x22",
+    "0x14D8",
+    "0x145C"
+   ]
   },
   "0x217E": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x217D"
   },
   "0x217F": {
    "kind": "pointer",
@@ -64348,19 +66375,24 @@
   },
   "0x2180": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x15E9"
   },
   "0x2181": {
    "kind": "pointer",
    "referent": "0x2180"
   },
   "0x2182": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x145C",
+    "0x145C"
+   ]
   },
   "0x2183": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x2182"
   },
   "0x2184": {
    "kind": "pointer",
@@ -64378,12 +66410,19 @@
    "referent": "0x2185"
   },
   "0x2187": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x20",
+    "0x2186",
+    "0x14D8",
+    "0x145C"
+   ]
   },
   "0x2188": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x2187"
   },
   "0x2189": {
    "kind": "pointer",
@@ -64398,48 +66437,74 @@
    "referent": "0x218A"
   },
   "0x218C": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x119B",
+    "0x218B",
+    "0x145C"
+   ]
   },
   "0x218D": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x218C"
   },
   "0x218E": {
    "kind": "pointer",
    "referent": "0x218D"
   },
   "0x218F": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x119B",
+    "0x22",
+    "0x22",
+    "0x159F",
+    "0x14D8",
+    "0x145C"
+   ]
   },
   "0x2190": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x218F"
   },
   "0x2191": {
    "kind": "pointer",
    "referent": "0x2190"
   },
   "0x2192": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x14D5",
+    "0x145C"
+   ]
   },
   "0x2193": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x2192"
   },
   "0x2194": {
    "kind": "pointer",
    "referent": "0x2193"
   },
   "0x2195": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x119B",
+    "0x14D5",
+    "0x145C"
+   ]
   },
   "0x2196": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x2195"
   },
   "0x2197": {
    "kind": "pointer",
@@ -64457,48 +66522,74 @@
    "referent": "0x2198"
   },
   "0x219A": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x119B",
+    "0x22",
+    "0x22",
+    "0x603",
+    "0x159F",
+    "0x14D8",
+    "0x2199",
+    "0x22",
+    "0x145C"
+   ]
   },
   "0x219B": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x219A"
   },
   "0x219C": {
    "kind": "pointer",
    "referent": "0x219B"
   },
   "0x219D": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x14D3",
+    "0x2186",
+    "0x145C"
+   ]
   },
   "0x219E": {
    "kind": "proc",
-   "return": "0x20"
+   "return": "0x20",
+   "args": "0x219D"
   },
   "0x219F": {
    "kind": "pointer",
    "referent": "0x219E"
   },
   "0x21A0": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x218A",
+    "0x145C"
+   ]
   },
   "0x21A1": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x21A0"
   },
   "0x21A2": {
    "kind": "pointer",
    "referent": "0x21A1"
   },
   "0x21A3": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x147A",
+    "0x145C"
+   ]
   },
   "0x21A4": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x21A3"
   },
   "0x21A5": {
    "kind": "pointer",
@@ -65142,7 +67233,8 @@
   "0x21C5": {
    "kind": "bitfield",
    "type": "0x23",
-   "bits": 61
+   "bits": 61,
+   "pos": 2
   },
   "0x21C6": {
    "kind": "fieldlist",
@@ -65672,24 +67764,33 @@
    "referent": "0x21E2"
   },
   "0x21E4": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x21E3",
+    "0x10B4"
+   ]
   },
   "0x21E5": {
    "kind": "proc",
-   "return": "0x12"
+   "return": "0x12",
+   "args": "0x21E4"
   },
   "0x21E6": {
    "kind": "pointer",
    "referent": "0x21E5"
   },
   "0x21E7": {
-   "kind": "other",
-   "lf": "LF_ARGLIST"
+   "kind": "arglist",
+   "args": [
+    "0x21E3",
+    "0x12",
+    "0x603"
+   ]
   },
   "0x21E8": {
    "kind": "proc",
-   "return": "0x3"
+   "return": "0x3",
+   "args": "0x21E7"
   },
   "0x21E9": {
    "kind": "pointer",

@@ -1,52 +1,39 @@
 [
-  {"pdb": "~/autoboost-re/bin/ntkrnlmp.pdb",
-   "module": "ntoskrnl", "arch": "x64", "build": "10.0.26100.7824",
-   "family": "Windows 11 24H2"},
+  {"msdl": "ntoskrnl.exe", "timestamp": 2922963599, "size": 21299200,
+   "sha256": "54f57116bcbbe96da72088130a8f949e13884a3db39d81f4b80cb26a88de00ac",
+   "module": "ntoskrnl", "arch": "x64", "family": "Windows 11 24H2"},
+  {"msdl": "ntdll.dll", "timestamp": 3242245876, "size": 2523136,
+   "sha256": "2b7c796c408737c24e1319f814400ea3a2057bd6157ff30844aa325d12e393fc",
+   "module": "ntdll", "arch": "x64", "family": "Windows 11 24H2"},
 
-  {"pdb": "~/autoboost-re/versions/28000.3231/ntkrnlmp.pdb",
-   "module": "ntoskrnl", "arch": "x64", "build": "10.0.28000.3231",
-   "family": "Windows 11 Canary"},
+  {"msdl": "ntoskrnl.exe", "timestamp": 2764628947, "size": 21336064,
+   "sha256": "0e04b67c16f05f14e046a275097769a29ca88692ce3278eebc39ad476d922a76",
+   "module": "ntoskrnl", "arch": "x64", "family": "Windows 11 Canary"},
+  {"msdl": "ntdll.dll", "timestamp": 1093561993, "size": 2510848,
+   "sha256": "ee9242e152d2e508fdc01fbac39f02fb47a66d48036cb7dcae5162bc8ad4b188",
+   "module": "ntdll", "arch": "x64", "family": "Windows 11 Canary"},
 
-  {"pdb": "~/autoboost-re/versions/29680.1000/ntkrnlmp.pdb",
-   "module": "ntoskrnl", "arch": "x64", "build": "10.0.29680.1000",
-   "family": "Windows 11 Canary"},
+  {"uup": "${VP_IMAGES}/windows/canary/canary-uup/29680.1000/UUPs",
+   "arch": "x64", "family": "Windows 11 Canary"},
 
-  {"pdb": "${VP_IMAGES}/autoboost-vm/ntkrnlmp-26100.32230.pdb",
-   "module": "ntoskrnl", "arch": "x64", "build": "10.0.26100.32230",
-   "family": "Windows Server 2025"},
-
-  {"pdb": "./data/ntdll-26100.7309-x64.pdb",
-   "module": "ntdll", "arch": "x64", "build": "10.0.26100.7309",
-   "family": "Windows 11 24H2"},
-
-  {"iso": "${VP_IMAGES}/isos/win7/Win7_Ult_SP1_English_x64.iso",
-   "arch": "x64", "build": "6.1.7601", "family": "Windows 7 SP1"},
-
-  {"iso": "${VP_IMAGES}/isos/win8/en_windows_8_x64_dvd_915440.iso",
-   "arch": "x64", "build": "6.2.9200", "family": "Windows 8"},
-
-  {"iso": "${VP_IMAGES}/isos/win8.1/Win8.1_English_x64.iso",
-   "arch": "x64", "build": "6.3.9600", "family": "Windows 8.1"},
-
-  {"iso": "${VP_IMAGES}/isos/win10/Win10_22H2_English_x64.iso",
-   "arch": "x64", "build": "10.0.19045", "family": "Windows 10 22H2"},
-
-  {"iso": "${VP_IMAGES}/isos/win11/22000.194_CLIENTENTERPRISEEVAL_x64FRE_en-us.iso",
-   "arch": "x64", "build": "10.0.22000", "family": "Windows 11 21H2"},
-
-  {"iso": "${VP_IMAGES}/isos/server2012r2/9600.17050_SERVER_EVAL_x64_en-us.iso",
-   "arch": "x64", "build": "6.3.9600", "family": "Windows Server 2012 R2"},
-
-  {"iso": "${VP_IMAGES}/isos/server2016/Windows_Server_2016_Datacenter_EVAL_en-us_14393_refresh.iso",
-   "arch": "x64", "build": "10.0.14393", "family": "Windows Server 2016"},
-
-  {"iso": "${VP_IMAGES}/isos/server2019/17763.737_SERVER_EVAL_x64FRE_en-us.iso",
-   "arch": "x64", "build": "10.0.17763", "family": "Windows Server 2019"},
-
-  {"iso": "${VP_IMAGES}/isos/server2022/20348_SERVER_EVAL_x64FRE_en-us.iso",
-   "arch": "x64", "build": "10.0.20348", "family": "Windows Server 2022"},
-
-  {"iso": "${VP_IMAGES}/isos/server2025/26100.32230.260111-0550.lt_release_svc_refresh_SERVER_EVAL_x64FRE_en-us.iso",
-   "arch": "x64", "build": "10.0.26100.32230", "family": "Windows Server 2025",
-   "modules": ["ntdll"]}
+  {"iso": "${VP_IMAGES}/windows/win7/Win7_Ult_SP1_English_x64.iso",
+   "arch": "x64", "family": "Windows 7 SP1"},
+  {"iso": "${VP_IMAGES}/windows/win8/en_windows_8_x64_dvd_915440.iso",
+   "arch": "x64", "family": "Windows 8"},
+  {"iso": "${VP_IMAGES}/windows/win8.1/Win8.1_English_x64.iso",
+   "arch": "x64", "family": "Windows 8.1"},
+  {"iso": "${VP_IMAGES}/windows/win10/Win10_22H2_English_x64.iso",
+   "arch": "x64", "family": "Windows 10 22H2"},
+  {"iso": "${VP_IMAGES}/windows/win11/22000.194_CLIENTENTERPRISEEVAL_x64FRE_en-us.iso",
+   "arch": "x64", "family": "Windows 11 21H2"},
+  {"iso": "${VP_IMAGES}/windows/server2012r2/9600.17050_SERVER_EVAL_x64_en-us.iso",
+   "arch": "x64", "family": "Windows Server 2012 R2"},
+  {"iso": "${VP_IMAGES}/windows/server2016/Windows_Server_2016_Datacenter_EVAL_en-us_14393_refresh.iso",
+   "arch": "x64", "family": "Windows Server 2016"},
+  {"iso": "${VP_IMAGES}/windows/server2019/17763.737_SERVER_EVAL_x64FRE_en-us.iso",
+   "arch": "x64", "family": "Windows Server 2019"},
+  {"iso": "${VP_IMAGES}/windows/server2022/20348_SERVER_EVAL_x64FRE_en-us.iso",
+   "arch": "x64", "family": "Windows Server 2022"},
+  {"iso": "${VP_IMAGES}/windows/server2025/26100.32230.260111-0550.lt_release_svc_refresh_SERVER_EVAL_x64FRE_en-us.iso",
+   "arch": "x64", "family": "Windows Server 2025"}
 ]
