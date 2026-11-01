@@ -1,7 +1,7 @@
 # CLAUDE.md — vergiliplus
 
 Static browser of Windows struct/union/enum layouts from Microsoft's **public PDBs**:
-kernel (`ntoskrnl`) and userland (`ntdll`) across 13 x64 builds, live at
+kernel (`ntoskrnl`) and userland (`ntdll`) across 20 x64 builds (Win7 → Canary), live at
 https://vergiliplus.com. Not a fork of Vergilius; it borrows only its look.
 
 ## Map
@@ -37,7 +37,15 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   FileVersion. All modules of one image share its label, so module pairs line up.
   Win10 22H2 honestly shows 10.0.19041.x. A manifest `"build"` overrides.
 - **Prefer `msdl` manifest entries** where winbindex.m417z.com knows the file. They need
-  no local media. Canary builds come from UUP sets (`uup` entries).
+  no local media. Canary builds come from UUP sets (`uup` entries). msdl's
+  TimeDateStamp+SizeOfImage key **collides**: it can serve a different revision. So
+  entries carry `version`; a sha256 mismatch passes only if the FileVersion matches, and
+  a mismatching revision gets re-pinned by probing older ones. Pin both modules of a
+  build to the same revision.
+- **Opaque types**: names a PDB declares or mentions but never defines (forward
+  declarations, plus struct/union/enum names demangled from public symbols, e.g. the
+  canary `_AB_*` family). They live in `doc.opaque` ({name: kind}) and get a small page
+  (declaration, "defined in", used in), dimmed in lists.
 - **`data/*.json` is the committed artifact**: compact, and pruned to types reachable
   from the documented ones. Never commit PDBs, PEs or `web/dist/`.
 - **Text first, HTML at the edge.** layout/types produce segments; only
@@ -66,14 +74,21 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 - `<unnamed-tag>` is MSVC's name for every anonymous aggregate. `loadDoc` drops it from
   `named`; layout inlines such members; `usedIn` credits the enclosing type.
 - Pointer size comes from the doc's arch (`PTR_SIZE` in types.mjs).
+- `/search-index.json` is grouped: `{v: versions, m: modules, t: [[name, kind, slug,
+  module#, [defined v#], [opaque v#]]]}` (~340 KB). Palette filters (kind, PDB, opaque,
+  versions checklist) persist in localStorage `vp-ck`; it opens with `/` or ⌘K.
 - PDBs cache in `$TMPDIR/vergiliplus-pdbs`, keyed by GUID+age.
 - Stale `astro preview` servers keep their port; a new one silently moves.
 
 ## Open (undecided)
 
-Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`,
-about +25 MB `dist` per build) · x86/ARM64 (needs media) · home grouping
-(client/server/insider).
+**Scale ceiling:** about 20 MB of `dist` per build (two modules), so 20 builds ≈ 394 MB.
+GitHub Pages caps at ~1 GB, so roughly 40 builds is the limit without an architecture
+change (e.g. client-rendering older builds from JSON). Plan that before x86/ARM64 or
+per-update builds.
+Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
+x86/ARM64 (winbindex has them; budget first) · more canary builds (UUP sets) · home
+grouping (client/server/insider).
 
 ## Attribution
 

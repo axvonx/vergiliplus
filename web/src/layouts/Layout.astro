@@ -22,11 +22,13 @@ const { title, side = false, wide = false } = Astro.props;
     <nav class="topnav">
       {side && <button class="side-toggle" title="Toggle sidebar" data-side-toggle>☰</button>}
       <a class="brand" href="/"><img class="logo" src="/logo.svg" alt="" width="46" height="46" /><span>vergili<span class="plus">plus</span></span></a>
-      <button class="navlink" data-cmdk>Search<span class="kbd">⌘K</span></button>
+      <button class="navlink" data-cmdk title="Search ( / or ⌘K )">Search</button>
     </nav>
     <div id="vp-ck" class="ck-ov" hidden><div class="ck">
-      <input class="ck-input" placeholder="Search every type in every build…  (↑↓ ↵ esc)" />
+      <input class="ck-input" placeholder="Search every type in every build…" />
+      <div class="ck-filters"></div>
       <div class="ck-list"></div>
+      <div class="ck-foot">↑↓ move · ↵ open · click a square for that build · esc close · / or ⌘K to open</div>
     </div></div>
     {side ? (
       <div class="docs">
@@ -35,7 +37,7 @@ const { title, side = false, wide = false } = Astro.props;
             <div class="sb-top">
               <input class="sb-filter" placeholder="filter types…" />
               <div class="sb-kinds">
-                <button class="btn on" data-k="all">all</button><button class="btn" data-k="struct">S</button><button class="btn" data-k="union">U</button><button class="btn" data-k="enum">E</button>
+                <button class="btn on" data-k="all">all</button><button class="btn" data-k="struct">S</button><button class="btn" data-k="union">U</button><button class="btn" data-k="enum">E</button><button class="btn" data-k="opaque">O</button>
               </div>
             </div>
             <div class="sb-count"></div>

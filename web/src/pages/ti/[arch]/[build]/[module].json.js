@@ -1,5 +1,4 @@
-import { catalog, typesFor, slugNames } from "../../../../lib/catalog.mjs";
-import { slug } from "../../../../lib/types.mjs";
+import { catalog, typeList } from "../../../../lib/catalog.mjs";
 
 // /ti/<arch>/<build>/<module>.json — the sidebar's type list for one context.
 export function getStaticPaths() {
@@ -10,7 +9,7 @@ export function getStaticPaths() {
 
 export function GET({ params }) {
   const doc = catalog().get(params.arch, params.build, params.module);
-  const T = typesFor(doc);
-  const items = slugNames(doc).map((n) => ({ n, k: T.get(doc.named[n]).kind, s: slug(n) }));
+  // o: 1 for opaque (declared/mentioned only) names
+  const items = typeList(doc).map((it) => (it.o ? { n: it.n, k: it.k, s: it.s, o: 1 } : { n: it.n, k: it.k, s: it.s }));
   return new Response(JSON.stringify(items), { headers: { "content-type": "application/json" } });
 }

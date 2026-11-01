@@ -29,7 +29,7 @@ const next = i >= 0 && i < tb.length - 1 ? tb[i + 1] : null;
     data-l={`/v/${arch}/@/${module}.html`}>
     {builds.map((b) => (
       <option value={b} selected={b === build} data-n={type && !has.has(b) ? "1" : undefined}>
-        {fam(b)} — {b}{type && !has.has(b) ? "  (not defined)" : ""}
+        {fam(b)} — {b}{type && !has.has(b) ? "  (not defined)" : type && cat.get(arch, b, module).opaque[type] ? "  (opaque)" : ""}
       </option>
     ))}
   </select>
@@ -38,7 +38,8 @@ const next = i >= 0 && i < tb.length - 1 ? tb[i + 1] : null;
     {mods.map((m) => {
       const label = modInfo(m).label;
       if (m === module) return <span class="cb-mod on">{label}</span>;
-      const inOther = type && cat.get(arch, build, m)?.named[type];
+      const od = cat.get(arch, build, m);
+      const inOther = type && od && (type in od.named || type in od.opaque);
       return <a class="cb-mod" href={inOther ? typeHref(build, m) : listHref(build, m)}
                 title={inOther ? `${type} in ${label}` : label}>{label}</a>;
     })}

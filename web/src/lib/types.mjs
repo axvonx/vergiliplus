@@ -25,9 +25,9 @@ export const slug = (s) => s.replace(/[^A-Za-z0-9_.-]/g, "_");
 
 // segments -> plain text / HTML (links are relative: sibling <Type>.html in a build dir)
 export const text = (segs) => segs.map((s) => s.t).join("");
-export const html = (segs, named) => segs.map((s) =>
+export const html = (segs, T) => segs.map((s) =>
   s.kw ? `<span class="kw">${esc(s.t)}</span>`
-  : s.ref && named && s.ref in named ? `<a class="str-link" href="${esc(slug(s.ref))}.html">${esc(s.t)}</a>`
+  : s.ref && T && T.hasPage(s.ref) ? `<a class="str-link" href="${esc(slug(s.ref))}.html">${esc(s.t)}</a>`
   : s.ref ? `<span class="str-link">${esc(s.t)}</span>`
   : esc(s.t)).join("");
 
@@ -38,9 +38,11 @@ const words = (name) => name.split(/([A-Za-z_]\w*)/).filter(Boolean)
 
 export class Types {
   constructor(doc) {
-    this.t = doc.types; this.named = doc.named;
+    this.t = doc.types; this.named = doc.named; this.opaque = doc.opaque || {};
     this.ptr = PTR_SIZE[doc.arch] ?? 8;
   }
+  // has a page in this doc: documented, or opaque (declared/mentioned only)
+  hasPage(name) { return name in this.named || name in this.opaque; }
   get(idx) { return this.t[idx] || { kind: "other" }; }
   // a forward reference resolves to its definition: [idx, node]
   derefFwd(idx) {

@@ -51,7 +51,6 @@ pre, code { font-family: var(--mono); }
 .navlink { margin-left: auto; background: none; border: 0; border-bottom: 3px solid transparent; padding: 0.4rem 0;
   color: var(--gold); font-size: 1.8rem; font-weight: 700; text-transform: uppercase; cursor: pointer; }
 .navlink:hover { border-bottom-color: yellow; }
-.kbd { font-family: var(--mono); font-size: 1.3rem; color: var(--mute); margin-left: 0.4rem; text-transform: none; }
 .side-toggle { background: none; border: 0; color: var(--gold); font-size: 2.4rem; font-weight: 700; cursor: pointer; padding: 0 0.4rem; }
 
 /* ---- page shells: a #141422 content column over the faceted field ---- */
@@ -169,17 +168,47 @@ a.str-link:hover { color: yellow; }
 .used-list a:hover { color: var(--kw); text-decoration: underline; }
 .used-list a:not(:last-child)::after { content: ","; color: var(--mint); margin-right: 0.6rem; }
 
-/* ---- ⌘K palette ---- */
-.ck-ov { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; justify-content: center; align-items: flex-start; padding-top: 12vh; }
-.ck { width: min(720px, 92vw); background: var(--panel); border-radius: 0.5rem; padding: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+/* ---- opaque types (declared or mentioned, never defined in that PDB) ---- */
+.op { opacity: 0.6; font-style: italic; }
+.kind-btn[data-k="opaque"] { color: var(--mute); }
+.opaque-note { color: var(--mute); font-size: 1.6rem; margin: 1.2rem 0 0.4rem; }
+.opaque-note b { color: var(--mint); }
+.defined-in { font-size: 1.6rem; color: var(--mute); }
+.defined-in a { display: inline-block; margin: 0 1rem 0 0.4rem; color: var(--gold); font-family: var(--mono); }
+
+/* ---- search palette ---- */
+.ck-ov { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; justify-content: center; align-items: flex-start; padding-top: 8vh; }
+.ck { width: min(1000px, 94vw); background: var(--panel); border-radius: 0.5rem; padding: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
 .ck-input { width: 100%; outline: none; }
-.ck-list { max-height: 52vh; overflow-y: auto; margin-top: 0.6rem; }
-.ck-item { display: flex; align-items: center; gap: 0.2rem; padding: 0.5rem 0.8rem; border-radius: 0.3rem; color: inherit; }
+.ck-filters { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; align-items: center; margin: 0.8rem 0 0.2rem; }
+.ck-grp { display: inline-flex; gap: 0.3rem; }
+.ck-vers { position: relative; }
+.ck-vmenu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 2; width: 36rem; max-height: 50vh; overflow-y: auto;
+  background: var(--bg); border: 1px solid #44475a; border-radius: 0.4rem; padding: 0.6rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.ck-vmenu:not([hidden]) { display: block; }
+.ck-vall { display: flex; gap: 0.4rem; margin-bottom: 0.4rem; }
+.ck-vmenu label { display: flex; align-items: center; gap: 0.6rem; padding: 0.2rem 0.3rem; cursor: pointer; font-size: 1.5rem; }
+.ck-vmenu label:hover { background: var(--panel); }
+.ck-vmenu .vf { color: var(--ch); flex: 1 1 auto; }
+.ck-vmenu .vb { color: var(--mute); font-family: var(--mono); font-size: 1.3rem; }
+.ck-list { max-height: 58vh; overflow-y: auto; margin-top: 0.6rem; }
+.ck-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.4rem 0.8rem; border-radius: 0.3rem; color: inherit; }
 .ck-item:hover { color: inherit; }
 .ck-item.sel { background: var(--bg); }
-.ck-name { color: var(--mint); font-size: 1.8rem; font-weight: 700; flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ck-kind { color: var(--mute); font-size: 1.3rem; flex: 0 0 auto; }
+.ck-item .dot { margin-right: 0; }
+.ck-name { color: var(--mint); font-size: 1.8rem; font-weight: 700; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ck-name b { color: var(--brand); }
+.ck-mod { color: var(--gold); font-size: 1.3rem; font-family: var(--mono); flex: 0 0 auto; }
+/* presence strip: one square per selected version, oldest -> newest */
+.ck-strip { display: inline-flex; gap: 2px; flex: 0 0 auto; }
+.ck-strip i { width: 0.9rem; height: 1.4rem; border-radius: 2px; background: #33334a; }
+.ck-strip i.d { background: var(--ch); cursor: pointer; }
+.ck-strip i.o { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ch); cursor: pointer; }
+.ck-strip i[data-go]:hover { outline: 1px solid #fff; }
+.ck-ver { color: var(--ch); font-size: 1.4rem; flex: 0 0 13rem; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ck-empty { padding: 1.8rem; color: var(--mute); text-align: center; }
+.ck-foot { margin-top: 0.6rem; color: var(--mute); font-size: 1.25rem; text-align: right; }
+@media (max-width: 760px) { .ck-strip { display: none; } }
 
 /* ---- responsive: scale every rem via html font-size (verg.css trick) ---- */
 @media (max-width: 543px) { html { font-size: 5px; } }

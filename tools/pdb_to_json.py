@@ -57,6 +57,26 @@ def run_pdbutil(pdb, pdbutil):
     return out.stdout.splitlines()
 
 
+# A type named inside an MSVC-mangled public symbol: [P|Q|R|S][E][A|B]? then
+# T(union) U(struct) V(class) W4(enum), the name, then its scope up to "@@"
+MANGLED_TYPE = re.compile(r"(?<![A-Za-z0-9_])(?:[PQRS]E?[AB])?([TUV]|W4)([A-Za-z_][A-Za-z0-9_]*)@((?:[0-9]|[A-Za-z_][A-Za-z0-9_]*@)*)@")
+MANGLED_KIND = {"T": "union", "U": "struct", "V": "struct", "W4": "enum"}
+
+
+def mangled_type_names(pdb, pdbutil):
+    """Aggregate names that appear only inside mangled C++ public symbols. Newer
+    internals (e.g. the canary AutoBoost _AB_* family) have no type records in the
+    public PDB at all, so their signatures are the only place the names exist."""
+    out = subprocess.run([find_pdbutil(pdbutil), "dump", "-publics", pdb],
+                         capture_output=True, text=True).stdout
+    names = {}
+    for sym in re.findall(r"`(\?[^`]+)`", out):
+        for tag, name, _scope in MANGLED_TYPE.findall(sym):
+            if name.startswith("_") or name[:1].isupper():
+                names.setdefault(name, MANGLED_KIND[tag])
+    return names
+
+
 def pdb_identity(pdb, pdbutil):
     """{guid, age} of the PDB itself, so a doc can be re-fetched from msdl later."""
     out = subprocess.run([find_pdbutil(pdbutil), "dump", "-summary", pdb],
@@ -210,15 +230,26 @@ def convert(pdb, module, arch, build, family="", file_version=None, pdbutil=None
     """PDB -> the vergiliplus doc for one module x build x arch."""
     types = parse(run_pdbutil(pdb, pdbutil))
     # index of renderable top-level named types (definitions, not forward refs)
-    named = {}
+    named, declared = {}, {}
     for key, t in types.items():
-        if t.get("kind") in ("struct", "union", "enum") and t.get("name") \
-                and t.get("fieldlist") and not t.get("forward"):
+        if t.get("kind") not in ("struct", "union", "enum") or not t.get("name") \
+                or t["name"].startswith("<"):
+            continue
+        if t.get("fieldlist") and not t.get("forward"):
             named[t["name"]] = key
+        else:
+            declared.setdefault(t["name"], t["kind"])
+    # opaque: names this PDB knows but never defines, as {name: kind}, from forward
+    # declarations and from mangled public symbols (whose tag gives the kind)
+    opaque = {n: k for n, k in declared.items() if n not in named}
+    for n, k in mangled_type_names(pdb, pdbutil).items():
+        if n not in named:
+            opaque.setdefault(n, k)
     return {
         "module": module, "arch": arch, "build": build, "family": family,
         "fileVersion": file_version, "pdb": pdb_identity(pdb, pdbutil),
-        "named": named, "types": reachable(types, named.values()),
+        "named": named, "opaque": dict(sorted(opaque.items())),
+        "types": reachable(types, named.values()),
     }
 
 

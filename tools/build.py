@@ -22,7 +22,7 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
   {"uup": "path/UUPs", ...}                    # a UUP set: MetadataESD_*.esd + package
                                                # ESDs, resolved with wimlib --ref
 
-  {"msdl": "ntdll.dll", "timestamp": N, "size": N, "sha256": "...",
+  {"msdl": "ntdll.dll", "timestamp": N, "size": N, "sha256": "...", "version": "10.0.x.y",
    "module":"ntdll", "arch":"x64", "family":"..."}
                                                # the PE itself from the msdl binary store
                                                # (indexed by TimeDateStamp+SizeOfImage, see
@@ -125,7 +125,14 @@ def fetch_pe(entry, outdir):
         with open(out, "rb") as f:
             got = hashlib.sha256(f.read()).hexdigest()
         if got != entry["sha256"].lower():
-            raise RuntimeError("sha256 mismatch for %s: %s" % (name, got))
+            # winbindex hashes the file as shipped in an update; msdl can serve a
+            # differently-signed copy of the same build. Accept it only if it is the
+            # FileVersion the entry expects.
+            fv = pe_pdbid.file_version(out)
+            if not entry.get("version") or fv != entry["version"]:
+                raise RuntimeError("sha256 mismatch for %s: %s (FileVersion %s)" % (name, got, fv))
+            print("  ~~ %s: sha256 differs from winbindex, FileVersion %s matches" % (name, fv),
+                  file=sys.stderr)
     return out
 
 

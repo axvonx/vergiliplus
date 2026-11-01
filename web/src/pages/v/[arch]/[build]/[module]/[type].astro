@@ -2,17 +2,17 @@
 import Layout from "../../../../../layouts/Layout.astro";
 import StructCode from "../../../../../components/StructCode.astro";
 import ContextBar from "../../../../../components/ContextBar.astro";
-import { catalog, typesFor, usedInFor, slugNames } from "../../../../../lib/catalog.mjs";
+import { catalog, typesFor, usedInFor, typeList, ctxPath } from "../../../../../lib/catalog.mjs";
 import { slug } from "../../../../../lib/types.mjs";
 import { structLayout, enumLayout as enumOf } from "../../../../../lib/layout.mjs";
 
 export function getStaticPaths() {
   const out = [];
   for (const d of catalog().docs) {
-    for (const name of slugNames(d)) {
+    for (const it of typeList(d)) {
       out.push({
-        params: { arch: d.arch, build: d.build, module: d.module, type: slug(name) },
-        props: { name },
+        params: { arch: d.arch, build: d.build, module: d.module, type: it.s },
+        props: { name: it.n, opaque: it.o, kind: it.k },
       });
     }
   }
@@ -20,30 +20,56 @@ export function getStaticPaths() {
 }
 
 const { arch, build, module } = Astro.params;
-const { name } = Astro.props;
-const doc = catalog().get(arch, build, module);
+const { name, opaque, kind } = Astro.props;
+const cat = catalog();
+const doc = cat.get(arch, build, module);
 const T = typesFor(doc);
-const layout = structLayout(T, name);
-const enumLayout = layout ? null : enumOf(T, name);
 const used = usedInFor(doc)[name] || [];
 const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
-const s = layout?.summary;
-const stats = enumLayout
-  ? [[plural(enumLayout.summary.values, "value"), ""], ["size", enumLayout.summary.size]]
-  : [["size", `${s.size} (0x${s.size.toString(16)})`], [plural(s.members, "member"), ""],
-     [plural(s.holes, "hole"), s.holes ? `${s.sumHoles} bytes` : ""], ["padding", s.padding],
-     [plural(s.cachelines, "cacheline"), ""]];
+
+let layout = null, enumLayout = null, stats = [], definedIn = [];
+if (opaque) {
+  // where this name does have a layout: other modules of this build first, then other builds
+  definedIn = cat.docs
+    .filter((d) => d.arch === arch && name in d.named)
+    .map((d) => ({ d, here: d.build === build }))
+    .sort((x, y) => (y.here - x.here) || (x.d.build < y.d.build ? 1 : -1));
+} else {
+  layout = structLayout(T, name);
+  enumLayout = layout ? null : enumOf(T, name);
+  const s = layout?.summary;
+  stats = enumLayout
+    ? [[plural(enumLayout.summary.values, "value"), ""], ["size", enumLayout.summary.size]]
+    : [["size", `${s.size} (0x${s.size.toString(16)})`], [plural(s.members, "member"), ""],
+       [plural(s.holes, "hole"), s.holes ? `${s.sumHoles} bytes` : ""], ["padding", s.padding],
+       [plural(s.cachelines, "cacheline"), ""]];
+}
 ---
 <Layout title={`${name} · ${module} ${build}`} side>
   <ContextBar arch={arch} build={build} module={module} type={name} />
-  <div class="panel">
-  <StructCode layout={layout} enumLayout={enumLayout} named={doc.named} />
-  <div class="stats">
-    {stats.map(([k, v]) => /^\d/.test(k)
-      ? <span><b>{k.split(" ")[0]}</b> {k.split(" ").slice(1).join(" ")}{v !== "" ? ` (${v})` : ""}</span>
-      : <span>{k} <b>{v}</b></span>)}
-  </div>
-  </div>
+  {opaque ? (
+    <div class="panel">
+      <pre class="sc-pre"><code><div class="sc-line"><span class="sc-code"><span class="kw">{kind}</span> {name};</span><span class="sc-ann">/* opaque */</span></div></code></pre>
+      <p class="opaque-note">
+        Declared but not defined in <b>{module}</b>'s public PDB for this build: a forward
+        declaration, or a name that only appears in mangled C++ symbols. The layout isn't public here.
+      </p>
+      {definedIn.length > 0 && (
+        <div class="defined-in">Defined in: {definedIn.map(({ d }) => (
+          <a href={`${ctxPath(d.arch, d.build, d.module)}/${slug(name)}.html`}>{d.module} {d.build}</a>
+        ))}</div>
+      )}
+    </div>
+  ) : (
+    <div class="panel">
+      <StructCode layout={layout} enumLayout={enumLayout} T={T} />
+      <div class="stats">
+        {stats.map(([k, v]) => /^\d/.test(k)
+          ? <span><b>{k.split(" ")[0]}</b> {k.split(" ").slice(1).join(" ")}{v !== "" ? ` (${v})` : ""}</span>
+          : <span>{k} <b>{v}</b></span>)}
+      </div>
+    </div>
+  )}
   {used.length > 0 && (
     <section class="panel">
       <div class="used-h">Used in ({used.length})</div>

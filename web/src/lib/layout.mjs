@@ -104,7 +104,7 @@ export function structLayout(T, name) {
       fkind: T.memberKind(m.type), field: m.name, offset: m.offset,
       size: bf ? T.sizeof(node.type) : T.sizeof(m.type),
       bits: bf ? node.bits : null, bitpos: bf ? pos : null,
-      ref, linked: ref in T.named,
+      ref, linked: T.hasPage(ref),
     });
   };
   const emitUnit = (u, depth) => u.ms.forEach((x) => member(x, depth));
@@ -179,7 +179,7 @@ export function usedIn(T) {
   const walk = (flIdx, tname, seen, depth) => {
     for (const m of T.get(flIdx).members || []) {
       const r = T.refName(m.type);
-      if (r && r in T.named) { if (r !== tname) seen.add(r); continue; }
+      if (r && T.hasPage(r)) { if (r !== tname) seen.add(r); continue; }
       // descend into an anonymous aggregate, through pointers/arrays/modifiers
       let idx = m.type, n = T.get(idx);
       while (["pointer", "modifier", "array", "bitfield"].includes(n.kind)) {

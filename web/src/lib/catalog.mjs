@@ -20,6 +20,7 @@ export function loadDoc(p) {
   const doc = JSON.parse(fs.readFileSync(p, "utf8"));
   // "<unnamed-tag>" is MSVC's name for every anonymous aggregate: not a real type
   for (const n of Object.keys(doc.named)) if (ANON.test(n)) delete doc.named[n];
+  doc.opaque ||= {};  // names declared/mentioned but not defined in this PDB: {name: kind}
   return doc;
 }
 
@@ -49,12 +50,12 @@ export function catalog() {
   const byKey = new Map();
   const builds = new Map();   // arch|module -> [build asc]
   const modules = new Map();  // arch|build  -> [module]
-  const wizard = new Map();   // arch|module|name -> [build asc]
+  const wizard = new Map();   // arch|module|name -> [build asc] (defined or opaque)
   for (const d of docs) {
     byKey.set(key(d.arch, d.build, d.module), d);
     (builds.get(key(d.arch, d.module)) || builds.set(key(d.arch, d.module), []).get(key(d.arch, d.module))).push(d.build);
     (modules.get(key(d.arch, d.build)) || modules.set(key(d.arch, d.build), []).get(key(d.arch, d.build))).push(d.module);
-    for (const n of Object.keys(d.named)) {
+    for (const n of [...Object.keys(d.named), ...Object.keys(d.opaque)]) {
       const k = key(d.arch, d.module, n);
       (wizard.get(k) || wizard.set(k, []).get(k)).push(d.build);
     }
@@ -75,7 +76,7 @@ export function catalog() {
   return _cat;
 }
 
-const _t = new WeakMap(), _u = new WeakMap(), _s = new WeakMap();
+const _t = new WeakMap(), _u = new WeakMap(), _s = new WeakMap(), _l = new WeakMap();
 export function typesFor(doc) {
   if (!_t.has(doc)) _t.set(doc, new Types(doc));
   return _t.get(doc);
@@ -95,6 +96,21 @@ export function slugNames(doc) {
     _s.set(doc, out);
   }
   return _s.get(doc);
+}
+
+// every type with a page in a doc, documented and opaque: [{n, k, s, o}] by name.
+// Slugs are unique per doc (documented names claim theirs first).
+export function typeList(doc) {
+  if (!_l.has(doc)) {
+    const T = typesFor(doc), seen = new Set(slugNames(doc).map(slug));
+    const out = slugNames(doc).map((n) => ({ n, k: T.get(doc.named[n]).kind, s: slug(n), o: false }));
+    for (const [n, k] of Object.entries(doc.opaque)) {
+      const s = slug(n);
+      if (!seen.has(s)) { seen.add(s); out.push({ n, k, s, o: true }); }
+    }
+    _l.set(doc, out.sort((a, b) => (a.n < b.n ? -1 : a.n > b.n ? 1 : 0)));
+  }
+  return _l.get(doc);
 }
 
 export const ctxPath = (a, b, m) => `/v/${a}/${b}/${m}`;
