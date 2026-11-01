@@ -44,8 +44,8 @@ Last updated 2026-11-01 (after the "implement PLAN.md" session).
 | C2 Generalise modules | ✅ `web/src/lib/modules.mjs` |
 | C3 x86 / ARM64 | ⚠️ renderer ready (`PTR_SIZE`); **no x86/ARM64 sources on hand** |
 | C4 UUP ingest | ✅ `uup` kind; 29680 built from its UUP set |
-| D1 GitHub repo + push | ⏳ needs owner go-ahead (history rewrite + first push) |
-| D2 CI | ✅ workflow written, unrun until pushed |
+| D1 GitHub repo + push | ✅ history scrubbed of personal paths; `main` pushed to private axvonx/vergiliplus |
+| D2 CI | ✅ green on first fixed run (~1 min) |
 | D3 Pages deploy | ✅ wired (`site`, CNAME); flip `PAGES_ENABLED` + Pages settings |
 | D4 Licensing | ✅ MIT (`LICENSE`); CSS attribution + data statement in README |
 | D5 README rewrite | ⏳ owner. README "Status"/"next steps" are now stale |
@@ -53,8 +53,8 @@ Last updated 2026-11-01 (after the "implement PLAN.md" session).
 
 ## Open work (next session)
 
-- **D1**: rewrite history so personal paths never reach GitHub (if not already done),
-  rename `master` → `main`, push, watch the first CI run.
+- **D3 go-live**: repo variable `PAGES_ENABLED=true`, Pages source = GitHub Actions,
+  custom domain vergiliplus.com (Pages on a private repo needs a paid plan).
 - **D5**: README rewrite (owner).
 - **C1 follow-up**: decide the budget, then add `"modules": [..., "ndis", "fltmgr"]`
   to image entries (~+25 MB per build).
@@ -66,8 +66,8 @@ Last updated 2026-11-01 (after the "implement PLAN.md" session).
 ## Dependency graph & critical path
 
 ```
-D1 (push) ──► D2 first run ──► D3 (PAGES_ENABLED)   ← critical path to launch
-D4, D5 (owner) ─────────────► D3 (before public)
+D3 (PAGES_ENABLED + Pages settings)   ← all that's left to launch
+D5 README (owner) ──► before going public
 C1 follow-up (budget decision) ──► manifest modules
 C3 data (needs x86/ARM64 media)
 ```
