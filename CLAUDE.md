@@ -15,17 +15,23 @@ it reuses only its look (lifted CSS) and its declaration-rendering idea.
 ## Pipeline (the whole thing)
 
 ```
-PE ─tools/pe_pdbid.py→ sym-path ─tools/fetch_pdb.sh→ <module>.pdb
+PE ─tools/pe_pdbid.py→ sym-path + FileVersion ─tools/fetch_pdb.sh→ <module>.pdb
    ─tools/pdb_to_json.py (llvm-pdbutil dump -types)→ data/<module>-<build>-<arch>.json
    ─web/ (Astro, pnpm)→ static site  web/dist/
 tools/build.py  = the batch driver over a manifest (data/sources.json)
+tools/check_links.py, tools/check_budget.py = post-build gates (CI runs both)
+tests/render.test.mjs = golden tests over render.mjs (fixtures in tests/golden/)
 ```
 
 Site URL scheme (web/src/pages): `/` versions home · `/v/<arch>/<build>/<module>.html`
 type listing · `/v/<arch>/<build>/<module>/<Type>.html` type page ·
 `/ti/<arch>/<build>/<module>.json` sidebar index · `/search-index.json` ⌘K index.
 `web/src/lib/render.mjs` is the type→C renderer + `catalog()` (all docs loaded once,
-memoized — never re-read JSON per page).
+memoized — never re-read JSON per page). `web/src/lib/modules.mjs` is the module
+table (ring + label). Pages are static HTML: no islands, no Preact. Behaviour lives in
+two vanilla scripts, `web/public/assets/nav.js` (sidebar + ⌘K) and `struct.js`
+(Metadata toggle, copy, row click-through). Every byte of per-page chrome is ×~28k
+pages, so keep it out of the page template.
 
 No server, no database, no self-scrape (Vergilius uses Spring Boot + MySQL +
 `wget --mirror`; we don't). `{module, arch, build, family}` are first-class in the
@@ -34,24 +40,37 @@ JSON and the URL.
 ## Build
 
 ```sh
-(cd web && pnpm install)           # once; uses web/.npmrc + run bins directly (see below)
-python3 tools/build.py            # reads data/sources.json, writes JSON, builds web/dist
-python3 tools/build.py --skip-render   # data only
-(cd web && ./node_modules/.bin/astro build && ./node_modules/.bin/astro preview)
+(cd web && pnpm install)
+export VP_IMAGES=/path/to/disk-images   # root of the image/UUP paths in the manifest
+python3 tools/build.py                  # reads data/sources.json, writes JSON, builds web/dist
+python3 tools/build.py --skip-render    # data only;  --only <substr> for one entry
+(cd web && pnpm test && pnpm build && pnpm preview)
+python3 tools/check_links.py && python3 tools/check_budget.py
 ```
 
-Call the Astro binary directly rather than `pnpm build`: pnpm 11's pre-script
-deps-verify re-runs install and fails on the (blocked) esbuild/sharp build scripts.
-Full build is ~11 s / ~770 MB for ~24.7k pages. Watch for pathological types (e.g.
-`_MI_HYPER_SPACE` is 276 MB) — anything that scales with struct *size* rather than
-member count will blow the heap.
+Full build is ~10 s for ~27.6k pages, `dist` ≈ 281 MB. Watch for pathological types
+(e.g. `_MI_HYPER_SPACE` is 276 MB): anything that scales with struct *size* rather
+than member count will blow the heap. The golden tests include it as a canary.
+After an intended rendering change, `UPDATE_GOLDEN=1 node --test tests/` and review
+the fixture diff like code.
 
 Manifest entries (`data/sources.json`) are one of:
-- `{"pdb": "...", "module","arch","build","family"}` — a local PDB (most portable; this
-  is how others add builds they have).
+- `{"msdl": "ntdll.dll", "timestamp", "size", "sha256", "module","arch","family"}` — the
+  PE itself from msdl's binary store (indexed by TimeDateStamp+SizeOfImage; look them up
+  on winbindex.m417z.com). Needs no local files; the most reproducible kind.
+- `{"pdb": "...", "module","arch","build","family"}` — a local PDB (how others add builds
+  they have; `build` required unless a `pe` is given too).
 - `{"pe": "...", ...}` — a local PE; the matching PDB is fetched from msdl.
-- `{"iso": "...", "arch","build","family", "modules":[...]}` — extract the module PEs
-  from the install image, then fetch PDBs. Needs `7z` + `wimlib` (optional path).
+- `{"iso"|"wim"|"uup": "...", "arch","family", "modules":[...]}` — extract the module PEs
+  from an install ISO, a WIM/ESD, or a UUP set (MetadataESD + package ESDs via wimlib
+  `--ref`), then fetch PDBs. Needs `7z` (ISO only) + `wimlib`.
+
+Paths expand `$VARS`/`~` and are relative to the manifest; the committed manifest
+roots image paths at `$VP_IMAGES` and must never contain absolute personal paths.
+**Build labels come from the binaries** (image Build.SPBuild, else PE FileVersion), not
+the manifest. All modules of one image share its label, so module pairs line up.
+`"build"` overrides. Win10 22H2 honestly reports 10.0.19041.x (it's an enablement
+package on 19041).
 
 ## Dependencies
 
@@ -69,16 +88,20 @@ Manifest entries (`data/sources.json`) are one of:
   If llvm changes its dump format, the regexes there break — that's the first place to
   look if a new toolchain version yields empty/short output. (`pdb2yaml` is a more
   robust-but-verbose alternative if this ever needs hardening.)
-- **Manifest `build` labels are cosmetic** — the correct PDB is resolved from the PE's
-  RSDS GUID, so an approximate build string only affects the displayed label/URL.
+- **The correct PDB is resolved from the PE's RSDS GUID.** Each doc also records its
+  `fileVersion` and the PDB `{guid, age}`, so it can be re-fetched from msdl later.
 - **A type is "documented" only if its PDB record has a real field list** (not a
   forward-ref). ntdll and ntoskrnl PDBs are complementary: each defines what it owns
   and forward-declares the other's types (e.g. `_TP_POOL` is full in ntdll, opaque in
   ntoskrnl). Opaque types render as plain (unlinked) names.
-- **Anonymous unions are currently rendered sequentially** with offset comments, not
-  wrapped in `union {}`/nested `struct {}`. Bitfields *are* handled. Porting
-  Vergilius's offset-collision grouping (`FieldBuilder.getFirstPieceOfStruct`) is the
-  main open rendering task — needed before `_PEB`/`_TEB`/`_KTHREAD` read perfectly.
+- **Anonymous unions/structs are reconstructed** (`units()` → `structItems()` →
+  `alternatives()` in render.mjs). Bitfields first merge into storage units (same
+  offset, rising bit `pos`; a reset to 0 means a new alternative). Then a unit whose
+  offset is revisited later opens a union. Known ambiguity: a last alternative longer
+  than the others has its tail rendered after the union (offsets still exact).
+  `<unnamed-tag>` members are inlined as `struct { … } name;`.
+- **Pointer size comes from the doc's arch** (`PTR_SIZE`), so x86/ARM data needs no
+  renderer changes.
 
 ## Don't
 
@@ -91,6 +114,4 @@ Manifest entries (`data/sources.json`) are one of:
 
 ## Status
 
-See `PLAN.md` (single source of truth for open work). Notable known gaps: anonymous
-unions render flat; `PTR = 8` is hardcoded in render.mjs (x86 needs arch-aware sizes);
-module labels are hardcoded to ntdll/ntoskrnl.
+See `PLAN.md` (single source of truth for open work).

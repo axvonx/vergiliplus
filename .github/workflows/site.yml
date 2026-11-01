@@ -1,0 +1,63 @@
+# Build, test and (when enabled) deploy the static site. data/*.json is committed,
+# so CI needs no PDBs, ISOs or LLVM — just Node + Python.
+name: site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: web/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Golden tests
+        run: node --test ../tests/
+      - name: Build
+        run: ./node_modules/.bin/astro build
+      - name: Link check
+        run: python3 ../tools/check_links.py dist
+      - name: Size budget
+        run: python3 ../tools/check_budget.py dist
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: web/dist
+
+  # GitHub Pages on a private repo needs a paid plan: set the repo variable
+  # PAGES_ENABLED=true (and Settings -> Pages -> Source: GitHub Actions, custom
+  # domain vergiliplus.com) when it's time to go live.
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.PAGES_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
