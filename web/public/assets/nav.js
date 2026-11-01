@@ -8,6 +8,15 @@
   window.__vpNav = true;
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const dot = (k) => `<i class="dot k-${k}"></i>`;
+  // scroll el into view within its own list only (scrollIntoView would also scroll the
+  // window, hiding the top nav on every type page)
+  const nearest = (list, el) => {
+    if (!list || !el) return;
+    const top = el.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop;
+    if (top < list.scrollTop) list.scrollTop = top;
+    else if (top + el.offsetHeight > list.scrollTop + list.clientHeight)
+      list.scrollTop = top + el.offsetHeight - list.clientHeight;
+  };
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
 
   // ---- sidebar -------------------------------------------------------------
@@ -32,7 +41,7 @@
     root.querySelector(".sb-count").textContent = `${shown.length} types`;
     root.querySelector(".sb-list").innerHTML = shown.map((it) =>
       `<a class="sb-item${it.s === sb.loc.slug ? " active" : ""}" href="${sb.loc.ctx}/${esc(it.s)}.html">${dot(it.k)}${esc(it.n)}</a>`).join("");
-    root.querySelector(".sb-item.active")?.scrollIntoView({ block: "nearest" });
+    nearest(root.querySelector(".sb-list"), root.querySelector(".sb-item.active"));
   };
   const sbSync = () => {
     sb.loc = parseLoc();
@@ -79,6 +88,14 @@
     a.href = `/v/${a.dataset.ab}/${mod}.html`;
   });
 
+  // ---- context bar build switcher: same type in the chosen build, else its listing ----
+  document.addEventListener("change", (e) => {
+    const s = e.target;
+    if (!s.matches?.(".cb-build")) return;
+    const tpl = s.selectedOptions[0].dataset.n || !s.dataset.t ? s.dataset.l : s.dataset.t;
+    location.href = tpl.replace("@", s.value);
+  });
+
   // ---- nav buttons ----------------------------------------------------------------
   document.addEventListener("click", (e) => {
     if (e.target.closest?.("[data-cmdk]")) ckOpen(!ck.open);
@@ -119,7 +136,7 @@
         : `<div class="ck-empty">No matches</div>`;
     }
     root.querySelector(".ck-list").innerHTML = body;
-    root.querySelector(".ck-item.sel")?.scrollIntoView({ block: "nearest" });
+    nearest(root.querySelector(".ck-list"), root.querySelector(".ck-item.sel"));
   };
   const ckOpen = (open) => {
     ck.open = open;

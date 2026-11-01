@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="vergiliplus">
+  <!-- Earth's interior, fully opened: mantle, liquid outer core, solid inner core.
+       Stylized proportions (cores enlarged) so it reads at favicon size. -->
+  <defs>
+    <radialGradient id="mantle" cx="50%" cy="50%" r="50%">
+      <stop offset="0.55" stop-color="#d4542c"/>
+      <stop offset="1" stop-color="#7a1f1d"/>
+    </radialGradient>
+    <radialGradient id="outer" cx="50%" cy="50%" r="50%">
+      <stop offset="0.45" stop-color="#ffb347"/>
+      <stop offset="1" stop-color="#e2651f"/>
+    </radialGradient>
+    <radialGradient id="inner" cx="42%" cy="40%" r="60%">
+      <stop offset="0" stop-color="#fffbe6"/>
+      <stop offset="0.6" stop-color="#ffe066"/>
+      <stop offset="1" stop-color="#f6b62b"/>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30.5" fill="url(#mantle)" stroke="#3a1014" stroke-width="2"/>
+  <!-- mantle convection -->
+  <g fill="none" stroke="#f7a26b" stroke-opacity="0.35" stroke-width="1.6" stroke-linecap="round">
+    <path d="M11 24 A22 22 0 0 1 24 10.5"/>
+    <path d="M53 40 A22 22 0 0 1 40 53.5"/>
+    <path d="M44 9.5 A24 24 0 0 1 55 21"/>
+    <path d="M20 54.5 A24 24 0 0 1 9 43"/>
+  </g>
+  <circle cx="32" cy="32" r="19" fill="url(#outer)" stroke="#8a2a17" stroke-width="1.2"/>
+  <circle cx="32" cy="32" r="9.5" fill="url(#inner)"/>
+</svg>

@@ -28,7 +28,8 @@ pre, code { font-family: var(--mono); }
 
 /* ---- top nav ---- */
 .topnav { display: flex; align-items: center; gap: 1rem; padding: 0 1.6rem; border-bottom: 2px solid var(--line); }
-.brand { color: var(--gold-bright); font-size: 3.4rem; font-weight: 900; letter-spacing: -0.5px; }
+.brand { display: inline-flex; align-items: center; gap: 0.8rem; color: var(--gold-bright); font-size: 3.4rem; font-weight: 900; letter-spacing: -0.5px; }
+.logo { width: 3.4rem; height: 3.4rem; }
 .brand:hover { color: var(--gold-bright); }
 .brand .plus { color: var(--cyan); }
 .btn { background: var(--panel-2); color: var(--mute); border: 1px solid var(--line-2); border-radius: 0.3rem;

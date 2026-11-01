@@ -12,6 +12,7 @@ const { title, side = false, wide = false } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title ? `${title} · vergiliplus` : "vergiliplus"}</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800;900&display=swap" />
+    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/assets/site.css" />
     <ClientRouter />
     <script is:inline>try{document.documentElement.classList.toggle("side-collapsed",localStorage.getItem("vp-side")==="0")}catch(e){}</script>
@@ -21,7 +22,7 @@ const { title, side = false, wide = false } = Astro.props;
   <body>
     <nav class="topnav">
       {side && <button class="btn side-toggle" title="Toggle sidebar" data-side-toggle>☰</button>}
-      <a class="brand" href="/">vergili<span class="plus">plus</span></a>
+      <a class="brand" href="/"><img class="logo" src="/logo.svg" alt="" width="34" height="34" /><span>vergili<span class="plus">plus</span></span></a>
       <button class="btn search-btn" data-cmdk>Search <span class="kbd">⌘K</span></button>
     </nav>
     <div id="vp-ck" class="ck-ov" hidden><div class="ck">
