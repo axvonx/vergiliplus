@@ -8,8 +8,9 @@ a single module+build is one document (unlike Vergilius, where one PDB == one
 "OS" and there is no module axis).
 
 Usage:
-  pdb_to_json.py <pdb> --module ntdll --arch x64 --build 10.0.26100.7309 \
-      [--timestamp N] [--pdbutil /path/to/llvm-pdbutil] [-o out.json]
+  pdb_to_json.py <pdb> --module ntdll --arch x64 --build 10.0.26100.7824 \
+      [--family F] [--file-version V] [--pdbutil /path/to/llvm-pdbutil] [-o out.json]
+Also importable: convert(...) -> doc, write(doc, path).
 
 Only the record kinds needed to render C declarations are modeled; anything else
 is kept as a best-effort {kind:"other"} node so rendering degrades instead of
@@ -17,6 +18,7 @@ crashing.
 """
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -36,7 +38,6 @@ INLINE_BASE = re.compile(r"0x([0-9A-Fa-f]+) \(([^)]*)\)")
 
 def find_pdbutil(pdbutil):
     """Locate llvm-pdbutil: explicit arg, then $LLVM_PDBUTIL, then PATH."""
-    import os
     for cand in (pdbutil, os.environ.get("LLVM_PDBUTIL")):
         if cand and shutil.which(cand):
             return cand
@@ -186,6 +187,49 @@ def parse(lines):
     return types
 
 
+def reachable(types, roots):
+    """Type records reachable from the documented types. The rest of the TPI stream
+    (other modules' arglists, procs, pointers nothing we render points at) is
+    dropped: about a quarter of the records."""
+    seen, stack = set(), list(roots)
+    while stack:
+        k = stack.pop()
+        if not isinstance(k, str) or k in seen or k not in types:
+            continue
+        seen.add(k)
+        t = types[k]
+        for f in ("fieldlist", "forward", "referent", "element", "type", "return"):
+            stack.append(t.get(f))
+        args = t.get("args")
+        stack.extend(args if isinstance(args, list) else [args])
+        stack.extend(m["type"] for m in t.get("members", []))
+    return {k: types[k] for k in types if k in seen}
+
+
+def convert(pdb, module, arch, build, family="", file_version=None, pdbutil=None):
+    """PDB -> the vergiliplus doc for one module x build x arch."""
+    types = parse(run_pdbutil(pdb, pdbutil))
+    # index of renderable top-level named types (definitions, not forward refs)
+    named = {}
+    for key, t in types.items():
+        if t.get("kind") in ("struct", "union", "enum") and t.get("name") \
+                and t.get("fieldlist") and not t.get("forward"):
+            named[t["name"]] = key
+    return {
+        "module": module, "arch": arch, "build": build, "family": family,
+        "fileVersion": file_version, "pdb": pdb_identity(pdb, pdbutil),
+        "named": named, "types": reachable(types, named.values()),
+    }
+
+
+def write(doc, path):
+    """Compact JSON, one doc per file (data/ is the committed artifact)."""
+    with open(path, "w") as f:
+        json.dump(doc, f, separators=(",", ":"))
+    print("wrote %s  (%d types, %d named)" % (path, len(doc["types"]), len(doc["named"])),
+          file=sys.stderr)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("pdb")
@@ -193,40 +237,17 @@ def main():
     ap.add_argument("--arch", required=True)
     ap.add_argument("--build", required=True)
     ap.add_argument("--family", default="")
-    ap.add_argument("--timestamp", type=int, default=0)
     ap.add_argument("--file-version", default=None,
                     help="the module's PE FileVersion, when known")
     ap.add_argument("--pdbutil", default=None)
     ap.add_argument("-o", "--out", default=None)
     args = ap.parse_args()
-
-    types = parse(run_pdbutil(args.pdb, args.pdbutil))
-
-    # index of renderable top-level named types (definitions, not forward refs)
-    named = {}
-    for key, t in types.items():
-        if t.get("kind") in ("struct", "union", "enum") and t.get("name") \
-                and t.get("fieldlist") and not t.get("forward"):
-            named[t["name"]] = key
-
-    doc = {
-        "module": args.module,
-        "arch": args.arch,
-        "build": args.build,
-        "family": args.family,
-        "timestamp": args.timestamp,
-        "fileVersion": args.file_version,
-        "pdb": pdb_identity(args.pdb, args.pdbutil),
-        "named": named,
-        "types": types,
-    }
-    out = json.dumps(doc, indent=1)
+    doc = convert(args.pdb, args.module, args.arch, args.build, args.family,
+                  args.file_version, args.pdbutil)
     if args.out:
-        open(args.out, "w").write(out)
-        print("wrote %s  (%d types, %d named)" %
-              (args.out, len(types), len(named)), file=sys.stderr)
+        write(doc, args.out)
     else:
-        print(out)
+        json.dump(doc, sys.stdout, separators=(",", ":"))
 
 
 if __name__ == "__main__":

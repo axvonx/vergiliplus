@@ -47,26 +47,24 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.error
+import urllib.request
+
+import pdb_to_json
+import pe_pdbid
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DATA = os.path.join(ROOT, "data")
 # where a module's PE lives inside a Windows image / on the running system
+# (only modules whose public PDBs carry types; see docs/module-survey.md)
 PE_IN_IMAGE = {
     "ntoskrnl": "Windows/System32/ntoskrnl.exe",
     "ntdll": "Windows/System32/ntdll.dll",
-    "kernelbase": "Windows/System32/KernelBase.dll",
-    "kernel32": "Windows/System32/kernel32.dll",
-    "combase": "Windows/System32/combase.dll",
-    "win32k": "Windows/System32/win32k.sys",
-    "win32kbase": "Windows/System32/win32kbase.sys",
-    "win32kfull": "Windows/System32/win32kfull.sys",
-    "hal": "Windows/System32/hal.dll",
-    "ci": "Windows/System32/ci.dll",
     "fltmgr": "Windows/System32/drivers/fltMgr.sys",
-    "tcpip": "Windows/System32/drivers/tcpip.sys",
     "ndis": "Windows/System32/drivers/ndis.sys",
 }
+MSDL = "https://msdl.microsoft.com/download/symbols/"
 
 
 class Skip(Exception):
@@ -97,40 +95,38 @@ def resolve(p, base):
     return out
 
 
-def pe_info(pe):
-    out = subprocess.run([sys.executable, "-I", os.path.join(HERE, "pe_pdbid.py"), pe],
-                         capture_output=True, text=True, check=True).stdout
-    return dict(line.split("=", 1) for line in out.splitlines())
+def download(url, out):
+    """GET url -> out (msdl redirects to a CDN; urllib follows it)."""
+    print("  GET " + url, file=sys.stderr)
+    req = urllib.request.Request(url, headers={"User-Agent": "Microsoft-Symbol-Server/10.0"})
+    with urllib.request.urlopen(req, timeout=120) as r, open(out, "wb") as f:
+        shutil.copyfileobj(r, f)
+    return out
 
 
 def fetch_pdb(pe, outdir):
-    out = run([os.path.join(HERE, "fetch_pdb.sh"), pe, outdir],
-              capture_output=True, text=True)
-    return out.stdout.strip().splitlines()[-1]
+    """The PE's public PDB from msdl, by its RSDS identity (cached in outdir)."""
+    info = pe_pdbid.extract(pe)
+    if not info:
+        raise RuntimeError("no RSDS CodeView record in " + pe)
+    out = os.path.join(outdir, info["guid"] + str(info["age"]) + "-" + info["pdb"])
+    if not os.path.exists(out):
+        download(MSDL + info["sympath"], out + ".part")
+        os.replace(out + ".part", out)
+    return out
 
 
 def fetch_pe(entry, outdir):
     """Download a PE from msdl by TimeDateStamp+SizeOfImage and verify its sha256."""
     name = entry["msdl"]
-    url = "https://msdl.microsoft.com/download/symbols/%s/%08X%x/%s" % (
-        name, entry["timestamp"], entry["size"], name)
-    out = os.path.join(outdir, name)
-    run(["curl", "-fsSL", "-A", "Microsoft-Symbol-Server/10.0", "-o", out, url])
+    out = download("%s%s/%08X%x/%s" % (MSDL, name, entry["timestamp"], entry["size"], name),
+                   os.path.join(outdir, name))
     if entry.get("sha256"):
         with open(out, "rb") as f:
             got = hashlib.sha256(f.read()).hexdigest()
         if got != entry["sha256"].lower():
-            raise RuntimeError("sha256 mismatch for %s: %s" % (url, got))
+            raise RuntimeError("sha256 mismatch for %s: %s" % (name, got))
     return out
-
-
-def make_json(pdb, module, arch, build, family, out, file_version=None):
-    cmd = [sys.executable, "-I", os.path.join(HERE, "pdb_to_json.py"), pdb,
-           "--module", module, "--arch", arch, "--build", build,
-           "--family", family, "-o", out]
-    if file_version:
-        cmd += ["--file-version", file_version]
-    run(cmd)
 
 
 def json_name(module, build, arch):
@@ -230,20 +226,20 @@ def handle(entry, base, pdbdir):
         if not build:
             raise Skip("no build label for %s: give \"build\" or a \"pe\"" % module)
         out = json_name(module, build, arch)
-        make_json(pdb, module, arch, build, family, out, fv)
+        pdb_to_json.write(pdb_to_json.convert(pdb, module, arch, build, family, fv), out)
         produced.append(out)
 
     if "msdl" in entry:
         with tempfile.TemporaryDirectory() as work:
             pe = fetch_pe(entry, work)
-            fv = pe_info(pe).get("VERSION")
+            fv = pe_pdbid.file_version(pe)
             emit(fetch_pdb(pe, pdbdir), entry["module"], entry.get("build") or fv, fv)
         return produced
 
     if "pdb" in entry or "pe" in entry:
         module = entry["module"]
         pe = resolve(entry["pe"], base) if "pe" in entry else None
-        fv = pe_info(pe).get("VERSION") if pe else None
+        fv = pe_pdbid.file_version(pe) if pe else None
         pdb = resolve(entry["pdb"], base) if "pdb" in entry else fetch_pdb(pe, pdbdir)
         emit(pdb, module, entry.get("build") or fv, fv)
         return produced
@@ -257,7 +253,7 @@ def handle(entry, base, pdbdir):
     modules = entry.get("modules", ["ntoskrnl", "ntdll"])
     with tempfile.TemporaryDirectory() as work:
         pes, im = kinds[kind](src, modules, work)
-        versions = {m: pe_info(p).get("VERSION") for m, p in pes.items() if os.path.exists(p)}
+        versions = {m: pe_pdbid.file_version(p) for m, p in pes.items() if os.path.exists(p)}
         label = entry.get("build") or image_build(
             im, versions.get("ntoskrnl") or next(iter(versions.values()), None))
         for module, pe in pes.items():
@@ -267,7 +263,7 @@ def handle(entry, base, pdbdir):
             fv = versions[module]
             try:
                 pdb = fetch_pdb(pe, pdbdir)
-            except subprocess.CalledProcessError:
+            except urllib.error.HTTPError:
                 print("  !! no PDB on msdl for %s %s, skipping" % (module, fv),
                       file=sys.stderr)
                 continue
