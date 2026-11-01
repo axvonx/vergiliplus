@@ -1,6 +1,7 @@
 # CLAUDE.md — vergiliplus
 
 Guidance for Claude (and humans) working in this repo. Keep it current.
+**Roadmap, decisions and the dependency graph live in [`PLAN.md`](PLAN.md) — read it first.**
 
 ## What this is
 
@@ -90,7 +91,6 @@ Manifest entries (`data/sources.json`) are one of:
 
 ## Status
 
-Working for kernel+userland across the builds in `data/sources.json`. Open work:
-anonymous-union brace synthesis, "used in" back-references, cross-build diff (the JSON
-already carries the keys — a diff view is a new consumer, not a schema change), and
-x86/ARM64 arches (pipeline is arch-agnostic; just add manifest entries).
+See `PLAN.md` (single source of truth for open work). Notable known gaps: anonymous
+unions render flat; `PTR = 8` is hardcoded in render.mjs (x86 needs arch-aware sizes);
+module labels are hardcoded to ntdll/ntoskrnl.
