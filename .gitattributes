@@ -1,0 +1,10 @@
+# The per-build type data is generated from PDBs; don't let it skew language stats
+# or clutter diffs, but keep it in the repo (it is the publishable artifact).
+data/*.json linguist-generated=true
+data/*.json -diff
+
+# Normalize line endings; shell/py stay LF even if cloned on Windows.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

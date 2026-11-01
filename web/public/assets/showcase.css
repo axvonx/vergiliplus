@@ -1,0 +1,122 @@
+/* vergiliplus showcase components: struct-code view, three-pane shell, sidebar, ⌘K */
+
+/* ---------- interactive struct code view ---------- */
+.sc { margin: 0.5rem 0 1rem; }
+.sc-pre { position: relative; background: #282a36; border-radius: 0.5rem; padding: 1rem 0; margin: 0; overflow-x: auto; }
+.sc-pre code { display: block; font-family: SFMono-Regular,Menlo,Monaco,Consolas,monospace; font-size: 1.5rem; line-height: 1.55; color: #f8f8f2; }
+.sc-ctrls { position: absolute; top: 0.7rem; right: 0.9rem; display: flex; gap: 0.5rem; z-index: 3; }
+.sc-tgl { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(32,32,44,0.9); color: #8894ae; border: 1px solid #343448; border-radius: 0.4rem; padding: 2px 9px; font-size: 1.3rem; font-weight: 600; cursor: pointer; }
+.sc-tgl.on { color: #bfe4ca; border-color: #50607a; }
+.sc-box { width: 1.3rem; height: 1.3rem; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #50607a; border-radius: 3px; font-size: 1rem; color: #50fa7b; background: #161620; }
+.sc-copy { background: rgba(68,71,90,0.9); color: #fff; border: none; border-radius: 0.4rem; padding: 2px 12px; font-size: 1.3rem; font-weight: 600; cursor: pointer; }
+.sc-line { display: flex; align-items: baseline; padding: 0 1.2rem; white-space: pre; border-left: 3px solid transparent; }
+.sc-member { border-left-color: var(--accent); cursor: default; }
+.sc-member.link { cursor: pointer; }
+.sc-code { flex: 1 1 auto; }
+.sc-ann { margin-left: 2rem; color: #6272a4; white-space: pre; flex: 0 0 auto; }
+.sc-field { color: #f8f8f2; }
+.sc-hole { background: repeating-linear-gradient(45deg,#2a2330,#2a2330 7px,#241f2a 7px,#241f2a 14px); }
+.sc-hole .sc-code { color: #8a7a9a; font-style: italic; }
+.sc-cache .sc-code { color: #6272a4; }
+.sc-head { color: #f8f8f2; }
+.sc-foot { color: #6272a4; white-space: pre; }
+.sc-foot div { color: #6272a4; padding: 0 1.2rem; }
+.sc .str-link { color: #8be9fd; text-decoration: none; }
+.sc .str-link:hover { color: #e4d06c; }
+
+/* ---------- two-pane docs shell (sidebar + main; metadata drops to bottom) ---------- */
+.docs { display: grid; grid-template-columns: 300px minmax(0,1fr); align-items: start; }
+.docs-side { position: sticky; top: 0; height: 100vh; overflow: hidden; border-right: 1px solid #262633; background: #141422; }
+.docs-main { padding: 1rem 1.6rem 3rem; min-width: 0; }
+.side-toggle { background: #20202c; color: #bfe4ca; border: 1px solid #343448; border-radius: 0.4rem; padding: 2px 10px; font-size: 1.5rem; font-weight: 700; cursor: pointer; margin-right: 0.8rem; }
+html.side-collapsed .docs { grid-template-columns: 0 minmax(0,1fr); }
+html.side-collapsed .docs-side { display: none; }
+@media (max-width: 760px) { .docs { grid-template-columns: minmax(0,1fr); } .docs-side { display: none; } }
+
+/* metadata band at the bottom of the page */
+.meta-bottom { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.6rem 2rem; margin-top: 2.2rem; padding-top: 1.4rem; border-top: 1px solid #262633; }
+
+/* ---------- home: versions grouped by module ---------- */
+.mod-h { color: #8894ae; font-size: 1.3rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin: 1.8rem 0 0.8rem; }
+.ver-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+.ver-card { display: block; background: #20202c; border: 1px solid #343448; border-radius: 0.5rem; padding: 1rem 1.2rem; text-decoration: none; transition: border-color 0.1s; }
+.ver-card:hover { border-color: #1cc1cc; text-decoration: none; }
+.ver-card .vc-mod { color: #e4d06c; font-weight: 800; font-size: 2rem; font-family: SFMono-Regular,Menlo,monospace; }
+.ver-card .vc-build { color: #bfe4ca; font-size: 1.4rem; font-weight: 600; font-family: SFMono-Regular,Menlo,monospace; }
+.ver-card .vc-fam { color: #8894ae; font-size: 1.3rem; display: block; margin-top: 0.2rem; }
+.ver-card .vc-count { color: #1cc1cc; font-weight: 700; font-size: 1.4rem; float: right; }
+.ver-card.coverage { opacity: 0.75; cursor: default; }
+.ver-card.coverage:hover { border-color: #343448; }
+.ver-card .vc-tag { display: inline-block; font-size: 1.1rem; color: #8894ae; border: 1px solid #343448; border-radius: 0.3rem; padding: 0 6px; margin-left: 0.5rem; vertical-align: middle; }
+
+/* ---------- type-listing page header (title + subtitle + legend) ---------- */
+.list-head { border-bottom: 1px solid #262633; padding-bottom: 1rem; margin-bottom: 1.2rem; }
+.list-title { font-size: 3.4rem; font-weight: 800; color: #e4d06c; font-family: SFMono-Regular,Menlo,monospace; }
+.list-sub { color: #8894ae; font-size: 1.5rem; font-weight: 600; margin-top: 0.2rem; }
+.list-legend { display: flex; gap: 1.4rem; margin-top: 0.8rem; font-size: 1.4rem; font-weight: 700; font-family: SFMono-Regular,Menlo,monospace; }
+.list-legend .lg i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.4rem; vertical-align: middle; }
+.list-legend .lg b { color: #fff; }
+
+/* ---------- auto-fit N-column colour-coded type list ---------- */
+.hz-list { column-gap: 2.2rem; margin-top: 1rem; }
+.hz { display: block; break-inside: avoid; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: SFMono-Regular,Menlo,Monaco,monospace; font-size: 1.4rem; font-weight: 600; padding: 2px 0; text-decoration: none; }
+.hz:hover { text-decoration: underline; }
+.hz .d { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 0.6rem; vertical-align: middle; }
+
+/* ---------- sidebar ---------- */
+.sb { display: flex; flex-direction: column; height: 100vh; }
+.sb-top { padding: 1rem; border-bottom: 1px solid #262633; display: flex; gap: 0.5rem; align-items: center; flex: 0 0 auto; }
+.sb-filter { flex: 1 1 auto; min-width: 0; background: #1a1825; border: 1px solid #343448; border-radius: 0.4rem; color: #bfe4ca; font-size: 1.3rem; font-weight: 600; padding: 5px 8px; }
+.sb-kinds { display: flex; gap: 2px; flex: 0 0 auto; }
+.sb-kind { background: #20202c; color: #8894ae; border: 1px solid #343448; border-radius: 0.3rem; padding: 4px 7px; font-size: 1.2rem; font-weight: 700; cursor: pointer; min-width: 2.4rem; }
+.sb-kind.on { color: #1cc1cc; border-color: #1cc1cc; }
+.sb-count { padding: 0.4rem 1rem; color: #6272a4; font-size: 1.2rem; flex: 0 0 auto; }
+.sb-list { overflow-y: auto; padding: 0 0.5rem 2rem; flex: 1 1 auto; }
+.sb-item { display: flex; align-items: center; gap: 0.5rem; padding: 3px 8px; border-radius: 0.3rem; color: #bfe4ca; font-size: 1.3rem; font-weight: 600; font-family: SFMono-Regular,Menlo,monospace; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-item:hover { background: #20202c; color: #fff; text-decoration: none; }
+.sb-item.active { background: #262633; color: #e4d06c; }
+.sb-dot { width: 8px; height: 8px; border-radius: 2px; flex: 0 0 auto; }
+
+/* ---------- ⌘K palette ---------- */
+.ck-ov { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; justify-content: center; align-items: flex-start; padding-top: 12vh; }
+.ck { width: min(680px,92vw); background: #1e1e2a; border: 1px solid #44475a; border-radius: 0.7rem; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.ck-input { width: 100%; background: #1e1e2a; border: 0; border-bottom: 1px solid #343448; color: #f8f8f2; font-size: 1.7rem; padding: 13px 18px; outline: none; box-sizing: border-box; }
+.ck-list { max-height: 52vh; overflow-y: auto; }
+.ck-item { display: flex; align-items: center; gap: 0.7rem; padding: 8px 18px; cursor: pointer; }
+.ck-item.sel { background: #2d2d3f; }
+.ck-name { color: #bfe4ca; font-size: 1.5rem; font-weight: 600; font-family: SFMono-Regular,Menlo,monospace; flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ck-kind { color: #6272a4; font-size: 1.2rem; flex: 0 0 auto; }
+.ck-empty { padding: 18px; color: #6272a4; text-align: center; }
+.kbd { font-family: SFMono-Regular,Menlo,monospace; font-size: 1.2rem; background: #20202c; border: 1px solid #343448; border-radius: 0.3rem; padding: 1px 6px; color: #8894ae; }
+
+/* ---------- right rail ---------- */
+.rail-h { color: #8894ae; font-size: 1.2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0.2rem 0 0.5rem; }
+.rail-stat { display: flex; justify-content: space-between; font-size: 1.4rem; padding: 2px 0; color: #bfe4ca; font-family: SFMono-Regular,Menlo,monospace; }
+.rail-stat b { color: #fff; }
+.rail-sec { margin-top: 1.4rem; }
+.rail-link { display: block; color: #8be9fd; font-size: 1.3rem; font-weight: 600; text-decoration: none; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: SFMono-Regular,Menlo,monospace; }
+.rail-link:hover { color: #e4d06c; text-decoration: none; }
+
+/* ---------- version navigation bar ---------- */
+.vbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem 1.2rem; margin: 0.4rem 0 1.2rem;
+  padding: 0.6rem 1rem; background: #1c1c28; border: 1px solid #2c2c3c; border-radius: 0.5rem; font-size: 1.4rem; }
+.vb-arch { color: #8894ae; font-weight: 700; font-family: SFMono-Regular,Menlo,monospace; }
+.vb-mods { display: inline-flex; gap: 2px; }
+.vb-mod { padding: 2px 10px; border: 1px solid #343448; border-radius: 0.3rem; color: #8894ae; font-weight: 700; text-decoration: none; }
+.vb-mod:hover { color: #fff; text-decoration: none; }
+.vb-mod.on { color: #1cc1cc; border-color: #1cc1cc; }
+.vb-build { background: #141422; color: #bfe4ca; border: 1px solid #343448; border-radius: 0.3rem; padding: 3px 6px;
+  font-size: 1.4rem; font-family: SFMono-Regular,Menlo,monospace; max-width: 100%; }
+.vb-step { display: inline-flex; gap: 1rem; align-items: center; margin-left: auto; font-family: SFMono-Regular,Menlo,monospace; }
+.vb-step a { color: #e4d06c; text-decoration: none; }
+.vb-step a:hover { color: yellow; }
+.vb-off { color: #4a4a5e; }
+.vb-n { color: #8894ae; }
+
+/* sidebar context header + home group counts */
+.sb-ctx { display: block; padding: 0.8rem 1rem 0; text-decoration: none; font-size: 1.4rem; font-family: SFMono-Regular,Menlo,monospace; }
+.sb-ctx b { color: #e4d06c; }
+.sb-ctx span { color: #8894ae; font-size: 1.2rem; }
+.sb-ctx:hover { text-decoration: none; }
+.mod-n { text-transform: none; letter-spacing: 0; color: #4a4a5e; font-weight: 600; margin-left: 0.6rem; }
+.list-kind { font-size: 1.6rem; color: #8894ae; font-weight: 600; margin-left: 0.6rem; }

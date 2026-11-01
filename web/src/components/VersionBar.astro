@@ -1,0 +1,46 @@
+---
+import { catalog, ctxPath, slug, MODLABEL } from "../lib/render.mjs";
+const { arch, build, module, type } = Astro.props;
+const cat = catalog();
+const fam = (b, m = module) => cat.get(arch, b, m)?.family || "";
+const typeHref = (b, m = module) => `${ctxPath(arch, b, m)}/${slug(type)}.html`;
+const listHref = (b, m = module) => `${ctxPath(arch, b, m)}.html`;
+
+const mods = cat.modules(arch, build);
+const builds = cat.builds(arch, module);
+const has = type ? new Set(cat.typeBuilds(arch, module, type)) : null;
+const target = (b) => (type && has.has(b) ? typeHref(b) : listHref(b));
+
+let prev = null, next = null;
+if (type) {
+  const tb = cat.typeBuilds(arch, module, type);
+  const i = tb.indexOf(build);
+  prev = i > 0 ? tb[i - 1] : null;
+  next = i >= 0 && i < tb.length - 1 ? tb[i + 1] : null;
+}
+---
+<div class="vbar">
+  <span class="vb-arch">{arch}</span>
+  <span class="vb-mods">
+    {mods.map((m) => {
+      const inOther = type && cat.get(arch, build, m)?.named[type];
+      return m === module
+        ? <span class="vb-mod on">{MODLABEL[m]}</span>
+        : <a class="vb-mod" href={inOther ? typeHref(build, m) : listHref(build, m)}>{MODLABEL[m]}</a>;
+    })}
+  </span>
+  <select class="vb-build" onchange="location.href=this.value" aria-label="Build">
+    {builds.map((b) => (
+      <option value={target(b)} selected={b === build}>
+        {fam(b)} — {b}{type && !has.has(b) ? "  (not defined)" : ""}
+      </option>
+    ))}
+  </select>
+  {type && (
+    <span class="vb-step">
+      {prev ? <a href={typeHref(prev)} title={`${fam(prev)} ${prev}`}>← {prev}</a> : <span class="vb-off">← first</span>}
+      <span class="vb-n">{has.size} build{has.size === 1 ? "" : "s"}</span>
+      {next ? <a href={typeHref(next)} title={`${fam(next)} ${next}`}>{next} →</a> : <span class="vb-off">latest →</span>}
+    </span>
+  )}
+</div>

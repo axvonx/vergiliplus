@@ -1,0 +1,33 @@
+---
+import { ClientRouter } from "astro:transitions";
+import CmdK from "../components/CmdK.jsx";
+const { title } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>vergiliplus | {title}</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800;900&display=swap" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/assets/dracula.css" />
+    <link rel="stylesheet" href="/assets/vergiliplus.css" />
+    <link rel="stylesheet" href="/assets/showcase.css" />
+    <ClientRouter />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+      <a class="navbar-brand" href="/">vergili<span class="plus">plus</span></a>
+      <ul class="navbar-nav mr-auto flex-row">
+        <li class="nav-item"><a class="nav-link" href="/">VERSIONS</a></li>
+      </ul>
+      <button class="sb-kind" style="margin-left:auto"
+        onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'k',metaKey:true}))">
+        Search&nbsp;<span class="kbd">⌘K</span>
+      </button>
+    </nav>
+    <div class="container-fluid"><div class="container"><slot /></div></div>
+    <CmdK client:load />
+  </body>
+</html>
