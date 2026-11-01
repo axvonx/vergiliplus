@@ -373,15 +373,28 @@ export class Renderer {
     return out + `\n};`;
   }
 
+  // named type -> the named types whose members reference it (directly, via
+  // pointers/arrays, or from inside members of anonymous "<unnamed-tag>" type,
+  // which belong to the enclosing type)
   usedIn() {
     const rev = {};
-    for (const [tname, tidx] of Object.entries(this.named)) {
-      const fl = this.get(this.get(tidx).fieldlist);
-      const seen = new Set();
-      for (const m of fl.members || []) {
+    const walk = (flIdx, tname, seen, depth) => {
+      for (const m of this.get(flIdx).members || []) {
         const r = this.refName(m.type);
-        if (r && r in this.named && r !== tname) seen.add(r);
+        if (r && r in this.named) { if (r !== tname) seen.add(r); continue; }
+        // descend into an anonymous aggregate, through pointers/arrays/modifiers
+        let idx = m.type, n = this.get(idx);
+        while (["pointer", "modifier", "array", "bitfield"].includes(n.kind)) {
+          idx = n.referent ?? n.element ?? n.type; n = this.get(idx);
+        }
+        if (!["struct", "union"].includes(n.kind)) continue;
+        const [, d] = this.derefFwd(idx);
+        if (ANON.test(d.name || "") && d.fieldlist && depth < 8) walk(d.fieldlist, tname, seen, depth + 1);
       }
+    };
+    for (const [tname, tidx] of Object.entries(this.named)) {
+      const seen = new Set();
+      walk(this.get(tidx).fieldlist, tname, seen, 0);
       for (const r of seen) (rev[r] ||= new Set()).add(tname);
     }
     const out = {};

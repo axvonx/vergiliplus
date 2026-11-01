@@ -81,6 +81,13 @@ test("all ntoskrnl 24H2 layouts are well-formed", () => {
   }
 });
 
+// "Used in" must credit the enclosing type for references made from inside members
+// of anonymous "<unnamed-tag>" type (e.g. union { ...; struct _ERESOURCE* r; } u;)
+test("usedIn sees through anonymous member types", () => {
+  const used = renderer(NTOS).usedIn()["_ERESOURCE"];
+  for (const t of ["_TOKEN", "_HEAP_LOCK", "_FS_FILTER_PARAMETERS"]) assert.ok(used.includes(t), t);
+});
+
 // ---- synthetic docs: arch-aware pointer size (C3) and grouping edge cases ----
 const T = (types, named, arch = "x64") => new Renderer({ arch, named, types });
 const fl = (members) => ({ kind: "fieldlist", members, enums: [] });

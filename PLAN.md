@@ -16,8 +16,8 @@ Repo: github.com/axvonx/vergiliplus (public, branch `main`, CI green). **Live: h
   Home = version list (colour-coded client/server/insider) → last-viewed module (else
   kernel); no per-build page (module chips in the context bar switch). Listings are
   full-width multi-column. One context bar per page (build ▾ / module / Type), no
-  breadcrumbs. Struct summary is a pahole footer line; the bottom
-  band is only "Used in". No islands, no Bootstrap: `site.css`, `nav.js`, `struct.js`.
+  breadcrumbs. Layout stats sit in a box under the struct, above
+  "Used in" (which credits references made inside anonymous member types). No islands, no Bootstrap: `site.css`, `nav.js`, `struct.js`.
 - **Renderer** — anonymous union/struct reconstruction, inlined `<unnamed-tag>`
   members, enum tables, function-pointer signatures, bitfield bit positions,
   arch-aware pointer size. 16 golden/unit tests.

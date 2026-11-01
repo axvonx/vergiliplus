@@ -129,14 +129,17 @@ html.side-collapsed .docs-side { display: none; }
 .sc-ann { margin-left: 2rem; color: var(--mute-2); flex: 0 0 auto; }
 .sc-hole { background: repeating-linear-gradient(45deg, #2a2330, #2a2330 7px, #241f2a 7px, #241f2a 14px); }
 .sc-hole .sc-code { color: #8a7a9a; font-style: italic; }
-.sc-cache .sc-code, .sc-sum .sc-code { color: var(--mute-2); }
-.sc.meta-off .sc-hole, .sc.meta-off .sc-cache, .sc.meta-off .sc-sum, .sc.meta-off .sc-ann { display: none; }
+.sc-cache .sc-code { color: var(--mute-2); }
+.sc.meta-off .sc-hole, .sc.meta-off .sc-cache, .sc.meta-off .sc-ann { display: none; }
 .str-link { color: var(--gold); }
 .sc .str-link { color: #8be9fd; }
 .sc .str-link:hover { color: var(--gold); }
 
-/* ---- "used in", bottom of a type page ---- */
-.used { margin-top: 2.2rem; padding-top: 1.4rem; border-top: 1px solid var(--line); }
+/* ---- layout stats box + "used in", bottom of a type page ---- */
+.stats { display: flex; flex-wrap: wrap; gap: 0.4rem 2.4rem; margin-top: 1.6rem; padding: 0.8rem 1.2rem;
+  background: var(--panel); border: 1px solid #2c2c3c; border-radius: 0.5rem; font-family: var(--mono); font-size: 1.4rem; color: var(--mute); }
+.stats b { color: var(--fg); font-weight: 700; }
+.used { margin-top: 1.6rem; }
 .used-h { color: var(--mute); font-size: 1.2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
 .used-list { column-width: 30ch; column-gap: 2rem; }
 .used-list a { display: block; color: #8be9fd; font-size: 1.3rem; font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
