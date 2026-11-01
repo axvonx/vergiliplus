@@ -1,0 +1,50 @@
+---
+// The one page shell. `side` adds the persisted type sidebar (type pages).
+// Behaviour lives in /assets/nav.js + struct.js: vanilla, cached once, no islands.
+import { ClientRouter } from "astro:transitions";
+const { title, side = false } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title ? `${title} · vergiliplus` : "vergiliplus"}</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800;900&display=swap" />
+    <link rel="stylesheet" href="/assets/site.css" />
+    <ClientRouter />
+    <script is:inline>try{document.documentElement.classList.toggle("side-collapsed",localStorage.getItem("vp-side")==="0")}catch(e){}</script>
+    <script is:inline src="/assets/nav.js"></script>
+    <script is:inline src="/assets/struct.js"></script>
+  </head>
+  <body>
+    <nav class="topnav">
+      {side && <button class="btn side-toggle" title="Toggle sidebar" data-side-toggle>☰</button>}
+      <a class="brand" href="/">vergili<span class="plus">plus</span></a>
+      <button class="btn search-btn" data-cmdk>Search <span class="kbd">⌘K</span></button>
+    </nav>
+    <div id="vp-ck" class="ck-ov" hidden><div class="ck">
+      <input class="ck-input" placeholder="Search every type in every build…  (↑↓ ↵ esc)" />
+      <div class="ck-list"></div>
+    </div></div>
+    {side ? (
+      <div class="docs">
+        <aside class="docs-side" transition:persist>
+          <div class="sb" id="vp-sb">
+            <div class="sb-top">
+              <input class="sb-filter" placeholder="filter types…" />
+              <div class="sb-kinds">
+                <button class="btn on" data-k="all">all</button><button class="btn" data-k="struct">S</button><button class="btn" data-k="union">U</button><button class="btn" data-k="enum">E</button>
+              </div>
+            </div>
+            <div class="sb-count"></div>
+            <nav class="sb-list"></nav>
+          </div>
+        </aside>
+        <main class="docs-main"><slot /></main>
+      </div>
+    ) : (
+      <main class="page"><slot /></main>
+    )}
+  </body>
+</html>

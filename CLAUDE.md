@@ -23,15 +23,24 @@ tools/check_links.py, tools/check_budget.py = post-build gates (CI runs both)
 tests/render.test.mjs = golden tests over render.mjs (fixtures in tests/golden/)
 ```
 
-Site URL scheme (web/src/pages): `/` versions home · `/v/<arch>/<build>/<module>.html`
-type listing · `/v/<arch>/<build>/<module>/<Type>.html` type page ·
-`/ti/<arch>/<build>/<module>.json` sidebar index · `/search-index.json` ⌘K index.
+Site URL scheme (web/src/pages): `/` home (one row per Windows version, colour-coded
+client/server/insider) · `/v/<arch>/<build>.html` version page (userland | kernel module
+cards) · `/v/<arch>/<build>/<module>.html` type listing ·
+`/v/<arch>/<build>/<module>/<Type>.html` type page · `/ti/<arch>/<build>/<module>.json`
+sidebar index · `/search-index.json` ⌘K index. Home rows link to the version page,
+which is the no-JS fallback. nav.js retargets each row to the module last viewed for
+that build (localStorage `vp-mod:<arch>/<build>`), or the kernel if none.
 `web/src/lib/render.mjs` is the type→C renderer + `catalog()` (all docs loaded once,
 memoized — never re-read JSON per page). `web/src/lib/modules.mjs` is the module
-table (ring + label). Pages are static HTML: no islands, no Preact. Behaviour lives in
-two vanilla scripts, `web/public/assets/nav.js` (sidebar + ⌘K) and `struct.js`
-(Metadata toggle, copy, row click-through). Every byte of per-page chrome is ×~28k
-pages, so keep it out of the page template.
+table (ring + label). One layout, `web/src/layouts/Layout.astro` (`side` adds the
+type sidebar), and one stylesheet, `web/public/assets/site.css` (no Bootstrap). Listing
+and type pages share `ContextBar.astro`: build select ▾ / module toggles / Type,
+plus prev/next over the builds defining the type. It's the only "where am I", so
+there are no breadcrumbs or page headings. Pages are static HTML: no islands, no
+Preact. Behaviour lives in two vanilla scripts: `web/public/assets/nav.js` (sidebar,
+⌘K, listing filter, home links, nav buttons) and `struct.js` (Metadata toggle, copy,
+row click-through). Every byte of per-page chrome is ×~28k pages, so keep it out of
+the page template.
 
 No server, no database, no self-scrape (Vergilius uses Spring Boot + MySQL +
 `wget --mirror`; we don't). `{module, arch, build, family}` are first-class in the
@@ -48,7 +57,7 @@ python3 tools/build.py --skip-render    # data only;  --only <substr> for one en
 python3 tools/check_links.py && python3 tools/check_budget.py
 ```
 
-Full build is ~10 s for ~27.6k pages, `dist` ≈ 281 MB. Watch for pathological types
+Full build is ~8 s for ~27.6k pages, `dist` ≈ 230 MB. Watch for pathological types
 (e.g. `_MI_HYPER_SPACE` is 276 MB): anything that scales with struct *size* rather
 than member count will blow the heap. The golden tests include it as a canary.
 After an intended rendering change, `UPDATE_GOLDEN=1 node --test tests/render.test.mjs` and review
@@ -151,8 +160,9 @@ at Porkbun (GitHub Pages A/AAAA records). Every push to `main` redeploys.
   once to remove them before the first push.
 - **`main` is production**: every push deploys to vergiliplus.com. CI gates (tests,
   links, budget) run first; use branches/PRs for anything unfinished.
-- `web/vendor/verg.css` (original) + `web/public/assets/{vergiliplus,dracula}.css` are
-  **lifted from the Vergilius Project** and are © its authors. Keep the attribution
+- `web/vendor/verg.css` (original) is from the Vergilius Project, and
+  `web/public/assets/site.css` adapts its palette, typography, wordmark and rem-scaling
+  trick. **© its authors.** Keep the attribution
   in README's License section (code is MIT, `LICENSE`).
 
 ## Status

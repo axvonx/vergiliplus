@@ -1,0 +1,38 @@
+---
+// Version page: the userland | kernel split for one build, as module cards.
+import Layout from "../../../layouts/Layout.astro";
+import { catalog, ctxPath, channel, modInfo } from "../../../lib/render.mjs";
+import { RINGS } from "../../../lib/modules.mjs";
+
+export function getStaticPaths() {
+  const seen = new Set();
+  return catalog().docs
+    .filter((d) => { const k = d.arch + "/" + d.build; return !seen.has(k) && seen.add(k); })
+    .map((d) => ({ params: { arch: d.arch, build: d.build } }));
+}
+
+const { arch, build } = Astro.params;
+const cat = catalog();
+const mods = cat.modules(arch, build).map((m) => ({ m, info: modInfo(m), doc: cat.get(arch, build, m) }));
+const family = mods[0].doc.family;
+const rings = RINGS.map((r) => ({ ...r, mods: mods.filter((x) => x.info.ring === r.ring) }));
+---
+<Layout title={`${family} ${build}`}>
+  <div class={`ch-${channel(family)}`}>
+    <h1 class="ver-title">{family}</h1>
+    <div class="ver-sub">{build} · {arch}</div>
+  </div>
+  <div class="rings">
+    {rings.map((r) => (
+      <section>
+        <div class="ring-h">{r.label}</div>
+        {r.mods.map((x) => (
+          <a class="mod-card" href={`${ctxPath(arch, build, x.m)}.html`}>
+            <span class="mc-name">{x.info.label}</span>
+            <span class="mc-count">{Object.keys(x.doc.named).length} types</span>
+          </a>
+        ))}
+      </section>
+    ))}
+  </div>
+</Layout>

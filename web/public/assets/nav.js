@@ -1,13 +1,14 @@
-// Sidebar (per-context type list) + ⌘K palette (every type in every build).
+// Sidebar (per-context type list), ⌘K palette (every type in every build), the
+// listing-page filter, and the home page's "last module viewed per build" links.
 // Vanilla and loaded once: islands would inline Astro's hydration runtime into every
 // one of ~28k pages. The sidebar <aside> is transition:persist, so its DOM (filter,
 // scroll) survives ClientRouter navigations; we just re-sync on astro:page-load.
 (() => {
   if (window.__vpNav) return;
   window.__vpNav = true;
-  const KDOT = { struct: "#bd93f9", union: "#ff79c6", enum: "#50fa7b" };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const dot = (k) => `<i class="sb-dot" style="background:${KDOT[k] || "#6272a4"}"></i>`;
+  const dot = (k) => `<i class="dot k-${k}"></i>`;
+  const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
 
   // ---- sidebar -------------------------------------------------------------
   const sb = { items: [], ctx: "", q: "", kind: "all", loc: null };
@@ -24,10 +25,7 @@
     const shown = sb.items.filter((it) => (sb.kind === "all" || it.k === sb.kind) && (!v || it.n.toLowerCase().includes(v)));
     const c = { all: sb.items.length, struct: 0, union: 0, enum: 0 };
     for (const it of sb.items) c[it.k]++;
-    root.querySelector(".sb-ctx").innerHTML =
-      `<b>${esc(sb.loc.module)}</b> <span>${esc(sb.loc.arch)} · ${esc(sb.loc.build)}</span>`;
-    root.querySelector(".sb-ctx").href = sb.loc.ctx + ".html";
-    root.querySelectorAll(".sb-kind").forEach((b) => {
+    root.querySelectorAll(".btn[data-k]").forEach((b) => {
       b.classList.toggle("on", b.dataset.k === sb.kind);
       b.title = `${c[b.dataset.k] || 0} ${b.dataset.k}`;
     });
@@ -39,6 +37,7 @@
   const sbSync = () => {
     sb.loc = parseLoc();
     if (!sb.loc) return;
+    store(`vp-mod:${sb.loc.arch}/${sb.loc.build}`, sb.loc.module);
     if (sb.ctx !== sb.loc.ctx) {
       sb.ctx = sb.loc.ctx; sb.items = [];
       const want = sb.ctx;
@@ -51,8 +50,42 @@
     if (e.target.matches(".sb-filter")) { sb.q = e.target.value; sbRender(); }
   });
   document.addEventListener("click", (e) => {
-    const b = e.target.closest?.(".sb-kind[data-k]");
+    const b = e.target.closest?.("#vp-sb .btn[data-k]");
     if (b) { sb.kind = b.dataset.k; sbRender(); }
+  });
+
+  // ---- module listing page filter ---------------------------------------------
+  const tl = { q: "", kind: "all" };
+  const tlApply = () => {
+    const v = tl.q.toLowerCase();
+    document.querySelectorAll("[data-tl] a").forEach((a) => {
+      a.hidden = !((tl.kind === "all" || a.classList.contains("k-" + tl.kind)) &&
+                   (!v || a.textContent.toLowerCase().includes(v)));
+    });
+    document.querySelectorAll("[data-tl-ctrl] .btn[data-k]").forEach((b) => b.classList.toggle("on", b.dataset.k === tl.kind));
+  };
+  document.addEventListener("input", (e) => {
+    if (e.target.matches(".tl-filter")) { tl.q = e.target.value; tlApply(); }
+  });
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest?.("[data-tl-ctrl] .btn[data-k]");
+    if (b) { tl.kind = b.dataset.k; tlApply(); }
+  });
+
+  // ---- home: jump into the module last viewed for each build, else the kernel ----
+  const homeLinks = () => document.querySelectorAll("a.vrow[data-ab]").forEach((a) => {
+    const last = store(`vp-mod:${a.dataset.ab}`);
+    const mod = last && a.dataset.mods.split(",").includes(last) ? last : a.dataset.def;
+    a.href = `/v/${a.dataset.ab}/${mod}.html`;
+  });
+
+  // ---- nav buttons ----------------------------------------------------------------
+  document.addEventListener("click", (e) => {
+    if (e.target.closest?.("[data-cmdk]")) ckOpen(!ck.open);
+    else if (e.target.closest?.("[data-side-toggle]")) {
+      const c = document.documentElement.classList.toggle("side-collapsed");
+      store("vp-side", c ? "0" : "1");
+    }
   });
 
   // ---- ⌘K palette ------------------------------------------------------------
@@ -103,7 +136,6 @@
     }
     ckRender();
   };
-  window.vpCmdK = () => ckOpen(!ck.open);
   document.addEventListener("keydown", (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); ckOpen(!ck.open); return; }
     if (!ck.open) return;
@@ -126,7 +158,11 @@
     }
   });
 
-  const sync = () => { ck.open = false; ckRender(); sbSync(); };
+  const sync = () => {
+    ck.open = false; ckRender(); sbSync(); homeLinks();
+    tl.q = ""; tl.kind = "all";
+    document.documentElement.classList.toggle("side-collapsed", store("vp-side") === "0");
+  };
   document.addEventListener("astro:page-load", sync);
   if (document.readyState !== "loading") sync();
   else document.addEventListener("DOMContentLoaded", sync);

@@ -20,6 +20,18 @@ function rowHtml(r) {
   return `<div class="sc-member k-${r.fkind}${r.reflink ? " link" : ""}"><span class="sc-code">${ind(r.depth)}${r.typePre}${r.sep}<span class="sc-field">${esc(r.field)}</span>${r.typeSuf}${bits};</span><span class="sc-ann">/* ${offAnn(r)} */</span></div>`;
 }
 
+// pahole-style summary footer (a Metadata line: hidden with the annotations)
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+let sum;
+if (enumLayout) {
+  sum = `/* ${plural(enumLayout.summary.values, "value")}, size: ${enumLayout.summary.size} */`;
+} else {
+  const s = layout.summary;
+  sum = `/* size: ${s.size} (0x${s.size.toString(16)}), ${plural(s.members, "member")}, ` +
+    `${plural(s.holes, "hole")}${s.holes ? ` (${s.sumHoles} bytes)` : ""}, padding: ${s.padding}, ` +
+    `${plural(s.cachelines, "cacheline")} */`;
+}
+
 let head, body;
 if (enumLayout) {
   head = `<span class="kw">enum</span> ${esc(enumLayout.name)} {`;
@@ -31,5 +43,5 @@ if (enumLayout) {
 }
 ---
 <div class="sc" data-sc>
-  <pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-tgl" data-sc-meta aria-pressed="true"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div><div class="sc-line sc-head"><span class="sc-code" set:html={head} /></div><Fragment set:html={body} /><div class="sc-line"><span class="sc-code">{"};"}</span></div></code></pre>
+  <pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-tgl" data-sc-meta aria-pressed="true"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div><div class="sc-line sc-head"><span class="sc-code" set:html={head} /></div><Fragment set:html={body} /><div class="sc-line"><span class="sc-code">{"};"}</span></div><div class="sc-line sc-sum"><span class="sc-code">{sum}</span></div></code></pre>
 </div>

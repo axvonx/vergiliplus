@@ -12,8 +12,11 @@ Repo: github.com/axvonx/vergiliplus (public, branch `main`, CI green). **Live: h
   Win10 22H2 10.0.19041.2006 · 2022 10.0.20348.587 · Win11 21H2 10.0.22000.194 ·
   24H2 10.0.26100.7824 · 2025 10.0.26100.32230 · Canary 10.0.28000.3231 / 10.0.29680.1000.
   Labels are derived from the binaries. Sources: msdl (24H2, 28000), UUP (29680), ISOs.
-- **Site** — 27.6k static pages, ~10 s build, `dist` 281 MB, 0 broken links (409k).
-  No islands: `nav.js` (sidebar + ⌘K) and `struct.js` (Metadata/copy/click-through).
+- **Site** — 27.6k static pages, ~8 s build, `dist` 230 MB, 0 broken links (326k).
+  Home = version list (colour-coded client/server/insider) → last-viewed module (else
+  kernel); version page = userland | kernel cards. One context bar per page (build ▾ /
+  module / Type), no breadcrumbs. Struct summary is a pahole footer line; the bottom
+  band is only "Used in". No islands, no Bootstrap: `site.css`, `nav.js`, `struct.js`.
 - **Renderer** — anonymous union/struct reconstruction, inlined `<unnamed-tag>`
   members, enum tables, function-pointer signatures, bitfield bit positions,
   arch-aware pointer size. 16 golden/unit tests.
@@ -24,7 +27,9 @@ Repo: github.com/axvonx/vergiliplus (public, branch `main`, CI green). **Live: h
 
 | Decision | Choice |
 |---|---|
-| Site stack | Astro, static only; no islands (per-page runtime × 28k pages) |
+| Site stack | Astro, static only; no islands (per-page runtime × 28k pages), no Bootstrap |
+| Navigation | version → module → type; home jumps to last-viewed module for a build (else kernel) |
+| Home grouping | deferred; rows colour-coded by channel, no legend |
 | Hosting | GitHub Pages at **vergiliplus.com**, public repo, deploy on every push to `main` |
 | Build labels | From the binaries: image Build.SPBuild (else kernel FileVersion); one label per image |
 | Manifest | Rooted at `$VP_IMAGES`; prefer `msdl` entries (no local files) where winbindex has the PE |

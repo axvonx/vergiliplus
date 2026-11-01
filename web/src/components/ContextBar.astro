@@ -1,0 +1,53 @@
+---
+// Where am I + where can I go, in one row (replaces breadcrumbs, the type heading,
+// the old version bar and the sidebar header):
+//   [arch]  build ▾  /  module | module  /  Type        ← prev · n builds · next →
+// The build select keeps you on the same type when the target build defines it.
+import { catalog, ctxPath, slug, modInfo } from "../lib/render.mjs";
+const { arch, build, module, type } = Astro.props;
+const cat = catalog();
+const fam = (b) => cat.get(arch, b, module)?.family || "";
+const typeHref = (b, m = module) => `${ctxPath(arch, b, m)}/${slug(type)}.html`;
+const listHref = (b, m = module) => `${ctxPath(arch, b, m)}.html`;
+const multiArch = cat.archs().length > 1;
+
+const mods = cat.modules(arch, build);
+const builds = cat.builds(arch, module);
+const tb = type ? cat.typeBuilds(arch, module, type) : [];
+const has = new Set(tb);
+const i = tb.indexOf(build);
+const prev = i > 0 ? tb[i - 1] : null;
+const next = i >= 0 && i < tb.length - 1 ? tb[i + 1] : null;
+---
+<div class="cbar">
+  {multiArch && <span class="cb-arch">{arch}</span>}
+  {/* option value = build; the target URL is rebuilt client-side (keeps ~28k pages lean) */}
+  <select class="cb-build" aria-label="Build" data-t={type ? `/v/${arch}/@/${module}/${slug(type)}.html` : ""}
+    data-l={`/v/${arch}/@/${module}.html`}
+    onchange="var o=this.selectedOptions[0];location.href=(o.dataset.n||!this.dataset.t?this.dataset.l:this.dataset.t).replace('@',this.value)">
+    {builds.map((b) => (
+      <option value={b} selected={b === build} data-n={type && !has.has(b) ? "1" : undefined}>
+        {fam(b)} — {b}{type && !has.has(b) ? "  (not defined)" : ""}
+      </option>
+    ))}
+  </select>
+  <span class="cb-sep">/</span>
+  <span class="cb-mods">
+    {mods.map((m) => {
+      const label = modInfo(m).label;
+      if (m === module) return <span class="cb-mod on">{label}</span>;
+      const inOther = type && cat.get(arch, build, m)?.named[type];
+      return <a class="cb-mod" href={inOther ? typeHref(build, m) : listHref(build, m)}
+                title={inOther ? `${type} in ${label}` : label}>{label}</a>;
+    })}
+  </span>
+  {type && <span class="cb-sep">/</span>}
+  {type && <h1 class="cb-type">{type}</h1>}
+  {type && (
+    <span class="cb-step">
+      {prev ? <a href={typeHref(prev)} title={`${fam(prev)} ${prev}`}>← {prev}</a> : <span class="off">← first</span>}
+      <span class="n">{tb.length} build{tb.length === 1 ? "" : "s"}</span>
+      {next ? <a href={typeHref(next)} title={`${fam(next)} ${next}`}>{next} →</a> : <span class="off">latest →</span>}
+    </span>
+  )}
+</div>

@@ -1,34 +1,28 @@
 ---
-import Base from "../layouts/Base.astro";
-import { catalog, cmpBuild, ctxPath, modInfo } from "../lib/render.mjs";
-import { RINGS } from "../lib/modules.mjs";
-const docs = catalog().docs.slice().sort((a, b) => cmpBuild(b.build, a.build));
-// ring -> module -> builds; a module heading per module, grouped under its ring
-const mods = [...new Set(docs.map((d) => d.module))].sort();
-const groups = RINGS.flatMap((g) => mods
-  .filter((m) => modInfo(m).ring === g.ring)
-  .map((m) => ({ label: g.label, module: m, docs: docs.filter((d) => d.module === m) })));
-const archs = [...new Set(docs.map((d) => d.arch))].sort();
-const total = docs.reduce((n, d) => n + Object.keys(d.named).length, 0);
+// Home: one row per Windows version, newest first, colour-coded by channel.
+// A row links to the version page (no-JS fallback); nav.js retargets it to the
+// module last viewed for that build, else the kernel.
+import Layout from "../layouts/Layout.astro";
+import { catalog, cmpBuild, versionPath, channel, modInfo } from "../lib/render.mjs";
+const cat = catalog();
+const seen = new Set();
+const versions = cat.docs.slice().sort((a, b) => cmpBuild(b.build, a.build))
+  .filter((d) => { const k = d.arch + "/" + d.build; return !seen.has(k) && seen.add(k); })
+  .map((d) => {
+    const mods = cat.modules(d.arch, d.build);
+    const kernel = mods.includes("ntoskrnl") ? "ntoskrnl" : mods.find((m) => modInfo(m).ring === "kernel") || mods[0];
+    return { ...d, mods, kernel };
+  });
+const multiArch = cat.archs().length > 1;
 ---
-<Base title="versions">
-  <h1 class="page-title">Versions</h1>
-  <p class="subtle">
-    {docs.length} module builds · {archs.join(" / ")} · {total.toLocaleString()} documented types, from public PDBs.
-    Press <span class="kbd">⌘K</span> to search everything.
-  </p>
-  {groups.map((g) => (
-    <>
-      <div class="mod-h">{g.label} <span class="mod-n">{modInfo(g.module).label} · {g.docs.length} builds</span></div>
-      <div class="ver-grid">
-        {g.docs.map((d) => (
-          <a class="ver-card" href={`${ctxPath(d.arch, d.build, d.module)}.html`}>
-            <span class="vc-count">{Object.keys(d.named).length} types</span>
-            <span class="vc-build">{d.build}</span>
-            <span class="vc-fam">{d.family} · {d.arch}</span>
-          </a>
-        ))}
-      </div>
-    </>
-  ))}
-</Base>
+<Layout>
+  <ul class="vlist">
+    {versions.map((v) => (
+      <li><a class={`vrow ch-${channel(v.family)}`} href={versionPath(v.arch, v.build)}
+             data-ab={`${v.arch}/${v.build}`} data-mods={v.mods.join(",")} data-def={v.kernel}>
+        <span class="vr-fam">{v.family}</span>
+        <span class="vr-build">{v.build}{multiArch ? ` · ${v.arch}` : ""}</span>
+      </a></li>
+    ))}
+  </ul>
+</Layout>

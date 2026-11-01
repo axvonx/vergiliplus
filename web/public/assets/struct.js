@@ -11,12 +11,12 @@
     sc.querySelector("[data-sc-meta]")?.setAttribute("aria-pressed", String(on));
   });
 
-  // the visible view as plain C (padding/cacheline lines + annotations only with Metadata)
+  // the visible view as plain C (padding/cacheline/summary lines + annotations only with Metadata)
   const text = (sc) => {
     const meta = !sc.classList.contains("meta-off");
     const out = [];
     for (const l of sc.querySelectorAll(".sc-line, .sc-member")) {
-      if (!meta && l.matches(".sc-hole, .sc-cache")) continue;
+      if (!meta && l.matches(".sc-hole, .sc-cache, .sc-sum")) continue;
       const code = l.querySelector(".sc-code")?.textContent ?? "";
       const ann = meta && l.querySelector(".sc-ann")?.textContent;
       if (l.matches(".sc-cache")) out.push("");

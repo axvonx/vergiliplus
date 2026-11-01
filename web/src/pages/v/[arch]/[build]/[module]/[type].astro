@@ -1,9 +1,8 @@
 ---
-import Docs from "../../../../../layouts/Docs.astro";
+import Layout from "../../../../../layouts/Layout.astro";
 import StructCode from "../../../../../components/StructCode.astro";
-import VersionBar from "../../../../../components/VersionBar.astro";
-import { catalog, rendererFor, usedInFor, slugNames, slug, ctxPath, modInfo } from "../../../../../lib/render.mjs";
-import { RINGLABEL } from "../../../../../lib/modules.mjs";
+import ContextBar from "../../../../../components/ContextBar.astro";
+import { catalog, rendererFor, usedInFor, slugNames, slug } from "../../../../../lib/render.mjs";
 
 export function getStaticPaths() {
   const out = [];
@@ -25,61 +24,14 @@ const r = rendererFor(doc);
 const layout = r.paholeLayout(name);
 const enumLayout = layout ? null : r.enumLayout(name);
 const used = usedInFor(doc)[name] || [];
-const refs = layout
-  ? [...new Map(layout.rows.filter((x) => x.reflink).map((x) => [x.reflink, x.ref])).entries()]
-      .map(([s, n]) => ({ s, n })).sort((a, b) => a.n.localeCompare(b.n))
-  : [];
-const s = layout?.summary;
-const hex = (n) => "0x" + n.toString(16);
 ---
-<Docs title={`${name} · ${module} ${build}`}>
-  <div class="breadcrumbs-col">
-    <nav><ol class="breadcrumb">
-      <li class="breadcrumb-item"><a class="breadcrumb-link" href="/">Versions</a></li>
-      <li class="breadcrumb-item"><a class="breadcrumb-link" href={`${ctxPath(arch, build, module)}.html`}>{module} {build}</a></li>
-      <li class="breadcrumb-item active">{name}</li>
-    </ol></nav>
-  </div>
-  <h2 class="h2-tdata">{name}</h2>
-  <VersionBar arch={arch} build={build} module={module} type={name} />
-
+<Layout title={`${name} · ${module} ${build}`} side>
+  <ContextBar arch={arch} build={build} module={module} type={name} />
   <StructCode layout={layout} enumLayout={enumLayout} />
-
-  <Fragment slot="rail">
-    {s && (
-      <div>
-        <div class="rail-h">Layout</div>
-        <div class="rail-stat"><span>size</span><b>{hex(s.size)} ({s.size})</b></div>
-        <div class="rail-stat"><span>members</span><b>{s.members}</b></div>
-        <div class="rail-stat"><span>holes</span><b>{s.holes} ({s.sumHoles}b)</b></div>
-        <div class="rail-stat"><span>padding</span><b>{s.padding}</b></div>
-        <div class="rail-stat"><span>cachelines</span><b>{s.cachelines}</b></div>
-      </div>
-    )}
-    {enumLayout && (
-      <div>
-        <div class="rail-h">Enum</div>
-        <div class="rail-stat"><span>values</span><b>{enumLayout.summary.values}</b></div>
-        <div class="rail-stat"><span>size</span><b>{enumLayout.summary.size}</b></div>
-      </div>
-    )}
-    <div>
-      <div class="rail-h">Version</div>
-      <div class="rail-stat"><span>module</span><b>{module} ({RINGLABEL[modInfo(module).ring]})</b></div>
-      <div class="rail-stat"><span>build</span><b>{build}</b></div>
-      <div class="rail-stat"><span>defined in</span><b>{catalog().typeBuilds(arch, module, name).length} builds</b></div>
-    </div>
-    {refs.length > 0 && (
-      <div>
-        <div class="rail-h">References ({refs.length})</div>
-        {refs.map((x) => (<a class="rail-link" href={`${x.s}.html`}>{x.n}</a>))}
-      </div>
-    )}
-    {used.length > 0 && (
-      <div>
-        <div class="rail-h">Used in ({used.length})</div>
-        {used.map((x) => (<a class="rail-link" href={`${slug(x)}.html`}>{x}</a>))}
-      </div>
-    )}
-  </Fragment>
-</Docs>
+  {used.length > 0 && (
+    <section class="used">
+      <div class="used-h">Used in ({used.length})</div>
+      <div class="used-list">{used.map((x) => (<a href={`${slug(x)}.html`}>{x}</a>))}</div>
+    </section>
+  )}
+</Layout>

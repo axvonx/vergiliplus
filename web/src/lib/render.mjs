@@ -23,7 +23,7 @@ const KW = new Set(["struct", "union", "enum", "const", "volatile", "void", "cha
 export const esc = (s) => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 export const slug = (s) => s.replace(/[^A-Za-z0-9_.-]/g, "_");
 const hk = (s) => `<span class="kw">${s}</span>`;
-const hc = (s) => `<span class="hljs-comment">${s}</span>`;
+const hc = (s) => `<span class="sc-ann">${s}</span>`;
 const hn = (s) => s;  // numbers are unstyled; no span keeps ~28k pages lean
 // highlight keyword words inside base names too ("unsigned long", "void*")
 const kwOrPlain = (n) => esc(n).replace(/[A-Za-z_]\w*/g, (w) => KW.has(w) ? hk(w) : w);
@@ -154,17 +154,6 @@ export class Renderer {
     }
     return o + `\n${ind}}`;
   }
-  toplevel(name) {
-    const idx = this.named[name], n = this.get(idx);
-    const size = n.size || this.sizeof(idx);
-    return `${hc("//0x" + size.toString(16) + " bytes (sizeof)")}\n${hk(n.kind)} ${esc(name)}` +
-      this.aggBody(idx, 0) + ";";
-  }
-  // raw C declaration text (no HTML) — for Expressive Code / Shiki
-  plainToplevel(name) {
-    return this.toplevel(name).replace(/<[^>]+>/g, "");
-  }
-
   // split type expression around the field name: decl = `${pre} name${suf}`
   typeParts(idx) {
     const [pre, suf] = this.renderType(idx);
@@ -399,11 +388,6 @@ export class Renderer {
     for (const [k, v] of Object.entries(rev)) out[k] = [...v].sort();
     return out;
   }
-  byKind() {
-    const k = { struct: [], union: [], enum: [] };
-    for (const n of Object.keys(this.named).sort()) k[this.get(this.named[n]).kind].push(n);
-    return k;
-  }
 }
 
 // "/* 0x18  8 */" offset annotation; bitfields carry their bit position: 0x18:3
@@ -462,6 +446,7 @@ export function catalog() {
     get: (a, b, m) => byKey.get(key(a, b, m)),
     builds: (a, m) => builds.get(key(a, m)) || [],
     modules: (a, b) => (modules.get(key(a, b)) || []).slice().sort(),
+    archs: () => [...new Set(docs.map((d) => d.arch))].sort(),
     typeBuilds: (a, m, n) => wizard.get(key(a, m, n)) || [],
   };
   return _cat;
@@ -490,3 +475,8 @@ export function slugNames(doc) {
 }
 
 export const ctxPath = (a, b, m) => `/v/${a}/${b}/${m}`;
+export const versionPath = (a, b) => `/v/${a}/${b}.html`;
+
+// release channel from the family name, for colour-coding versions
+export const channel = (family) =>
+  /server/i.test(family) ? "server" : /canary|insider|dev|beta|preview/i.test(family) ? "insider" : "client";

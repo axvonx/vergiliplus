@@ -1,8 +1,9 @@
 ---
-import Base from "../../../../layouts/Base.astro";
-import VersionBar from "../../../../components/VersionBar.astro";
-import { catalog, rendererFor, slugNames, slug, ctxPath, modInfo } from "../../../../lib/render.mjs";
-import { RINGLABEL } from "../../../../lib/modules.mjs";
+// Module type list: context bar, then a filter row (text + kind chips with counts)
+// over an auto-fit, colour-coded column list. Filtering is in nav.js.
+import Layout from "../../../../layouts/Layout.astro";
+import ContextBar from "../../../../components/ContextBar.astro";
+import { catalog, rendererFor, slugNames, slug, ctxPath } from "../../../../lib/render.mjs";
 
 export function getStaticPaths() {
   return catalog().docs.map((d) => ({
@@ -13,30 +14,24 @@ export function getStaticPaths() {
 const { arch, build, module } = Astro.params;
 const doc = catalog().get(arch, build, module);
 const r = rendererFor(doc);
-const KCOL = { struct: "#bd93f9", union: "#ff79c6", enum: "#50fa7b" };
 const names = slugNames(doc);
 const items = names.map((n) => ({ n, k: r.get(doc.named[n]).kind, s: slug(n) }));
-const counts = { struct: 0, union: 0, enum: 0 };
+const counts = { all: items.length, struct: 0, union: 0, enum: 0 };
 for (const it of items) counts[it.k]++;
 const maxLen = Math.max(...names.map((n) => n.length));
 const base = ctxPath(arch, build, module);
 ---
-<Base title={`${module} ${build}`}>
-  <div class="list-head">
-    <div class="list-title">{module} <span class="list-kind">{RINGLABEL[modInfo(module).ring]}</span></div>
-    <div class="list-sub">{doc.family} · {build} · {arch} · {items.length} types</div>
-    <div class="list-legend">
-      <span class="lg" style={`color:${KCOL.struct}`}><i style={`background:${KCOL.struct}`}></i>struct <b>{counts.struct}</b></span>
-      <span class="lg" style={`color:${KCOL.union}`}><i style={`background:${KCOL.union}`}></i>union <b>{counts.union}</b></span>
-      <span class="lg" style={`color:${KCOL.enum}`}><i style={`background:${KCOL.enum}`}></i>enum <b>{counts.enum}</b></span>
-    </div>
-  </div>
-  <VersionBar arch={arch} build={build} module={module} />
-  <div class="hz-list" style={`column-width:${maxLen + 3}ch`}>
-    {items.map((it) => (
-      <a class="hz" href={`${base}/${it.s}.html`} style={`color:${KCOL[it.k]}`}>
-        <span class="d" style={`background:${KCOL[it.k]}`}></span>{it.n}
-      </a>
+<Layout title={`${module} ${build}`}>
+  <ContextBar arch={arch} build={build} module={module} />
+  <div class="tl-top" data-tl-ctrl>
+    <input class="tl-filter" placeholder="filter types…" />
+    {Object.entries(counts).map(([k, n]) => (
+      <button class={`btn kind-btn${k === "all" ? " on" : ""}`} data-k={k}>{k} {n}</button>
     ))}
   </div>
-</Base>
+  <div class="hz-list" data-tl style={`column-width:${maxLen + 3}ch`}>
+    {items.map((it) => (
+      <a class={`hz k-${it.k}`} href={`${base}/${it.s}.html`}><span class="dot"></span>{it.n}</a>
+    ))}
+  </div>
+</Layout>
