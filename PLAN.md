@@ -2,7 +2,7 @@
 
 Self-contained hand-off for the next session(s). Read this, then `CLAUDE.md`, then work.
 Last updated 2026-11-01 (after the "implement PLAN.md" session).
-Repo: github.com/axvonx/vergiliplus (private, branch `main`, CI green).
+Repo: github.com/axvonx/vergiliplus (public, branch `main`, CI green). **Live: https://vergiliplus.com**
 
 ## Where things stand
 
@@ -25,7 +25,7 @@ Repo: github.com/axvonx/vergiliplus (private, branch `main`, CI green).
 | Decision | Choice |
 |---|---|
 | Site stack | Astro, static only; no islands (per-page runtime × 28k pages) |
-| Hosting | GitHub Pages at **vergiliplus.com**. Repo **private** until settled. Pages blocked on private (plan). |
+| Hosting | GitHub Pages at **vergiliplus.com**, public repo, deploy on every push to `main` |
 | Build labels | From the binaries: image Build.SPBuild (else kernel FileVersion); one label per image |
 | Manifest | Rooted at `$VP_IMAGES`; prefer `msdl` entries (no local files) where winbindex has the PE |
 | License | MIT for code; Vergilius CSS stays © its authors; data statement in README |
@@ -48,22 +48,16 @@ Repo: github.com/axvonx/vergiliplus (private, branch `main`, CI green).
 | C4 UUP ingest | ✅ `uup` kind; 29680 built from its UUP set |
 | D1 GitHub repo + push | ✅ history scrubbed of personal paths; `main` pushed to private axvonx/vergiliplus |
 | D2 CI | ✅ green on first fixed run (~1 min) |
-| D3 Pages deploy | ⛔ wired and DNS ready, but **blocked**: GitHub plan has no Pages for private repos (API 422) |
+| D3 Pages deploy | ✅ live at vergiliplus.com (repo made public; `PAGES_ENABLED=true`) |
 | D4 Licensing | ✅ MIT (`LICENSE`); CSS attribution + data statement in README |
-| D5 README rewrite | ✅ rewritten to current state |
+| D5 README rewrite | ⏳ owner writing it (README.md is a placeholder) |
 | E1 / E2 | deferred, unchanged |
 
 ## Open work (next session)
 
-- **D3 go-live (owner decision)**: either upgrade the GitHub plan or make the repo
-  public. Then: `gh api -X POST repos/axvonx/vergiliplus/pages -f build_type=workflow`,
-  `gh api -X PUT repos/axvonx/vergiliplus/pages -f cname=vergiliplus.com`,
-  `gh variable set PAGES_ENABLED --body true`, re-run the `site` workflow, then
-  enforce HTTPS once the certificate is issued. DNS already has GitHub Pages' A/AAAA
-  records. `www` still points at Porkbun's forwarder (fine, or CNAME it to
-  `axvonx.github.io`). Note: the owner's local resolver (Cisco Umbrella/OpenDNS)
-  answers vergiliplus.com with a block page (146.112.61.110), so check from another
-  network.
+- **D5**: README (owner is writing it).
+- **Local DNS note**: the owner's resolver (Cisco Umbrella/OpenDNS) answers
+  vergiliplus.com with a block page (146.112.61.110); the site itself is fine.
 - **C1 follow-up**: decide the budget, then add `"modules": [..., "ndis", "fltmgr"]`
   to image entries (~+25 MB per build).
 - **C3 data**: add x86 (Win7–Win10 32-bit ISOs) and ARM64 (UUP) entries; the
@@ -74,7 +68,7 @@ Repo: github.com/axvonx/vergiliplus (private, branch `main`, CI green).
 ## Dependency graph & critical path
 
 ```
-plan upgrade or repo public ──► D3 (Pages + PAGES_ENABLED)   ← all that's left to launch
+(launched) — remaining work is breadth: C1 follow-up, C3 data, new canaries
 C1 follow-up (budget decision) ──► manifest modules
 C3 data (needs x86/ARM64 media)
 ```

@@ -106,11 +106,9 @@ timestamp/size/sha256 for released and many insider builds. Fetched PDBs cache i
 `.github/workflows/site.yml` runs on every push and PR: `pnpm install
 --frozen-lockfile` → golden tests → `astro build` → `check_links.py` →
 `check_budget.py` → Pages artifact. The `deploy` job runs only on `main` when the repo
-variable `PAGES_ENABLED` is `true`. GitHub Pages is **not available yet**: the repo is
-private and the account plan doesn't include Pages for private repos (the API returns
-422). Go-live means either a paid plan or making the repo public, then: enable Pages
-with build type "workflow", custom domain `vergiliplus.com`, and set `PAGES_ENABLED=true`.
-DNS (Porkbun) already has GitHub Pages' A/AAAA records. `web/public/CNAME` is shipped too.
+variable `PAGES_ENABLED` is `true` (it is). **Live at https://vergiliplus.com** — public
+repo, Pages build type "workflow", custom domain vergiliplus.com, HTTPS enforced; DNS
+at Porkbun (GitHub Pages A/AAAA records). Every push to `main` redeploys.
 
 ## Conventions / gotchas
 
@@ -151,8 +149,8 @@ DNS (Porkbun) already has GitHub Pages' A/AAAA records. `web/public/CNAME` is sh
 - **Don't commit `web/dist/`** (generated).
 - **Don't commit absolute personal paths** (manifest, docs). History was rewritten
   once to remove them before the first push.
-- **Don't set `PAGES_ENABLED`** until Pages is actually enabled for the repo, or every
-  push to `main` fails at deploy.
+- **`main` is production**: every push deploys to vergiliplus.com. CI gates (tests,
+  links, budget) run first; use branches/PRs for anything unfinished.
 - `web/vendor/verg.css` (original) + `web/public/assets/{vergiliplus,dracula}.css` are
   **lifted from the Vergilius Project** and are © its authors. Keep the attribution
   in README's License section (code is MIT, `LICENSE`).
