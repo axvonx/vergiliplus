@@ -1,91 +1,139 @@
 # vergiliplus
 
-A **userland** type browser in the spirit of the [Vergilius Project](https://github.com/VergiliusProject/vergilius-project),
-which documents only *kernel* (`ntoskrnl`) structures. This fills the gap Vergilius
-leaves: the authoritative struct/union/enum layouts that Microsoft ships in the
-**public PDBs of user-mode modules** — starting with `ntdll.dll`, whose PDB defines
-the entire thread-pool family (`_TP_POOL`, `_TP_WORK`, `_TPP_*` …), the loader, heap,
-RTL and activation structures. Those are opaque in `ntoskrnl.pdb` (the kernel only
-forward-declares them), so Vergilius can't show them even though they're fully
-documented in a PDB anyone can download.
+A static browser of **authoritative Windows type layouts**: struct, union and enum
+definitions taken from Microsoft's **public PDBs**. It covers **kernel (`ntoskrnl`)
+and user-mode (`ntdll`)** across **13 builds**, from Windows 7 SP1 to Server 2025 and
+the Canary channel, rendered pahole-style with offsets, sizes, padding and cachelines.
 
-## Why not just fork Vergilius
+It started as the userland counterpart to the
+[Vergilius Project](https://github.com/VergiliusProject/vergilius-project), which shows
+only released kernels. `ntdll`'s PDB fully defines the thread pool (`_TP_POOL`,
+`_TPP_*`), loader, heap and RTL structures. The kernel PDB only forward-declares them,
+so Vergilius can't show them.
 
-Vergilius is Spring Boot + MySQL + Pug, and it *scrapes its own running site* with
-`wget --mirror` to publish static HTML. Its data model (`os`/`ttype`/`tdata`) keys
-everything on `(buildnumber, arch)` — **one PDB == one "OS"**, with no module axis and
-no cross-build diff concept. Its PDB→data extractor is **not** in the repo (the public
-repo only ships the renderer + a separate `kernels-data` repo of pre-made YAML).
+**Site:** vergiliplus.com (not yet live; see [Status](#status)).
 
-So vergiliplus keeps the two things worth keeping — the **look** (lifted CSS in
-`web/public/assets/`, original in `web/vendor/verg.css`) and the **declaration-rendering model** (ported from its `FieldBuilder`)
-— and drops the stack. The pipeline is just:
+## What you get
+
+- **Every documented type in every build**, cross-linked: click a member's type to
+  follow it, and see "Used in" back-references.
+- **Real C shape.** Anonymous unions and structs are reconstructed from the PDB's flat
+  field list, `<unnamed-tag>` members are inlined, and enums show value tables. You
+  also get function-pointer signatures and bitfield bit positions (`/* 0x74:3  4 */`).
+- **A Metadata toggle** for offset/size annotations, padding holes and cacheline
+  boundaries, and a **copy** button that copies exactly what's shown.
+- **A version bar:** a module switch (ntdll ↔ ntoskrnl), a build switcher that keeps
+  you on the same type, and previous/next across the builds that define it.
+- **⌘K search** over every type in every build, current context ranked first.
+
+Coverage is what the public symbols contain, no more. A type appears only where its
+PDB record has a real field list. For example, `_TP_POOL` is fully defined only from
+build 26100 on, and ntdll's documented-type count grows from 331 (Win7) to 772 (Canary 29680).
+
+| Family | Build | Source |
+|---|---|---|
+| Windows 7 SP1 | 6.1.7601.17514 | ISO |
+| Windows 8 | 6.2.9200.16384 | ISO |
+| Windows 8.1 | 6.3.9600.17415 | ISO |
+| Windows Server 2012 R2 | 6.3.9600.17031 | ISO |
+| Windows Server 2016 | 10.0.14393.693 | ISO |
+| Windows Server 2019 | 10.0.17763.737 | ISO |
+| Windows 10 22H2 | 10.0.19041.2006 ¹ | ISO |
+| Windows Server 2022 | 10.0.20348.587 | ISO |
+| Windows 11 21H2 | 10.0.22000.194 | ISO |
+| Windows 11 24H2 | 10.0.26100.7824 | msdl |
+| Windows Server 2025 | 10.0.26100.32230 | ISO |
+| Windows 11 Canary | 10.0.28000.3231 | msdl |
+| Windows 11 Canary | 10.0.29680.1000 | UUP |
+
+All x64, each with both ntoskrnl and ntdll. ¹ 22H2 is an enablement package on top of
+19041, and its binaries say so; build labels always come from the binaries.
+
+## How it works
 
 ```
-PE  ──pe_pdbid──▶ symbol-server path ──fetch_pdb──▶ <module>.pdb
-    ──pdb_to_json (llvm-pdbutil)──▶ <module>-<build>-<arch>.json
-    ──gen.py──▶ static site  (out/<arch>/<module>/<build>/)
+source (ISO / WIM / UUP set / msdl / local PE or PDB)
+  ─ tools/build.py ─▶ module PEs ─ pe_pdbid.py ─▶ RSDS GUID + FileVersion
+  ─ fetch_pdb.sh ─▶ <module>.pdb (Microsoft symbol server)
+  ─ pdb_to_json.py (llvm-pdbutil dump -types) ─▶ data/<module>-<build>-<arch>.json
+  ─ web/ (Astro) ─▶ web/dist/ (static HTML)
 ```
 
-No server, no DB, no self-scrape. `module`, `build`, and `arch` are first-class in the
-JSON and the URL from day one — the thing Vergilius's schema can't express.
-
-## Layout
+There's no server, no database and no scraping. The committed artifact is the derived
+`data/*.json`. PDBs and binaries are never committed. `{module, arch, build}` are
+first-class in the data and in the URL:
+`/v/<arch>/<build>/<module>/<Type>.html`.
 
 | Path | What |
-|------|------|
-| `tools/pe_pdbid.py`   | Extract the RSDS PDB GUID/age from a PE → symbol-server path |
-| `tools/fetch_pdb.sh`  | Download a module's public PDB from msdl |
-| `tools/pdb_to_json.py`| `llvm-pdbutil dump -types` → normalized JSON type graph |
-| `web/`                | Astro site (pnpm): reads every `data/*.json`, renders `web/dist/` |
-| `web/src/lib/render.mjs` | type → C declaration renderer (the `FieldBuilder` analog) |
-| `web/public/assets/`  | `vergiliplus.css` (adapted from Vergilius's `verg.css`) + `dracula.css` |
-| `data/*.json`         | Committed derived type data (the `kernels-data` analog) |
+|---|---|
+| `tools/build.py` | Batch driver over the manifest `data/sources.json` |
+| `tools/pe_pdbid.py` | PE → PDB identity (RSDS GUID/age) + `VS_FIXEDFILEINFO` FileVersion |
+| `tools/fetch_pdb.sh` | Download a PE's public PDB from msdl |
+| `tools/pdb_to_json.py` | `llvm-pdbutil` type dump → normalized JSON type graph |
+| `tools/check_links.py`, `tools/check_budget.py` | Post-build gates: internal links, `dist` size |
+| `web/src/lib/render.mjs` | Type → C renderer, layout reconstruction, cross-build catalog |
+| `web/src/lib/modules.mjs` | Module table (ring + label) |
+| `web/public/assets/nav.js`, `struct.js` | All client behaviour (sidebar, ⌘K, struct view); no framework |
+| `tests/` | Golden tests over the renderer (`tests/golden/*.txt`) |
+| `data/` | Committed type data + the manifest |
+| `docs/module-survey.md` | Which other modules' public PDBs are worth adding |
 
-## Build
+## Building
 
-The batch driver reads a manifest (`data/sources.json`) of builds and renders the lot:
+**Requirements:** Python 3 (stdlib only), `llvm-pdbutil` (LLVM), `curl`, Node 22+ and
+pnpm. Image sources also need `wimlib`, and ISOs additionally need 7-Zip:
+`brew install llvm wimlib p7zip` / `apt install llvm wimtools p7zip-full`. No mounts,
+no root, no hardcoded paths; tools are found via PATH (or `$LLVM_PDBUTIL`).
 
 ```sh
-python3 tools/build.py              # local PDBs + PEs + ISOs -> JSON -> site
-(cd web && pnpm install && ./node_modules/.bin/astro build && ./node_modules/.bin/astro preview)
+(cd web && pnpm install)
+(cd web && pnpm test && pnpm build && pnpm preview)   # site from the committed data
+python3 tools/check_links.py && python3 tools/check_budget.py
 ```
 
-Manifest entries are portable and mix-and-match — **others add builds they have
-locally** by dropping in a `pdb` entry; `pe`/`iso` entries are conveniences:
+Regenerating data from sources:
+
+```sh
+export VP_IMAGES=/path/to/disk-images    # root for the ISO/UUP paths in the manifest
+python3 tools/build.py --skip-render     # all entries;  --only <substring> for one
+```
+
+### Adding a build
+
+`data/sources.json` is a list of entries. Paths expand `$VARS` and `~` and are relative
+to the manifest. Build labels are derived automatically; a `"build"` key overrides.
 
 ```jsonc
-{"pdb": "ntkrnlmp.pdb", "module":"ntoskrnl", "arch":"x64", "build":"10.0.26100.7824", "family":"Windows 11 24H2"}
-{"pe":  "ntdll.dll",    "module":"ntdll", ...}          // fetch matching PDB from msdl
-{"iso": "win7.iso", "arch":"x64", "build":"6.1.7601", "family":"Windows 7 SP1"}  // extract ntoskrnl+ntdll
+// The PE straight from Microsoft's binary store. Needs no local files.
+// timestamp/size/sha256 for a given file version are on winbindex.m417z.com.
+{"msdl": "ntdll.dll", "timestamp": 3242245876, "size": 2523136, "sha256": "2b7c…",
+ "module": "ntdll", "arch": "x64", "family": "Windows 11 24H2"}
+
+// An install ISO, a WIM/ESD, or a UUP set (MetadataESD_*.esd + package ESDs)
+{"iso": "${VP_IMAGES}/windows/win7/Win7_Ult_SP1_English_x64.iso", "arch": "x64", "family": "Windows 7 SP1"}
+{"wim": "path/to/install.wim", "arch": "x64", "family": "…"}
+{"uup": "${VP_IMAGES}/windows/canary/canary-uup/29680.1000/UUPs", "arch": "x64", "family": "Windows 11 Canary"}
+
+// A PE or PDB you already have locally (a PDB alone needs an explicit "build")
+{"pe":  "ntoskrnl.exe", "module": "ntoskrnl", "arch": "x64", "family": "…"}
+{"pdb": "ntkrnlmp.pdb", "module": "ntoskrnl", "arch": "x64", "build": "10.0.26100.7824", "family": "…"}
 ```
 
-**Dependencies:** Python 3 (stdlib only) + `llvm-pdbutil` + `curl`. ISO entries also
-need `7z` and `wimlib` (`brew install llvm p7zip wimlib` / `apt install llvm p7zip-full wimtools`).
-Cross-platform — no mounts, no root, no hardcoded paths; tool discovery is via PATH/env.
+Image entries extract `["ntoskrnl", "ntdll"]` by default. Pass `"modules"` for others
+(paths are in `PE_IN_IMAGE` in `tools/build.py`). A new canary build is one `uup`
+entry, or two `msdl` entries once winbindex indexes it.
 
 ## Status
 
-Working end-to-end for **kernel + userland across 11 families** — Windows 7 SP1, 8,
-8.1, 10 22H2, 11 (21H2 / 24H2 / Canary 28000 & 29680), and Server 2012 R2 / 2016 /
-2019 / 2022 / 2025 — x64. ~24k cross-linked pages. Each page shows only types the
-public PDB actually defines (forward-refs render as plain names), so coverage reflects
-reality: e.g. `_TP_POOL`'s full layout appears only from build 26100 onward — older
-public ntdll PDBs ship it opaque — and ntdll's documented-type count climbs 331 (Win7)
-→ 712 (24H2) as Microsoft's public symbols grew richer.
-
-Deliberately simple where Vergilius is elaborate — next steps, roughly in order:
-
-- **Anonymous-union brace synthesis.** Overlapping non-bitfield members are currently
-  rendered sequentially with offset comments (correct & readable, but not wrapped in
-  `union {}` / nested `struct {}` the way `FieldBuilder.getFirstPieceOfStruct` does).
-  Bitfields *are* handled. Needed before structs like `_PEB`/`_TEB` read perfectly.
-- **"Used in" back-references** (Vergilius's `cros`) — invert the member graph.
-- **Cross-build diff** — the JSON already carries `{module,arch,build}`; a diff view
-  over two JSONs is a new consumer, not a schema change (Vergilius can't do this).
-- **Scope survey** — most user DLLs ship PDBs with function symbols but few struct
-  types; `ntdll` (and `kernelbase`) are the rich ones. Run `pdb_to_json` over
-  candidates and keep the ones with a meaningful `named` count.
+- **Working:** everything above. 27.6k pages, `dist` ≈ 281 MB, ~10 s build. CI
+  (GitHub Actions) runs the golden tests, the build, the link check (0 broken out of
+  ~409k) and the size budget on every push.
+- **Not live yet.** The repo is private, and GitHub Pages on a private repo needs a
+  paid plan. DNS for vergiliplus.com already points at GitHub Pages. The deploy job
+  turns on with the repo variable `PAGES_ENABLED=true` once Pages is available.
+- **Next:** add `ndis` and `fltmgr` (see `docs/module-survey.md`), add x86 and ARM64
+  builds (the renderer is arch-aware; it needs media), and decide on a cross-build
+  diff view. The roadmap lives in [`PLAN.md`](PLAN.md).
 
 ## License
 

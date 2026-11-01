@@ -74,11 +74,43 @@ package on 19041).
 
 ## Dependencies
 
-- **Required:** Python 3 (stdlib only — no pip deps), `llvm-pdbutil` (LLVM),
-  `curl` (for PDB fetch).
-- **Optional (ISO extraction only):** `7z`/`7zz` (p7zip) and `wimlib-imagex` (wimlib).
+- **Data pipeline:** Python 3 (stdlib only — no pip deps), `llvm-pdbutil` (LLVM),
+  `curl` (PDB/PE fetch). Image entries also need `wimlib-imagex` (wimlib); ISOs
+  additionally need `7z`/`7zz` (p7zip).
+- **Site:** Node 22+ and pnpm (version pinned by `packageManager` in `web/package.json`).
+  The only npm dependency is `astro`.
 - Tool discovery is generic: `$LLVM_PDBUTIL` or PATH; `7z`/`7zz`/`7za`; `wimlib-imagex`/
   `wimextract`. **No hardcoded paths, nothing macOS-specific** — keep it that way.
+
+## Data format
+
+One JSON per module × build × arch: `{module, arch, build, family, fileVersion,
+pdb: {guid, age}, named: {TypeName: idx}, types: {idx: node}}`. Node kinds: `struct`/
+`union` (`name, size, fieldlist, forward`), `enum`, `fieldlist` (`members[{name, type,
+offset}]`, `enums[{name, value}]`), `pointer`, `array` (`element, bytes`), `modifier`,
+`bitfield` (`type, bits, pos`), `proc` (`return, args` → `arglist`), `arglist`, `base`,
+`other`. `named` holds only real definitions (not forward refs); `loadDoc()` also drops
+MSVC's `<unnamed-tag>` names.
+
+## Sources and where they live
+
+The committed manifest roots image paths at `$VP_IMAGES`. On the owner's machine
+that's an external `disk-images/` directory: `windows/<release>/*.iso` and
+`windows/canary/canary-uup/<build>/UUPs` (UUP ESD sets). `msdl` entries need nothing
+local: winbindex.m417z.com (`/data/by_filename_compressed/<file>.json.gz`) gives the
+timestamp/size/sha256 for released and many insider builds. Fetched PDBs cache in
+`$TMPDIR/vergiliplus-pdbs` (named by PDB basename, so runs are sequential).
+
+## CI and deploy
+
+`.github/workflows/site.yml` runs on every push and PR: `pnpm install
+--frozen-lockfile` → golden tests → `astro build` → `check_links.py` →
+`check_budget.py` → Pages artifact. The `deploy` job runs only on `main` when the repo
+variable `PAGES_ENABLED` is `true`. GitHub Pages is **not available yet**: the repo is
+private and the account plan doesn't include Pages for private repos (the API returns
+422). Go-live means either a paid plan or making the repo public, then: enable Pages
+with build type "workflow", custom domain `vergiliplus.com`, and set `PAGES_ENABLED=true`.
+DNS (Porkbun) already has GitHub Pages' A/AAAA records. `web/public/CNAME` is shipped too.
 
 ## Conventions / gotchas
 
@@ -102,14 +134,28 @@ package on 19041).
   `<unnamed-tag>` members are inlined as `struct { … } name;`.
 - **Pointer size comes from the doc's arch** (`PTR_SIZE`), so x86/ARM data needs no
   renderer changes.
+- **Client JS uses document-level delegation and re-syncs on `astro:page-load`.**
+  The Docs layout uses ClientRouter with a `transition:persist` sidebar, so
+  per-element listeners would be lost or doubled. Both scripts guard against double
+  init (`window.__vpNav`, `window.__vpStruct`).
+- **Page weight is a budget.** A ~1 KB addition to the type-page template is ~28 MB
+  of `dist`. Put behaviour in `public/assets/*.js` (cached once), not inline. Don't
+  reintroduce islands.
+- **Golden fixtures are the renderer's spec.** Change rendering → `UPDATE_GOLDEN=1`
+  → review the `tests/golden/` diff.
 
 ## Don't
 
 - **Don't commit PDBs or PEs** (`*.pdb` gitignored; they're large and
   redistribution-dubious). The committed artifact is the derived `data/*.json`.
 - **Don't commit `web/dist/`** (generated).
-- `web/vendor/verg.css` (original) + `web/public/assets/dracula.css` are **lifted from the Vergilius Project** and
-  are © its authors — keep the attribution in README's License section (code is MIT).
+- **Don't commit absolute personal paths** (manifest, docs). History was rewritten
+  once to remove them before the first push.
+- **Don't set `PAGES_ENABLED`** until Pages is actually enabled for the repo, or every
+  push to `main` fails at deploy.
+- `web/vendor/verg.css` (original) + `web/public/assets/{vergiliplus,dracula}.css` are
+  **lifted from the Vergilius Project** and are © its authors. Keep the attribution
+  in README's License section (code is MIT, `LICENSE`).
 
 ## Status
 
