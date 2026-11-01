@@ -109,8 +109,7 @@ package on 19041).
   redistribution-dubious). The committed artifact is the derived `data/*.json`.
 - **Don't commit `web/dist/`** (generated).
 - `web/vendor/verg.css` (original) + `web/public/assets/dracula.css` are **lifted from the Vergilius Project** and
-  are © its authors — keep the attribution in README; a project LICENSE is still TODO
-  (owner's choice).
+  are © its authors — keep the attribution in README's License section (code is MIT).
 
 ## Status
 

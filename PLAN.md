@@ -47,7 +47,7 @@ Last updated 2026-11-01 (after the "implement PLAN.md" session).
 | D1 GitHub repo + push | ⏳ needs owner go-ahead (history rewrite + first push) |
 | D2 CI | ✅ workflow written, unrun until pushed |
 | D3 Pages deploy | ✅ wired (`site`, CNAME); flip `PAGES_ENABLED` + Pages settings |
-| D4 Licensing | ⏳ owner's choice |
+| D4 Licensing | ✅ MIT (`LICENSE`); CSS attribution + data statement in README |
 | D5 README rewrite | ⏳ owner. README "Status"/"next steps" are now stale |
 | E1 / E2 | deferred, unchanged |
 
@@ -55,7 +55,7 @@ Last updated 2026-11-01 (after the "implement PLAN.md" session).
 
 - **D1**: rewrite history so personal paths never reach GitHub (if not already done),
   rename `master` → `main`, push, watch the first CI run.
-- **D4/D5**: license + README (owner).
+- **D5**: README rewrite (owner).
 - **C1 follow-up**: decide the budget, then add `"modules": [..., "ndis", "fltmgr"]`
   to image entries (~+25 MB per build).
 - **C3 data**: add x86 (Win7–Win10 32-bit ISOs) and ARM64 (UUP) entries; the

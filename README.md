@@ -87,5 +87,11 @@ Deliberately simple where Vergilius is elaborate — next steps, roughly in orde
   types; `ntdll` (and `kernelbase`) are the rich ones. Run `pdb_to_json` over
   candidates and keep the ones with a meaningful `named` count.
 
-CSS is © the Vergilius Project authors; see that repo for its terms. Type data is
-derived from Microsoft's public symbol server.
+## License
+
+Code: [MIT](LICENSE). Exceptions: `web/vendor/verg.css` and the stylesheets adapted
+from it in `web/public/assets/` (`vergiliplus.css`, `dracula.css`) are © the
+[Vergilius Project](https://github.com/VergiliusProject/vergilius-project) authors,
+under that project's terms. The type data in `data/` is derived from Microsoft's
+public symbol server (layout facts extracted from public PDBs, as Vergilius does);
+no PDBs or binaries are redistributed.
