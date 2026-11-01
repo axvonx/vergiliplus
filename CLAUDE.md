@@ -51,7 +51,7 @@ python3 tools/check_links.py && python3 tools/check_budget.py
 Full build is ~10 s for ~27.6k pages, `dist` ≈ 281 MB. Watch for pathological types
 (e.g. `_MI_HYPER_SPACE` is 276 MB): anything that scales with struct *size* rather
 than member count will blow the heap. The golden tests include it as a canary.
-After an intended rendering change, `UPDATE_GOLDEN=1 node --test tests/` and review
+After an intended rendering change, `UPDATE_GOLDEN=1 node --test tests/render.test.mjs` and review
 the fixture diff like code.
 
 Manifest entries (`data/sources.json`) are one of:

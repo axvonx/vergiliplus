@@ -1,6 +1,6 @@
 // Golden tests for the type renderer (web/src/lib/render.mjs).
-//   node --test tests/                 (or: cd web && pnpm test)
-//   UPDATE_GOLDEN=1 node --test tests/ re-bless after an intended rendering change
+//   node --test tests/render.test.mjs                 (or: cd web && pnpm test)
+//   UPDATE_GOLDEN=1 node --test tests/render.test.mjs re-bless after an intended rendering change
 // Fixtures are paholeText() output for landmark types; review their diff like code.
 import { test } from "node:test";
 import assert from "node:assert/strict";
