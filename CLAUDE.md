@@ -16,7 +16,7 @@ web/src/lib/layout.mjs   pahole rows: anonymous union/struct reconstruction, enu
 web/src/lib/catalog.mjs  all docs loaded once + cross-build indexes + memoized per-doc views
 web/src/lib/modules.mjs  module -> ring/label
 web/public/assets/       site.css, nav.js (sidebar, ⌘K, filters, home links), struct.js (Metadata/copy)
-web/public/logo.svg      site logo + favicon (Earth's interior, fully opened)
+web/public/logo.svg      site logo, a circle (Earth's interior, fully opened); favicon.svg = same in an octagon
 tests/render.test.mjs    golden fixtures in tests/golden/ = the renderer's spec
 ```
 
@@ -77,6 +77,9 @@ about +25 MB `dist` per build) · x86/ARM64 (needs media) · home grouping
 
 ## Attribution
 
-Code is MIT (`LICENSE`). `web/vendor/verg.css` is the Vergilius Project's original, and
-`web/public/assets/site.css` adapts its palette, typography, wordmark and rem scaling.
-Keep the README License section.
+Code is MIT (`LICENSE`). The look deliberately follows vergiliusproject.com:
+`web/public/assets/site.css` uses `web/vendor/verg.css`'s colour values, type scale and
+component styling (© the Vergilius authors; their repo has no license). Their images and
+logo are **not** reused: the faceted background is plain CSS and both logos are our own
+art. Like verg.css, "Open Sans" is named but not loaded. Keep the footer credit and the
+README License section.

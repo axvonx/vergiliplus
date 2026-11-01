@@ -33,7 +33,7 @@ const base = ctxPath(arch, build, module);
       <button class={`btn kind-btn${k === "all" ? " on" : ""}`} data-k={k}>{k} {n}</button>
     ))}
   </div>
-  <div class="hz-list" data-tl style={`column-width:${colCh}ch`}>
+  <div class="hz-list" data-tl style={`column-width:${Math.round(colCh * 1.2)}ch`}>
     {items.map((it) => (
       <a class={`hz k-${it.k}`} href={`${base}/${it.s}.html`} title={it.n.length + 3 > colCh ? it.n : undefined}><span class="dot"></span>{it.n}</a>
     ))}

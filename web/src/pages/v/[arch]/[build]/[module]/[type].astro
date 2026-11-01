@@ -36,14 +36,16 @@ const stats = enumLayout
 ---
 <Layout title={`${name} · ${module} ${build}`} side>
   <ContextBar arch={arch} build={build} module={module} type={name} />
+  <div class="panel">
   <StructCode layout={layout} enumLayout={enumLayout} named={doc.named} />
   <div class="stats">
     {stats.map(([k, v]) => /^\d/.test(k)
       ? <span><b>{k.split(" ")[0]}</b> {k.split(" ").slice(1).join(" ")}{v !== "" ? ` (${v})` : ""}</span>
       : <span>{k} <b>{v}</b></span>)}
   </div>
+  </div>
   {used.length > 0 && (
-    <section class="used">
+    <section class="panel">
       <div class="used-h">Used in ({used.length})</div>
       <div class="used-list">{used.map((x) => (<a href={`${slug(x)}.html`}>{x}</a>))}</div>
     </section>

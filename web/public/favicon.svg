@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Tab icon: Earth's interior fully opened, in an octagon. Flat and bold so it
+       reads at 16 px: red mantle, orange outer core, yellow inner core. -->
+  <defs>
+    <radialGradient id="m" cx="50%" cy="50%" r="55%">
+      <stop offset="0.5" stop-color="#ff3b26"/><stop offset="1" stop-color="#c41a17"/>
+    </radialGradient>
+    <radialGradient id="c" cx="45%" cy="42%" r="60%">
+      <stop offset="0" stop-color="#fff3a0"/><stop offset="0.55" stop-color="#ffd23a"/><stop offset="1" stop-color="#ffaa18"/>
+    </radialGradient>
+  </defs>
+  <polygon points="19.5,2 44.5,2 62,19.5 62,44.5 44.5,62 19.5,62 2,44.5 2,19.5"
+           fill="url(#m)" stroke="#0b1a33" stroke-width="3.5" stroke-linejoin="round"/>
+  <circle cx="32" cy="32" r="19" fill="#ffaa18" stroke="#b3260f" stroke-width="1.5"/>
+  <circle cx="32" cy="32" r="10.5" fill="url(#c)"/>
+</svg>
