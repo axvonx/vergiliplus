@@ -3,12 +3,10 @@
 // A row links to the build's kernel listing; nav.js retargets it to the module
 // last viewed for that build.
 import Layout from "../layouts/Layout.astro";
-import { catalog, cmpBuild, ctxPath, channel, modInfo } from "../lib/render.mjs";
+import { catalog, ctxPath, channel } from "../lib/catalog.mjs";
+import { modInfo } from "../lib/modules.mjs";
 const cat = catalog();
-const seen = new Set();
-const versions = cat.docs.slice().sort((a, b) => cmpBuild(b.build, a.build))
-  .filter((d) => { const k = d.arch + "/" + d.build; return !seen.has(k) && seen.add(k); })
-  .map((d) => {
+const versions = cat.versions().map((d) => {
     const mods = cat.modules(d.arch, d.build);
     const kernel = mods.includes("ntoskrnl") ? "ntoskrnl" : mods.find((m) => modInfo(m).ring === "kernel") || mods[0];
     return { ...d, mods, kernel };

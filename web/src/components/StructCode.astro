@@ -2,8 +2,9 @@
 // Static pahole-style struct/union/enum view. All interactivity (Metadata toggle,
 // copy, row click-through) lives in /assets/struct.js via document-level delegation,
 // so the page carries the layout exactly once — no island props.
-import { esc, offAnn, hexv } from "../lib/render.mjs";
-const { layout, enumLayout } = Astro.props;
+import { esc, html } from "../lib/types.mjs";
+import { offAnn, hexv } from "../lib/layout.mjs";
+const { layout, enumLayout, named } = Astro.props;
 const IND = "    ";
 const ind = (d) => IND.repeat(d + 1);
 
@@ -17,7 +18,7 @@ function rowHtml(r) {
   if (r.close)
     return `<div class="sc-line sc-grp"><span class="sc-code">${ind(r.depth)}}${r.field ? ` <span class="sc-field">${esc(r.field)}</span>` : ""};</span><span class="sc-ann">/* 0x${r.offset.toString(16)}  ${r.size} */</span></div>`;
   const bits = r.bits != null ? ` : ${r.bits}` : "";
-  return `<div class="sc-member k-${r.fkind}${r.reflink ? " link" : ""}"><span class="sc-code">${ind(r.depth)}${r.typePre}${r.sep}<span class="sc-field">${esc(r.field)}</span>${r.typeSuf}${bits};</span><span class="sc-ann">/* ${offAnn(r)} */</span></div>`;
+  return `<div class="sc-member k-${r.fkind}${r.linked ? " link" : ""}"><span class="sc-code">${ind(r.depth)}${html(r.typePre, named)}${r.sep}<span class="sc-field">${esc(r.field)}</span>${html(r.typeSuf, named)}${bits};</span><span class="sc-ann">/* ${offAnn(r)} */</span></div>`;
 }
 
 let head, body;

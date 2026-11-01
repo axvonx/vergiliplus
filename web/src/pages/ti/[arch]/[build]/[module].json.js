@@ -1,4 +1,5 @@
-import { catalog, rendererFor, slugNames, slug } from "../../../../lib/render.mjs";
+import { catalog, typesFor, slugNames } from "../../../../lib/catalog.mjs";
+import { slug } from "../../../../lib/types.mjs";
 
 // /ti/<arch>/<build>/<module>.json — the sidebar's type list for one context.
 export function getStaticPaths() {
@@ -9,7 +10,7 @@ export function getStaticPaths() {
 
 export function GET({ params }) {
   const doc = catalog().get(params.arch, params.build, params.module);
-  const r = rendererFor(doc);
-  const items = slugNames(doc).map((n) => ({ n, k: r.get(doc.named[n]).kind, s: slug(n) }));
+  const T = typesFor(doc);
+  const items = slugNames(doc).map((n) => ({ n, k: T.get(doc.named[n]).kind, s: slug(n) }));
   return new Response(JSON.stringify(items), { headers: { "content-type": "application/json" } });
 }

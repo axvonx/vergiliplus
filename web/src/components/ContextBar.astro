@@ -3,7 +3,9 @@
 // the old version bar and the sidebar header):
 //   [arch]  build ▾  /  module | module  /  Type        ← prev · n builds · next →
 // The build select keeps you on the same type when the target build defines it.
-import { catalog, ctxPath, slug, modInfo } from "../lib/render.mjs";
+import { catalog, ctxPath } from "../lib/catalog.mjs";
+import { slug } from "../lib/types.mjs";
+import { modInfo } from "../lib/modules.mjs";
 const { arch, build, module, type } = Astro.props;
 const cat = catalog();
 const fam = (b) => cat.get(arch, b, module)?.family || "";
@@ -21,10 +23,10 @@ const next = i >= 0 && i < tb.length - 1 ? tb[i + 1] : null;
 ---
 <div class="cbar">
   {multiArch && <span class="cb-arch">{arch}</span>}
-  {/* option value = build; the target URL is rebuilt client-side (keeps ~28k pages lean) */}
-  <select class="cb-build" aria-label="Build" data-t={type ? `/v/${arch}/@/${module}/${slug(type)}.html` : ""}
-    data-l={`/v/${arch}/@/${module}.html`}
-    onchange="var o=this.selectedOptions[0];location.href=(o.dataset.n||!this.dataset.t?this.dataset.l:this.dataset.t).replace('@',this.value)">
+  {/* option value = build; nav.js rebuilds the target URL (@ = build), falling back
+      to the listing where the type isn't defined (data-n) */}
+  <select class="cb-build" aria-label="Build" data-t={type ? `/v/${arch}/@/${module}/${slug(type)}.html` : undefined}
+    data-l={`/v/${arch}/@/${module}.html`}>
     {builds.map((b) => (
       <option value={b} selected={b === build} data-n={type && !has.has(b) ? "1" : undefined}>
         {fam(b)} — {b}{type && !has.has(b) ? "  (not defined)" : ""}

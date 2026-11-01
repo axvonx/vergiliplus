@@ -2,7 +2,9 @@
 import Layout from "../../../../../layouts/Layout.astro";
 import StructCode from "../../../../../components/StructCode.astro";
 import ContextBar from "../../../../../components/ContextBar.astro";
-import { catalog, rendererFor, usedInFor, slugNames, slug } from "../../../../../lib/render.mjs";
+import { catalog, typesFor, usedInFor, slugNames } from "../../../../../lib/catalog.mjs";
+import { slug } from "../../../../../lib/types.mjs";
+import { structLayout, enumLayout as enumOf } from "../../../../../lib/layout.mjs";
 
 export function getStaticPaths() {
   const out = [];
@@ -20,9 +22,9 @@ export function getStaticPaths() {
 const { arch, build, module } = Astro.params;
 const { name } = Astro.props;
 const doc = catalog().get(arch, build, module);
-const r = rendererFor(doc);
-const layout = r.paholeLayout(name);
-const enumLayout = layout ? null : r.enumLayout(name);
+const T = typesFor(doc);
+const layout = structLayout(T, name);
+const enumLayout = layout ? null : enumOf(T, name);
 const used = usedInFor(doc)[name] || [];
 const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
 const s = layout?.summary;
@@ -34,7 +36,7 @@ const stats = enumLayout
 ---
 <Layout title={`${name} · ${module} ${build}`} side>
   <ContextBar arch={arch} build={build} module={module} type={name} />
-  <StructCode layout={layout} enumLayout={enumLayout} />
+  <StructCode layout={layout} enumLayout={enumLayout} named={doc.named} />
   <div class="stats">
     {stats.map(([k, v]) => /^\d/.test(k)
       ? <span><b>{k.split(" ")[0]}</b> {k.split(" ").slice(1).join(" ")}{v !== "" ? ` (${v})` : ""}</span>

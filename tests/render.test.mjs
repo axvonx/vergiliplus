@@ -1,13 +1,15 @@
-// Golden tests for the type renderer (web/src/lib/render.mjs).
+// Golden tests for the type renderer (web/src/lib/{types,layout}.mjs).
 //   node --test tests/render.test.mjs                 (or: cd web && pnpm test)
 //   UPDATE_GOLDEN=1 node --test tests/render.test.mjs re-bless after an intended rendering change
-// Fixtures are paholeText() output for landmark types; review their diff like code.
+// Fixtures are layoutText() output for landmark types; review their diff like code.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { Renderer, loadDoc } from "../web/src/lib/render.mjs";
+import { Types } from "../web/src/lib/types.mjs";
+import { structLayout, layoutText, usedIn } from "../web/src/lib/layout.mjs";
+import { loadDoc } from "../web/src/lib/catalog.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, "..", "data");
@@ -16,7 +18,7 @@ const UPDATE = !!process.env.UPDATE_GOLDEN;
 
 const docs = new Map();
 const renderer = (file) => {
-  if (!docs.has(file)) docs.set(file, new Renderer(loadDoc(path.join(DATA, file))));
+  if (!docs.has(file)) docs.set(file, new Types(loadDoc(path.join(DATA, file))));
   return docs.get(file);
 };
 
@@ -39,7 +41,7 @@ const CASES = [
 
 for (const [file, name] of CASES) {
   test(`golden ${file.split("-x64")[0]} ${name}`, () => {
-    const got = renderer(file).paholeText(name) + "\n";
+    const got = layoutText(renderer(file), name) + "\n";
     const fx = path.join(GOLDEN, `${file.split("-")[0]}.${name}.txt`);
     if (UPDATE || !fs.existsSync(fx)) {
       fs.writeFileSync(fx, got);
@@ -55,7 +57,7 @@ for (const [file, name] of CASES) {
 test("perf canary _MI_HYPER_SPACE", () => {
   const r = renderer("ntoskrnl-10.0.17763.737-x64.json");
   const t0 = performance.now();
-  const L = r.paholeLayout("_MI_HYPER_SPACE");
+  const L = structLayout(r, "_MI_HYPER_SPACE");
   assert.ok(L.summary.size > 250e6);
   assert.ok(L.rows.length < 20, `rows: ${L.rows.length}`);
   assert.ok(performance.now() - t0 < 500);
@@ -66,7 +68,7 @@ test("perf canary _MI_HYPER_SPACE", () => {
 test("all ntoskrnl 24H2 layouts are well-formed", () => {
   const r = renderer(NTOS);
   for (const name of Object.keys(r.named)) {
-    const L = r.paholeLayout(name);
+    const L = structLayout(r, name);
     if (!L) continue;
     const leaves = L.rows.filter((x) => x.field != null && !x.close).length;
     const inlined = L.rows.filter((x) => x.close && x.field).length;
@@ -84,12 +86,12 @@ test("all ntoskrnl 24H2 layouts are well-formed", () => {
 // "Used in" must credit the enclosing type for references made from inside members
 // of anonymous "<unnamed-tag>" type (e.g. union { ...; struct _ERESOURCE* r; } u;)
 test("usedIn sees through anonymous member types", () => {
-  const used = renderer(NTOS).usedIn()["_ERESOURCE"];
+  const used = usedIn(renderer(NTOS))["_ERESOURCE"];
   for (const t of ["_TOKEN", "_HEAP_LOCK", "_FS_FILTER_PARAMETERS"]) assert.ok(used.includes(t), t);
 });
 
 // ---- synthetic docs: arch-aware pointer size (C3) and grouping edge cases ----
-const T = (types, named, arch = "x64") => new Renderer({ arch, named, types });
+const T = (types, named, arch = "x64") => new Types({ arch, named, types });
 const fl = (members) => ({ kind: "fieldlist", members, enums: [] });
 
 test("pointer size follows the doc's arch", () => {
@@ -101,7 +103,7 @@ test("pointer size follows the doc's arch", () => {
   };
   const x86 = T(types, { S: "0x1000" }, "x86");
   assert.equal(x86.sizeof("0x1002"), 4);
-  assert.equal(x86.paholeLayout("S").summary.holes, 0);
+  assert.equal(structLayout(x86, "S").summary.holes, 0);
   assert.equal(T(types, { S: "0x1000" }, "x64").sizeof("0x1002"), 8);
 });
 
@@ -117,7 +119,7 @@ test("union of a word and a bitfield struct", () => {
     "0x1003": { kind: "bitfield", type: "0x22", bits: 31, pos: 1 },
     "0x22": { kind: "base", name: "unsigned long" },
   };
-  assert.equal(T(types, { S: "0x1000" }).paholeText("S", false), [
+  assert.equal(layoutText(T(types, { S: "0x1000" }), "S", false), [
     "struct S {",
     "    union {",
     "        unsigned long All;",

@@ -3,7 +3,8 @@
 // over an auto-fit, colour-coded column list. Filtering is in nav.js.
 import Layout from "../../../../layouts/Layout.astro";
 import ContextBar from "../../../../components/ContextBar.astro";
-import { catalog, rendererFor, slugNames, slug, ctxPath } from "../../../../lib/render.mjs";
+import { catalog, typesFor, slugNames, ctxPath } from "../../../../lib/catalog.mjs";
+import { slug } from "../../../../lib/types.mjs";
 
 export function getStaticPaths() {
   return catalog().docs.map((d) => ({
@@ -13,9 +14,9 @@ export function getStaticPaths() {
 
 const { arch, build, module } = Astro.params;
 const doc = catalog().get(arch, build, module);
-const r = rendererFor(doc);
+const T = typesFor(doc);
 const names = slugNames(doc);
-const items = names.map((n) => ({ n, k: r.get(doc.named[n]).kind, s: slug(n) }));
+const items = names.map((n) => ({ n, k: T.get(doc.named[n]).kind, s: slug(n) }));
 const counts = { all: items.length, struct: 0, union: 0, enum: 0 };
 for (const it of items) counts[it.k]++;
 // size columns to the 90th-percentile name (the long tail ellipsizes, full name in
