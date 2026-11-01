@@ -1,0 +1,362 @@
+struct _KTHREAD {
+    struct _DISPATCHER_HEADER Header;                       /* 0x0  24 */
+    void* SListFaultAddress;                                /* 0x18  8 */
+    unsigned __int64 QuantumTarget;                         /* 0x20  8 */
+    void* InitialStack;                                     /* 0x28  8 */
+    void* StackLimit;                                       /* 0x30  8 */
+    void* StackBase;                                        /* 0x38  8 */
+
+    /* --- cacheline 1 boundary (64 bytes) --- */
+    unsigned __int64 ThreadLock;                            /* 0x40  8 */
+    volatile unsigned __int64 CycleTime;                    /* 0x48  8 */
+    unsigned long CurrentRunTime;                           /* 0x50  4 */
+    unsigned long ExpectedRunTime;                          /* 0x54  4 */
+    void* KernelStack;                                      /* 0x58  8 */
+    struct _XSAVE_FORMAT* StateSaveArea;                    /* 0x60  8 */
+    struct _KSCHEDULING_GROUP* SchedulingGroup;             /* 0x68  8 */
+    union _KWAIT_STATUS_REGISTER WaitRegister;              /* 0x70  1 */
+    volatile unsigned char Running;                         /* 0x71  1 */
+    unsigned char Alerted[2];                               /* 0x72  2 */
+    union {
+        struct {
+            unsigned long AutoBoostActive : 1;              /* 0x74:0  4 */
+            unsigned long ReadyTransition : 1;              /* 0x74:1  4 */
+            unsigned long WaitNext : 1;                     /* 0x74:2  4 */
+            unsigned long SystemAffinityActive : 1;         /* 0x74:3  4 */
+            unsigned long Alertable : 1;                    /* 0x74:4  4 */
+            unsigned long Reserved1 : 1;                    /* 0x74:5  4 */
+            unsigned long ApcInterruptRequest : 1;          /* 0x74:6  4 */
+            unsigned long QuantumEndMigrate : 1;            /* 0x74:7  4 */
+            unsigned long SecureThread : 1;                 /* 0x74:8  4 */
+            unsigned long TimerActive : 1;                  /* 0x74:9  4 */
+            unsigned long SystemThread : 1;                 /* 0x74:10  4 */
+            unsigned long ProcessDetachActive : 1;          /* 0x74:11  4 */
+            unsigned long Reserved2 : 1;                    /* 0x74:12  4 */
+            unsigned long ScbReadyQueue : 1;                /* 0x74:13  4 */
+            unsigned long ApcQueueable : 1;                 /* 0x74:14  4 */
+            unsigned long Reserved3 : 1;                    /* 0x74:15  4 */
+            unsigned long WaitNextClearWobPriorityFloor : 1;  /* 0x74:16  4 */
+            unsigned long TimerSuspended : 1;               /* 0x74:17  4 */
+            unsigned long SuspendedWaitMode : 1;            /* 0x74:18  4 */
+            unsigned long SuspendSchedulerApcWait : 1;      /* 0x74:19  4 */
+            unsigned long CetUserShadowStack : 1;           /* 0x74:20  4 */
+            unsigned long BypassProcessFreeze : 1;          /* 0x74:21  4 */
+            unsigned long CetKernelShadowStack : 1;         /* 0x74:22  4 */
+            unsigned long StateSaveAreaDecoupled : 1;       /* 0x74:23  4 */
+            unsigned long Reserved : 8;                     /* 0x74:24  4 */
+        };                                                  /* 0x74  4 */
+        long MiscFlags;                                     /* 0x74  4 */
+    };                                                      /* 0x74  4 */
+    union {
+        struct {
+            unsigned long UserIdealProcessorFixed : 1;      /* 0x78:0  4 */
+            unsigned long IsolationWidth : 1;               /* 0x78:1  4 */
+            unsigned long AutoAlignment : 1;                /* 0x78:2  4 */
+            unsigned long DisableBoost : 1;                 /* 0x78:3  4 */
+            unsigned long AlertedByThreadId : 1;            /* 0x78:4  4 */
+            unsigned long QuantumDonation : 1;              /* 0x78:5  4 */
+            unsigned long EnableStackSwap : 1;              /* 0x78:6  4 */
+            unsigned long GuiThread : 1;                    /* 0x78:7  4 */
+            unsigned long DisableQuantum : 1;               /* 0x78:8  4 */
+            unsigned long ChargeOnlySchedulingGroup : 1;    /* 0x78:9  4 */
+            unsigned long DeferPreemption : 1;              /* 0x78:10  4 */
+            unsigned long QueueDeferPreemption : 1;         /* 0x78:11  4 */
+            unsigned long ForceDeferSchedule : 1;           /* 0x78:12  4 */
+            unsigned long SharedReadyQueueAffinity : 1;     /* 0x78:13  4 */
+            unsigned long FreezeCount : 1;                  /* 0x78:14  4 */
+            unsigned long TerminationApcRequest : 1;        /* 0x78:15  4 */
+            unsigned long AutoBoostEntriesExhausted : 1;    /* 0x78:16  4 */
+            unsigned long KernelStackResident : 1;          /* 0x78:17  4 */
+            unsigned long TerminateRequestReason : 2;       /* 0x78:18  4 */
+            unsigned long ProcessStackCountDecremented : 1;  /* 0x78:20  4 */
+            unsigned long RestrictedGuiThread : 1;          /* 0x78:21  4 */
+            unsigned long VpBackingThread : 1;              /* 0x78:22  4 */
+            unsigned long EtwStackTraceCrimsonApcDisabled : 1;  /* 0x78:23  4 */
+            unsigned long EtwStackTraceApcInserted : 8;     /* 0x78:24  4 */
+        };                                                  /* 0x78  4 */
+        volatile long ThreadFlags;                          /* 0x78  4 */
+    };                                                      /* 0x78  4 */
+    volatile unsigned char Tag;                             /* 0x7c  1 */
+    union {
+        struct {
+            unsigned char CalloutActive : 1;                /* 0x7d:0  1 */
+            unsigned char ReservedStackInUse : 1;           /* 0x7d:1  1 */
+            unsigned char UserStackWalkActive : 1;          /* 0x7d:2  1 */
+            unsigned char SameThreadTransientFlagsReserved : 5;  /* 0x7d:3  1 */
+        };                                                  /* 0x7d  1 */
+        char SameThreadTransientFlags;                      /* 0x7d  1 */
+    };                                                      /* 0x7d  1 */
+    union {
+        struct {
+            unsigned char RunningNonRetpolineCode : 1;      /* 0x7e:0  1 */
+            unsigned char SpecCtrlSpare : 7;                /* 0x7e:1  1 */
+        };                                                  /* 0x7e  1 */
+        unsigned char SpecCtrl;                             /* 0x7e  1 */
+    };                                                      /* 0x7e  1 */
+    /* 1 byte padding */
+
+    /* --- cacheline 2 boundary (128 bytes) --- */
+    unsigned long SystemCallNumber;                         /* 0x80  4 */
+    unsigned long ReadyTime;                                /* 0x84  4 */
+    void* FirstArgument;                                    /* 0x88  8 */
+    struct _KTRAP_FRAME* TrapFrame;                         /* 0x90  8 */
+    union {
+        struct _KAPC_STATE ApcState;                        /* 0x98  48 */
+        struct {
+            unsigned char ApcStateFill[43];                 /* 0x98  43 */
+            char Priority;                                  /* 0xc3  1 */
+            unsigned long UserIdealProcessor;               /* 0xc4  4 */
+        };                                                  /* 0x98  48 */
+    };                                                      /* 0x98  48 */
+
+    /* --- cacheline 3 boundary (192 bytes) --- */
+    volatile __int64 WaitStatus;                            /* 0xc8  8 */
+    struct _KWAIT_BLOCK* WaitBlockList;                     /* 0xd0  8 */
+    union {
+        struct _LIST_ENTRY WaitListEntry;                   /* 0xd8  16 */
+        struct _SINGLE_LIST_ENTRY SwapListEntry;            /* 0xd8  8 */
+    };                                                      /* 0xd8  16 */
+    struct _DISPATCHER_HEADER* Queue;                       /* 0xe8  8 */
+    void* Teb;                                              /* 0xf0  8 */
+    unsigned __int64 RelativeTimerBias;                     /* 0xf8  8 */
+
+    /* --- cacheline 4 boundary (256 bytes) --- */
+    struct _KTIMER Timer;                                   /* 0x100  64 */
+
+    /* --- cacheline 5 boundary (320 bytes) --- */
+    union {
+        struct _KWAIT_BLOCK WaitBlock[4];                   /* 0x140  192 */
+        struct {
+            unsigned char WaitBlockFill4[20];               /* 0x140  20 */
+            unsigned long ContextSwitches;                  /* 0x154  4 */
+        };                                                  /* 0x140  24 */
+        struct {
+            unsigned char WaitBlockFill5[68];               /* 0x140  68 */
+            volatile unsigned char State;                   /* 0x184  1 */
+            char Spare13;                                   /* 0x185  1 */
+            unsigned char WaitIrql;                         /* 0x186  1 */
+            char WaitMode;                                  /* 0x187  1 */
+        };                                                  /* 0x140  72 */
+        struct {
+            unsigned char WaitBlockFill6[116];              /* 0x140  116 */
+            unsigned long WaitTime;                         /* 0x1b4  4 */
+        };                                                  /* 0x140  120 */
+        struct {
+            unsigned char WaitBlockFill7[164];              /* 0x140  164 */
+            union {
+                struct {
+                    short KernelApcDisable;                 /* 0x1e4  2 */
+                    short SpecialApcDisable;                /* 0x1e6  2 */
+                };                                          /* 0x1e4  4 */
+                unsigned long CombinedApcDisable;           /* 0x1e4  4 */
+            };                                              /* 0x1e4  4 */
+        };                                                  /* 0x140  168 */
+        struct {
+            unsigned char WaitBlockFill8[40];               /* 0x140  40 */
+            struct _KTHREAD_COUNTERS* ThreadCounters;       /* 0x168  8 */
+        };                                                  /* 0x140  48 */
+        struct {
+            unsigned char WaitBlockFill9[88];               /* 0x140  88 */
+            struct _XSTATE_SAVE* XStateSave;                /* 0x198  8 */
+        };                                                  /* 0x140  96 */
+        struct {
+            unsigned char WaitBlockFill10[136];             /* 0x140  136 */
+            void* Win32Thread;                              /* 0x1c8  8 */
+        };                                                  /* 0x140  144 */
+        struct {
+            unsigned char WaitBlockFill11[176];             /* 0x140  176 */
+            unsigned __int64 Spare18;                       /* 0x1f0  8 */
+            unsigned __int64 LastXStateSaveDebugInfo;       /* 0x1f8  8 */
+        };                                                  /* 0x140  192 */
+    };                                                      /* 0x140  192 */
+
+    /* --- cacheline 8 boundary (512 bytes) --- */
+    union {
+        volatile long ThreadFlags2;                         /* 0x200  4 */
+        struct {
+            unsigned long DisableKasan : 1;                 /* 0x200:0  4 */
+            unsigned long AbContextSwitchState : 1;         /* 0x200:1  4 */
+            unsigned long ThreadFlags2Reserved : 30;        /* 0x200:2  4 */
+        };                                                  /* 0x200  4 */
+    };                                                      /* 0x200  4 */
+    volatile unsigned char BamQosLevel;                     /* 0x204  1 */
+    unsigned char HardwareFeedbackClass;                    /* 0x205  1 */
+    union {
+        short PriorityDecrement;                            /* 0x206  2 */
+        struct {
+            unsigned short ForegroundBoost : 4;             /* 0x206:0  2 */
+            unsigned short UnusualBoost : 8;                /* 0x206:4  2 */
+        };                                                  /* 0x206  2 */
+    };                                                      /* 0x206  2 */
+    struct _LIST_ENTRY QueueListEntry;                      /* 0x208  16 */
+    union {
+        volatile unsigned long NextProcessor;               /* 0x218  4 */
+        struct {
+            unsigned long NextProcessorNumber : 31;         /* 0x218:0  4 */
+            unsigned long SharedReadyQueue : 1;             /* 0x218:31  4 */
+        };                                                  /* 0x218  4 */
+    };                                                      /* 0x218  4 */
+    long QueuePriority;                                     /* 0x21c  4 */
+    struct _KPROCESS* Process;                              /* 0x220  8 */
+    struct _KAFFINITY_EX* UserAffinity;                     /* 0x228  8 */
+    unsigned short UserAffinityPrimaryGroup;                /* 0x230  2 */
+    char PreviousMode;                                      /* 0x232  1 */
+    char BasePriority;                                      /* 0x233  1 */
+    unsigned char Spare24;                                  /* 0x234  1 */
+    unsigned char Preempted;                                /* 0x235  1 */
+    unsigned char AdjustReason;                             /* 0x236  1 */
+    char AdjustIncrement;                                   /* 0x237  1 */
+    unsigned __int64 AffinityVersion;                       /* 0x238  8 */
+
+    /* --- cacheline 9 boundary (576 bytes) --- */
+    struct _KAFFINITY_EX* Affinity;                         /* 0x240  8 */
+    unsigned short AffinityPrimaryGroup;                    /* 0x248  2 */
+    unsigned char ApcStateIndex;                            /* 0x24a  1 */
+    unsigned char WaitBlockCount;                           /* 0x24b  1 */
+    unsigned long IdealProcessor;                           /* 0x24c  4 */
+    unsigned __int64 NpxState;                              /* 0x250  8 */
+    union {
+        struct _KAPC_STATE SavedApcState;                   /* 0x258  48 */
+        struct {
+            unsigned char SavedApcStateFill[43];            /* 0x258  43 */
+            unsigned char WaitReason;                       /* 0x283  1 */
+            char SuspendCount;                              /* 0x284  1 */
+            char Saturation;                                /* 0x285  1 */
+            unsigned short SListFaultCount;                 /* 0x286  2 */
+        };                                                  /* 0x258  48 */
+    };                                                      /* 0x258  48 */
+
+    /* --- cacheline 10 boundary (640 bytes) --- */
+    union {
+        struct _KAPC SchedulerApc;                          /* 0x288  88 */
+        struct {
+            unsigned char SchedulerApcFill1[3];             /* 0x288  3 */
+            unsigned char QuantumReset;                     /* 0x28b  1 */
+        };                                                  /* 0x288  4 */
+        struct {
+            unsigned char SchedulerApcFill2[4];             /* 0x288  4 */
+            unsigned long KernelTime;                       /* 0x28c  4 */
+        };                                                  /* 0x288  8 */
+        struct {
+            unsigned char SchedulerApcFill3[64];            /* 0x288  64 */
+            struct _KPRCB* WaitPrcb;                        /* 0x2c8  8 */
+        };                                                  /* 0x288  72 */
+        struct {
+            unsigned char SchedulerApcFill4[72];            /* 0x288  72 */
+            void* LegoData;                                 /* 0x2d0  8 */
+        };                                                  /* 0x288  80 */
+        struct {
+            unsigned char SchedulerApcFill5[83];            /* 0x288  83 */
+            unsigned char CallbackNestingLevel;             /* 0x2db  1 */
+            unsigned long UserTime;                         /* 0x2dc  4 */
+        };                                                  /* 0x288  88 */
+    };                                                      /* 0x288  88 */
+
+    /* --- cacheline 11 boundary (704 bytes) --- */
+    struct _KEVENT SuspendEvent;                            /* 0x2e0  24 */
+    struct _LIST_ENTRY ThreadListEntry;                     /* 0x2f8  16 */
+
+    /* --- cacheline 12 boundary (768 bytes) --- */
+    struct _LIST_ENTRY MutantListHead;                      /* 0x308  16 */
+    union {
+        struct {
+            volatile unsigned char AbWaitEntryCount;        /* 0x318  1 */
+            volatile unsigned char AbOwnedEntryCount;       /* 0x319  1 */
+        };                                                  /* 0x318  2 */
+        volatile unsigned short AbEntryCountValue;          /* 0x318  2 */
+    };                                                      /* 0x318  2 */
+    union {
+        unsigned char FreezeFlags;                          /* 0x31a  1 */
+        struct {
+            unsigned char FreezeCount2 : 1;                 /* 0x31a:0  1 */
+            unsigned char FreezeNormal : 1;                 /* 0x31a:1  1 */
+            unsigned char FreezeDeep : 1;                   /* 0x31a:2  1 */
+        };                                                  /* 0x31a  1 */
+    };                                                      /* 0x31a  1 */
+    char WobPriority;                                       /* 0x31b  1 */
+    unsigned long SecureThreadCookie;                       /* 0x31c  4 */
+    void* SchedulerSharedSystemSlot;                        /* 0x320  8 */
+    struct _SINGLE_LIST_ENTRY PropagateBoostsEntry;         /* 0x328  8 */
+    struct _SINGLE_LIST_ENTRY IoSelfBoostsEntry;            /* 0x330  8 */
+    unsigned char PriorityFloorCounts[32];                  /* 0x338  32 */
+
+    /* --- cacheline 13 boundary (832 bytes) --- */
+    unsigned long PriorityFloorSummary;                     /* 0x358  4 */
+    volatile long AbCompletedIoBoostCount;                  /* 0x35c  4 */
+    volatile long AbCompletedIoQoSBoostCount;               /* 0x360  4 */
+    volatile short KeReferenceCount;                        /* 0x364  2 */
+    char DecayBoost;                                        /* 0x366  1 */
+    unsigned char Spare6;                                   /* 0x367  1 */
+    unsigned long ForegroundLossTime;                       /* 0x368  4 */
+    /* 4 bytes padding */
+    union {
+        struct _LIST_ENTRY GlobalForegroundListEntry;       /* 0x370  16 */
+        struct {
+            struct _SINGLE_LIST_ENTRY ForegroundDpcStackListEntry;  /* 0x370  8 */
+            unsigned __int64 InGlobalForegroundList;        /* 0x378  8 */
+        };                                                  /* 0x370  16 */
+    };                                                      /* 0x370  16 */
+
+    /* --- cacheline 14 boundary (896 bytes) --- */
+    __int64 ReadOperationCount;                             /* 0x380  8 */
+    __int64 WriteOperationCount;                            /* 0x388  8 */
+    __int64 OtherOperationCount;                            /* 0x390  8 */
+    __int64 ReadTransferCount;                              /* 0x398  8 */
+    __int64 WriteTransferCount;                             /* 0x3a0  8 */
+    __int64 OtherTransferCount;                             /* 0x3a8  8 */
+    struct _KSCB* QueuedScb;                                /* 0x3b0  8 */
+    volatile unsigned long ThreadTimerDelay;                /* 0x3b8  4 */
+    unsigned short Spare26;                                 /* 0x3bc  2 */
+    volatile unsigned char PpmPolicy;                       /* 0x3be  1 */
+    unsigned char Spare27;                                  /* 0x3bf  1 */
+
+    /* --- cacheline 15 boundary (960 bytes) --- */
+    unsigned __int64 TracingPrivate[1];                     /* 0x3c0  8 */
+    void* SchedulerAssist;                                  /* 0x3c8  8 */
+    void* AbWaitObject;                                     /* 0x3d0  8 */
+    unsigned long ReservedPreviousReadyTimeValue;           /* 0x3d8  4 */
+    /* 4 bytes padding */
+    unsigned __int64 KernelWaitTime;                        /* 0x3e0  8 */
+    unsigned __int64 UserWaitTime;                          /* 0x3e8  8 */
+    union {
+        struct _LIST_ENTRY GlobalUpdateVpThreadPriorityListEntry;  /* 0x3f0  16 */
+        struct {
+            struct _SINGLE_LIST_ENTRY UpdateVpThreadPriorityDpcStackListEntry;  /* 0x3f0  8 */
+            unsigned __int64 InGlobalUpdateVpThreadPriorityList;  /* 0x3f8  8 */
+        };                                                  /* 0x3f0  16 */
+    };                                                      /* 0x3f0  16 */
+
+    /* --- cacheline 16 boundary (1024 bytes) --- */
+    long SchedulerAssistPriorityFloor;                      /* 0x400  4 */
+    long RealtimePriorityFloor;                             /* 0x404  4 */
+    void* KernelShadowStack;                                /* 0x408  8 */
+    void* KernelShadowStackInitial;                         /* 0x410  8 */
+    void* KernelShadowStackBase;                            /* 0x418  8 */
+    union _KERNEL_SHADOW_STACK_LIMIT KernelShadowStackLimit;  /* 0x420  8 */
+    unsigned __int64 ExtendedFeatureDisableMask;            /* 0x428  8 */
+    unsigned __int64 HgsFeedbackStartTime;                  /* 0x430  8 */
+    unsigned __int64 HgsFeedbackCycles;                     /* 0x438  8 */
+
+    /* --- cacheline 17 boundary (1088 bytes) --- */
+    unsigned long HgsInvalidFeedbackCount;                  /* 0x440  4 */
+    unsigned long HgsLowerPerfClassFeedbackCount;           /* 0x444  4 */
+    unsigned long HgsHigherPerfClassFeedbackCount;          /* 0x448  4 */
+    volatile unsigned long ModeHistory;                     /* 0x44c  4 */
+    struct _SINGLE_LIST_ENTRY SystemAffinityTokenListHead;  /* 0x450  8 */
+    void* IptSaveArea;                                      /* 0x458  8 */
+    unsigned char ResourceIndex;                            /* 0x460  1 */
+    volatile unsigned char CoreIsolationReasons;            /* 0x461  1 */
+    unsigned char BamQosLevelFromAssistPage;                /* 0x462  1 */
+    unsigned char SecureCallCoreIsolationCount;             /* 0x463  1 */
+    unsigned long SchedulerSharedOffset;                    /* 0x464  4 */
+    struct _KSWAPPABLE_PAGE* SchedulerSharedSwappablePage;  /* 0x468  8 */
+    struct _KLOCK_ENTRIES* KernelAbEntries;                 /* 0x470  8 */
+    struct _KLOCK_ENTRIES* UserAbEntries;                   /* 0x478  8 */
+
+    /* --- cacheline 18 boundary (1152 bytes) --- */
+    unsigned __int64 KcsanThread;                           /* 0x480  8 */
+    unsigned long SchedulerAssistYieldCounter;              /* 0x488  4 */
+    unsigned long SchedulerAssistYieldBoostCount;           /* 0x48c  4 */
+    __int64 SchedulerAssistLastYieldBoostTime;              /* 0x490  8 */
+    unsigned __int64 Padding[5];                            /* 0x498  40 */
+};

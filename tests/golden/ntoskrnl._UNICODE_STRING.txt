@@ -1,0 +1,6 @@
+struct _UNICODE_STRING {
+    unsigned short Length;                                  /* 0x0  2 */
+    unsigned short MaximumLength;                           /* 0x2  2 */
+    /* 4 bytes padding */
+    wchar_t* Buffer;                                        /* 0x8  8 */
+};

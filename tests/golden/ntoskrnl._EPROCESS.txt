@@ -1,0 +1,449 @@
+struct _EPROCESS {
+    struct _KPROCESS Pcb;                                   /* 0x0  456 */
+
+    /* --- cacheline 7 boundary (448 bytes) --- */
+    struct _EX_PUSH_LOCK ProcessLock;                       /* 0x1c8  8 */
+    void* UniqueProcessId;                                  /* 0x1d0  8 */
+    struct _LIST_ENTRY ActiveProcessLinks;                  /* 0x1d8  16 */
+    struct _EX_RUNDOWN_REF RundownProtect;                  /* 0x1e8  8 */
+    union {
+        unsigned long Flags2;                               /* 0x1f0  4 */
+        struct {
+            unsigned long JobNotReallyActive : 1;           /* 0x1f0:0  4 */
+            unsigned long AccountingFolded : 1;             /* 0x1f0:1  4 */
+            unsigned long NewProcessReported : 1;           /* 0x1f0:2  4 */
+            unsigned long ExitProcessReported : 1;          /* 0x1f0:3  4 */
+            unsigned long ReportCommitChanges : 1;          /* 0x1f0:4  4 */
+            unsigned long LastReportMemory : 1;             /* 0x1f0:5  4 */
+            unsigned long ForceWakeCharge : 1;              /* 0x1f0:6  4 */
+            unsigned long CrossSessionCreate : 1;           /* 0x1f0:7  4 */
+            unsigned long NeedsHandleRundown : 1;           /* 0x1f0:8  4 */
+            unsigned long RefTraceEnabled : 1;              /* 0x1f0:9  4 */
+            unsigned long PicoCreated : 1;                  /* 0x1f0:10  4 */
+            unsigned long EmptyJobEvaluated : 1;            /* 0x1f0:11  4 */
+            unsigned long DefaultPagePriority : 3;          /* 0x1f0:12  4 */
+            unsigned long PrimaryTokenFrozen : 1;           /* 0x1f0:15  4 */
+            unsigned long ProcessVerifierTarget : 1;        /* 0x1f0:16  4 */
+            unsigned long RestrictSetThreadContext : 1;     /* 0x1f0:17  4 */
+            unsigned long AffinityPermanent : 1;            /* 0x1f0:18  4 */
+            unsigned long AffinityUpdateEnable : 1;         /* 0x1f0:19  4 */
+            unsigned long PropagateNode : 1;                /* 0x1f0:20  4 */
+            unsigned long ExplicitAffinity : 1;             /* 0x1f0:21  4 */
+            unsigned long Flags2Available1 : 2;             /* 0x1f0:22  4 */
+            unsigned long EnableReadVmLogging : 1;          /* 0x1f0:24  4 */
+            unsigned long EnableWriteVmLogging : 1;         /* 0x1f0:25  4 */
+            unsigned long FatalAccessTerminationRequested : 1;  /* 0x1f0:26  4 */
+            unsigned long DisableSystemAllowedCpuSet : 1;   /* 0x1f0:27  4 */
+            unsigned long Flags2Available2 : 3;             /* 0x1f0:28  4 */
+            unsigned long InPrivate : 1;                    /* 0x1f0:31  4 */
+        };                                                  /* 0x1f0  4 */
+    };                                                      /* 0x1f0  4 */
+    union {
+        unsigned long Flags;                                /* 0x1f4  4 */
+        struct {
+            unsigned long CreateReported : 1;               /* 0x1f4:0  4 */
+            unsigned long NoDebugInherit : 1;               /* 0x1f4:1  4 */
+            unsigned long ProcessExiting : 1;               /* 0x1f4:2  4 */
+            unsigned long ProcessDelete : 1;                /* 0x1f4:3  4 */
+            unsigned long ManageExecutableMemoryWrites : 1;  /* 0x1f4:4  4 */
+            unsigned long VmDeleted : 1;                    /* 0x1f4:5  4 */
+            unsigned long OutswapEnabled : 1;               /* 0x1f4:6  4 */
+            unsigned long Outswapped : 1;                   /* 0x1f4:7  4 */
+            unsigned long FailFastOnCommitFail : 1;         /* 0x1f4:8  4 */
+            unsigned long Wow64VaSpace4Gb : 1;              /* 0x1f4:9  4 */
+            unsigned long AddressSpaceInitialized : 2;      /* 0x1f4:10  4 */
+            unsigned long SetTimerResolution : 1;           /* 0x1f4:12  4 */
+            unsigned long BreakOnTermination : 1;           /* 0x1f4:13  4 */
+            unsigned long DeprioritizeViews : 1;            /* 0x1f4:14  4 */
+            unsigned long WriteWatch : 1;                   /* 0x1f4:15  4 */
+            unsigned long ProcessInSession : 1;             /* 0x1f4:16  4 */
+            unsigned long OverrideAddressSpace : 1;         /* 0x1f4:17  4 */
+            unsigned long HasAddressSpace : 1;              /* 0x1f4:18  4 */
+            unsigned long LaunchPrefetched : 1;             /* 0x1f4:19  4 */
+            unsigned long Reserved : 1;                     /* 0x1f4:20  4 */
+            unsigned long VmTopDown : 1;                    /* 0x1f4:21  4 */
+            unsigned long ImageNotifyDone : 1;              /* 0x1f4:22  4 */
+            unsigned long PdeUpdateNeeded : 1;              /* 0x1f4:23  4 */
+            unsigned long VdmAllowed : 1;                   /* 0x1f4:24  4 */
+            unsigned long ProcessRundown : 1;               /* 0x1f4:25  4 */
+            unsigned long ProcessInserted : 1;              /* 0x1f4:26  4 */
+            unsigned long DefaultIoPriority : 3;            /* 0x1f4:27  4 */
+            unsigned long ProcessSelfDelete : 1;            /* 0x1f4:30  4 */
+            unsigned long SetTimerResolutionLink : 1;       /* 0x1f4:31  4 */
+        };                                                  /* 0x1f4  4 */
+    };                                                      /* 0x1f4  4 */
+    union _LARGE_INTEGER CreateTime;                        /* 0x1f8  8 */
+
+    /* --- cacheline 8 boundary (512 bytes) --- */
+    unsigned __int64 ProcessQuotaUsage[2];                  /* 0x200  16 */
+    unsigned __int64 ProcessQuotaPeak[2];                   /* 0x210  16 */
+    unsigned __int64 PeakVirtualSize;                       /* 0x220  8 */
+    unsigned __int64 VirtualSize;                           /* 0x228  8 */
+    struct _LIST_ENTRY SessionProcessLinks;                 /* 0x230  16 */
+
+    /* --- cacheline 9 boundary (576 bytes) --- */
+    union {
+        void* ExceptionPortData;                            /* 0x240  8 */
+        unsigned __int64 ExceptionPortValue;                /* 0x240  8 */
+        unsigned __int64 ExceptionPortState : 3;            /* 0x240:0  8 */
+    };                                                      /* 0x240  8 */
+    struct _EX_FAST_REF Token;                              /* 0x248  8 */
+    unsigned __int64 MmReserved;                            /* 0x250  8 */
+    struct _EX_PUSH_LOCK AddressCreationLock;               /* 0x258  8 */
+    struct _EX_PUSH_LOCK PageTableCommitmentLock;           /* 0x260  8 */
+    struct _ETHREAD* RotateInProgress;                      /* 0x268  8 */
+    struct _ETHREAD* ForkInProgress;                        /* 0x270  8 */
+    struct _EJOB* CommitChargeJob;                          /* 0x278  8 */
+
+    /* --- cacheline 10 boundary (640 bytes) --- */
+    struct _RTL_AVL_TREE CloneRoot;                         /* 0x280  8 */
+    volatile unsigned __int64 NumberOfPrivatePages;         /* 0x288  8 */
+    volatile unsigned __int64 MmReserved2;                  /* 0x290  8 */
+    void* Win32Process;                                     /* 0x298  8 */
+    struct _EJOB* Job;                                      /* 0x2a0  8 */
+    void* SectionObject;                                    /* 0x2a8  8 */
+    void* SectionBaseAddress;                               /* 0x2b0  8 */
+    unsigned long Cookie;                                   /* 0x2b8  4 */
+    /* 4 bytes padding */
+
+    /* --- cacheline 11 boundary (704 bytes) --- */
+    struct _PAGEFAULT_HISTORY* WorkingSetWatch;             /* 0x2c0  8 */
+    void* Win32WindowStation;                               /* 0x2c8  8 */
+    void* InheritedFromUniqueProcessId;                     /* 0x2d0  8 */
+    volatile unsigned __int64 OwnerProcessId;               /* 0x2d8  8 */
+    struct _PEB* Peb;                                       /* 0x2e0  8 */
+    struct _PSP_SESSION_SPACE* Session;                     /* 0x2e8  8 */
+    void* Spare1;                                           /* 0x2f0  8 */
+    struct _EPROCESS_QUOTA_BLOCK* QuotaBlock;               /* 0x2f8  8 */
+
+    /* --- cacheline 12 boundary (768 bytes) --- */
+    struct _HANDLE_TABLE* ObjectTable;                      /* 0x300  8 */
+    void* DebugPort;                                        /* 0x308  8 */
+    struct _EWOW64PROCESS* WoW64Process;                    /* 0x310  8 */
+    struct _EX_FAST_REF DeviceMap;                          /* 0x318  8 */
+    void* EtwDataSource;                                    /* 0x320  8 */
+    unsigned __int64 PageDirectoryPte;                      /* 0x328  8 */
+    struct _FILE_OBJECT* ImageFilePointer;                  /* 0x330  8 */
+    unsigned char ImageFileName[15];                        /* 0x338  15 */
+
+    /* --- cacheline 13 boundary (832 bytes) --- */
+    unsigned char PriorityClass;                            /* 0x347  1 */
+    void* SecurityPort;                                     /* 0x348  8 */
+    struct _SE_AUDIT_PROCESS_CREATION_INFO SeAuditProcessCreationInfo;  /* 0x350  8 */
+    struct _LIST_ENTRY JobLinks;                            /* 0x358  16 */
+    void* HighestUserAddress;                               /* 0x368  8 */
+    struct _LIST_ENTRY ThreadListHead;                      /* 0x370  16 */
+
+    /* --- cacheline 14 boundary (896 bytes) --- */
+    volatile unsigned long ActiveThreads;                   /* 0x380  4 */
+    unsigned long ImagePathHash;                            /* 0x384  4 */
+    unsigned long DefaultHardErrorProcessing;               /* 0x388  4 */
+    long LastThreadExitStatus;                              /* 0x38c  4 */
+    struct _EX_FAST_REF PrefetchTrace;                      /* 0x390  8 */
+    void* LockedPagesList;                                  /* 0x398  8 */
+    union _LARGE_INTEGER ReadOperationCount;                /* 0x3a0  8 */
+    union _LARGE_INTEGER WriteOperationCount;               /* 0x3a8  8 */
+    union _LARGE_INTEGER OtherOperationCount;               /* 0x3b0  8 */
+    union _LARGE_INTEGER ReadTransferCount;                 /* 0x3b8  8 */
+
+    /* --- cacheline 15 boundary (960 bytes) --- */
+    union _LARGE_INTEGER WriteTransferCount;                /* 0x3c0  8 */
+    union _LARGE_INTEGER OtherTransferCount;                /* 0x3c8  8 */
+    unsigned __int64 CommitChargeLimit;                     /* 0x3d0  8 */
+    volatile unsigned __int64 CommitCharge;                 /* 0x3d8  8 */
+    volatile unsigned __int64 CommitChargePeak;             /* 0x3e0  8 */
+    /* 24 bytes padding */
+
+    /* --- cacheline 16 boundary (1024 bytes) --- */
+    struct _MMSUPPORT_FULL Vm;                              /* 0x400  320 */
+
+    /* --- cacheline 21 boundary (1344 bytes) --- */
+    struct _LIST_ENTRY MmProcessLinks;                      /* 0x540  16 */
+    volatile unsigned long ModifiedPageCount;               /* 0x550  4 */
+    long ExitStatus;                                        /* 0x554  4 */
+    struct _RTL_AVL_TREE VadRoot;                           /* 0x558  8 */
+    void* VadHint;                                          /* 0x560  8 */
+    unsigned __int64 VadCount;                              /* 0x568  8 */
+    volatile unsigned __int64 VadPhysicalPages;             /* 0x570  8 */
+    unsigned __int64 VadPhysicalPagesLimit;                 /* 0x578  8 */
+
+    /* --- cacheline 22 boundary (1408 bytes) --- */
+    struct _ALPC_PROCESS_CONTEXT AlpcContext;               /* 0x580  32 */
+    struct _LIST_ENTRY TimerResolutionLink;                 /* 0x5a0  16 */
+    struct _PO_DIAG_STACK_RECORD* TimerResolutionStackRecord;  /* 0x5b0  8 */
+    unsigned long RequestedTimerResolution;                 /* 0x5b8  4 */
+    unsigned long SmallestTimerResolution;                  /* 0x5bc  4 */
+
+    /* --- cacheline 23 boundary (1472 bytes) --- */
+    union _LARGE_INTEGER ExitTime;                          /* 0x5c0  8 */
+    struct _INVERTED_FUNCTION_TABLE_KERNEL_MODE* InvertedFunctionTable;  /* 0x5c8  8 */
+    struct _EX_PUSH_LOCK InvertedFunctionTableLock;         /* 0x5d0  8 */
+    unsigned long ActiveThreadsHighWatermark;               /* 0x5d8  4 */
+    unsigned long LargePrivateVadCount;                     /* 0x5dc  4 */
+    struct _EX_PUSH_LOCK ThreadListLock;                    /* 0x5e0  8 */
+    void* WnfContext;                                       /* 0x5e8  8 */
+    struct _EJOB* ServerSilo;                               /* 0x5f0  8 */
+    unsigned char SignatureLevel;                           /* 0x5f8  1 */
+    unsigned char SectionSignatureLevel;                    /* 0x5f9  1 */
+    struct _PS_PROTECTION Protection;                       /* 0x5fa  1 */
+    unsigned char HangCount : 3;                            /* 0x5fb:0  1 */
+    unsigned char GhostCount : 3;                           /* 0x5fb:3  1 */
+    unsigned char PrefilterException : 1;                   /* 0x5fb:6  1 */
+    union {
+        unsigned long Flags3;                               /* 0x5fc  4 */
+        struct {
+            unsigned long Minimal : 1;                      /* 0x5fc:0  4 */
+            unsigned long ReplacingPageRoot : 1;            /* 0x5fc:1  4 */
+            unsigned long Crashed : 1;                      /* 0x5fc:2  4 */
+            unsigned long JobVadsAreTracked : 1;            /* 0x5fc:3  4 */
+            unsigned long VadTrackingDisabled : 1;          /* 0x5fc:4  4 */
+            unsigned long AuxiliaryProcess : 1;             /* 0x5fc:5  4 */
+            unsigned long SubsystemProcess : 1;             /* 0x5fc:6  4 */
+            unsigned long IndirectCpuSets : 1;              /* 0x5fc:7  4 */
+            unsigned long RelinquishedCommit : 1;           /* 0x5fc:8  4 */
+            unsigned long HighGraphicsPriority : 1;         /* 0x5fc:9  4 */
+            unsigned long CommitFailLogged : 1;             /* 0x5fc:10  4 */
+            unsigned long ReserveFailLogged : 1;            /* 0x5fc:11  4 */
+            unsigned long SystemProcess : 1;                /* 0x5fc:12  4 */
+            unsigned long AllImagesAtBasePristineBase : 1;  /* 0x5fc:13  4 */
+            unsigned long AddressPolicyFrozen : 1;          /* 0x5fc:14  4 */
+            unsigned long ProcessFirstResume : 1;           /* 0x5fc:15  4 */
+            unsigned long ForegroundExternal : 1;           /* 0x5fc:16  4 */
+            unsigned long ForegroundSystem : 1;             /* 0x5fc:17  4 */
+            unsigned long HighMemoryPriority : 1;           /* 0x5fc:18  4 */
+            unsigned long EnableProcessSuspendResumeLogging : 1;  /* 0x5fc:19  4 */
+            unsigned long EnableThreadSuspendResumeLogging : 1;  /* 0x5fc:20  4 */
+            unsigned long SecurityDomainChanged : 1;        /* 0x5fc:21  4 */
+            unsigned long SecurityFreezeComplete : 1;       /* 0x5fc:22  4 */
+            unsigned long VmProcessorHost : 1;              /* 0x5fc:23  4 */
+            unsigned long VmProcessorHostTransition : 1;    /* 0x5fc:24  4 */
+            unsigned long AltSyscall : 1;                   /* 0x5fc:25  4 */
+            unsigned long TimerResolutionIgnore : 1;        /* 0x5fc:26  4 */
+            unsigned long DisallowUserTerminate : 1;        /* 0x5fc:27  4 */
+            unsigned long EnableProcessRemoteExecProtectVmLogging : 1;  /* 0x5fc:28  4 */
+            unsigned long EnableProcessLocalExecProtectVmLogging : 1;  /* 0x5fc:29  4 */
+            unsigned long MemoryCompressionProcess : 1;     /* 0x5fc:30  4 */
+            unsigned long EnableProcessImpersonationLogging : 1;  /* 0x5fc:31  4 */
+        };                                                  /* 0x5fc  4 */
+    };                                                      /* 0x5fc  4 */
+
+    /* --- cacheline 24 boundary (1536 bytes) --- */
+    long DeviceAsid;                                        /* 0x600  4 */
+    /* 4 bytes padding */
+    void* SvmData;                                          /* 0x608  8 */
+    struct _EX_PUSH_LOCK SvmProcessLock;                    /* 0x610  8 */
+    unsigned __int64 SvmLock;                               /* 0x618  8 */
+    struct _LIST_ENTRY SvmProcessDeviceListHead;            /* 0x620  16 */
+    unsigned __int64 LastFreezeInterruptTime;               /* 0x630  8 */
+    struct _PROCESS_DISK_COUNTERS* DiskCounters;            /* 0x638  8 */
+
+    /* --- cacheline 25 boundary (1600 bytes) --- */
+    void* PicoContext;                                      /* 0x640  8 */
+    void* EnclaveTable;                                     /* 0x648  8 */
+    unsigned __int64 EnclaveNumber;                         /* 0x650  8 */
+    struct _EX_PUSH_LOCK EnclaveLock;                       /* 0x658  8 */
+    unsigned long HighPriorityFaultsAllowed;                /* 0x660  4 */
+    /* 4 bytes padding */
+    struct _PO_PROCESS_ENERGY_CONTEXT* EnergyContext;       /* 0x668  8 */
+    void* VmContext;                                        /* 0x670  8 */
+    unsigned __int64 SequenceNumber;                        /* 0x678  8 */
+
+    /* --- cacheline 26 boundary (1664 bytes) --- */
+    unsigned __int64 CreateInterruptTime;                   /* 0x680  8 */
+    unsigned __int64 CreateUnbiasedInterruptTime;           /* 0x688  8 */
+    unsigned __int64 TotalUnbiasedFrozenTime;               /* 0x690  8 */
+    unsigned __int64 LastAppStateUpdateTime;                /* 0x698  8 */
+    unsigned __int64 LastAppStateUptime : 61;               /* 0x6a0:0  8 */
+    unsigned __int64 LastAppState : 3;                      /* 0x6a0:61  8 */
+    volatile unsigned __int64 SharedCommitCharge;           /* 0x6a8  8 */
+    struct _EX_PUSH_LOCK SharedCommitLock;                  /* 0x6b0  8 */
+    struct _LIST_ENTRY SharedCommitLinks;                   /* 0x6b8  16 */
+
+    /* --- cacheline 27 boundary (1728 bytes) --- */
+    union {
+        struct {
+            unsigned __int64 AllowedCpuSets;                /* 0x6c8  8 */
+            unsigned __int64 DefaultCpuSets;                /* 0x6d0  8 */
+        };                                                  /* 0x6c8  16 */
+        struct {
+            unsigned __int64* AllowedCpuSetsIndirect;       /* 0x6c8  8 */
+            unsigned __int64* DefaultCpuSetsIndirect;       /* 0x6d0  8 */
+        };                                                  /* 0x6c8  16 */
+    };                                                      /* 0x6c8  16 */
+    void* DiskIoAttribution;                                /* 0x6d8  8 */
+    void* DxgProcess;                                       /* 0x6e0  8 */
+    unsigned long Win32KFilterSet;                          /* 0x6e8  4 */
+    unsigned short Machine;                                 /* 0x6ec  2 */
+    unsigned char MmSlabIdentity;                           /* 0x6ee  1 */
+    unsigned char Spare0;                                   /* 0x6ef  1 */
+    volatile union _PS_INTERLOCKED_TIMER_DELAY_VALUES ProcessTimerDelay;  /* 0x6f0  8 */
+    volatile unsigned long KTimerSets;                      /* 0x6f8  4 */
+    volatile unsigned long KTimer2Sets;                     /* 0x6fc  4 */
+
+    /* --- cacheline 28 boundary (1792 bytes) --- */
+    volatile unsigned long ThreadTimerSets;                 /* 0x700  4 */
+    /* 4 bytes padding */
+    unsigned __int64 VirtualTimerListLock;                  /* 0x708  8 */
+    struct _LIST_ENTRY VirtualTimerListHead;                /* 0x710  16 */
+    union {
+        struct _WNF_STATE_NAME WakeChannel;                 /* 0x720  8 */
+        struct _PS_PROCESS_WAKE_INFORMATION WakeInfo;       /* 0x720  48 */
+    };                                                      /* 0x720  48 */
+
+    /* --- cacheline 29 boundary (1856 bytes) --- */
+    union {
+        unsigned long MitigationFlags;                      /* 0x750  4 */
+        struct {
+            unsigned long ControlFlowGuardEnabled : 1;      /* 0x750:0  4 */
+            unsigned long ControlFlowGuardExportSuppressionEnabled : 1;  /* 0x750:1  4 */
+            unsigned long ControlFlowGuardStrict : 1;       /* 0x750:2  4 */
+            unsigned long DisallowStrippedImages : 1;       /* 0x750:3  4 */
+            unsigned long ForceRelocateImages : 1;          /* 0x750:4  4 */
+            unsigned long HighEntropyASLREnabled : 1;       /* 0x750:5  4 */
+            unsigned long StackRandomizationDisabled : 1;   /* 0x750:6  4 */
+            unsigned long ExtensionPointDisable : 1;        /* 0x750:7  4 */
+            unsigned long DisableDynamicCode : 1;           /* 0x750:8  4 */
+            unsigned long DisableDynamicCodeAllowOptOut : 1;  /* 0x750:9  4 */
+            unsigned long DisableDynamicCodeAllowRemoteDowngrade : 1;  /* 0x750:10  4 */
+            unsigned long AuditDisableDynamicCode : 1;      /* 0x750:11  4 */
+            unsigned long DisallowWin32kSystemCalls : 1;    /* 0x750:12  4 */
+            unsigned long AuditDisallowWin32kSystemCalls : 1;  /* 0x750:13  4 */
+            unsigned long EnableFilteredWin32kAPIs : 1;     /* 0x750:14  4 */
+            unsigned long AuditFilteredWin32kAPIs : 1;      /* 0x750:15  4 */
+            unsigned long DisableNonSystemFonts : 1;        /* 0x750:16  4 */
+            unsigned long AuditNonSystemFontLoading : 1;    /* 0x750:17  4 */
+            unsigned long PreferSystem32Images : 1;         /* 0x750:18  4 */
+            unsigned long ProhibitRemoteImageMap : 1;       /* 0x750:19  4 */
+            unsigned long AuditProhibitRemoteImageMap : 1;  /* 0x750:20  4 */
+            unsigned long ProhibitLowILImageMap : 1;        /* 0x750:21  4 */
+            unsigned long AuditProhibitLowILImageMap : 1;   /* 0x750:22  4 */
+            unsigned long SignatureMitigationOptIn : 1;     /* 0x750:23  4 */
+            unsigned long AuditBlockNonMicrosoftBinaries : 1;  /* 0x750:24  4 */
+            unsigned long AuditBlockNonMicrosoftBinariesAllowStore : 1;  /* 0x750:25  4 */
+            unsigned long LoaderIntegrityContinuityEnabled : 1;  /* 0x750:26  4 */
+            unsigned long AuditLoaderIntegrityContinuity : 1;  /* 0x750:27  4 */
+            unsigned long EnableModuleTamperingProtection : 1;  /* 0x750:28  4 */
+            unsigned long EnableModuleTamperingProtectionNoInherit : 1;  /* 0x750:29  4 */
+            unsigned long RestrictIndirectBranchPrediction : 1;  /* 0x750:30  4 */
+            unsigned long IsolateSecurityDomain : 1;        /* 0x750:31  4 */
+        } MitigationFlagsValues;                            /* 0x750  4 */
+    };                                                      /* 0x750  4 */
+    union {
+        unsigned long MitigationFlags2;                     /* 0x754  4 */
+        struct {
+            unsigned long EnableExportAddressFilter : 1;    /* 0x754:0  4 */
+            unsigned long AuditExportAddressFilter : 1;     /* 0x754:1  4 */
+            unsigned long EnableExportAddressFilterPlus : 1;  /* 0x754:2  4 */
+            unsigned long AuditExportAddressFilterPlus : 1;  /* 0x754:3  4 */
+            unsigned long EnableRopStackPivot : 1;          /* 0x754:4  4 */
+            unsigned long AuditRopStackPivot : 1;           /* 0x754:5  4 */
+            unsigned long EnableRopCallerCheck : 1;         /* 0x754:6  4 */
+            unsigned long AuditRopCallerCheck : 1;          /* 0x754:7  4 */
+            unsigned long EnableRopSimExec : 1;             /* 0x754:8  4 */
+            unsigned long AuditRopSimExec : 1;              /* 0x754:9  4 */
+            unsigned long EnableImportAddressFilter : 1;    /* 0x754:10  4 */
+            unsigned long AuditImportAddressFilter : 1;     /* 0x754:11  4 */
+            unsigned long DisablePageCombine : 1;           /* 0x754:12  4 */
+            unsigned long SpeculativeStoreBypassDisable : 1;  /* 0x754:13  4 */
+            unsigned long CetUserShadowStacks : 1;          /* 0x754:14  4 */
+            unsigned long AuditCetUserShadowStacks : 1;     /* 0x754:15  4 */
+            unsigned long AuditCetUserShadowStacksLogged : 1;  /* 0x754:16  4 */
+            unsigned long UserCetSetContextIpValidation : 1;  /* 0x754:17  4 */
+            unsigned long AuditUserCetSetContextIpValidation : 1;  /* 0x754:18  4 */
+            unsigned long AuditUserCetSetContextIpValidationLogged : 1;  /* 0x754:19  4 */
+            unsigned long CetUserShadowStacksStrictMode : 1;  /* 0x754:20  4 */
+            unsigned long BlockNonCetBinaries : 1;          /* 0x754:21  4 */
+            unsigned long BlockNonCetBinariesNonEhcont : 1;  /* 0x754:22  4 */
+            unsigned long AuditBlockNonCetBinaries : 1;     /* 0x754:23  4 */
+            unsigned long AuditBlockNonCetBinariesLogged : 1;  /* 0x754:24  4 */
+            unsigned long XtendedControlFlowGuard_Deprecated : 1;  /* 0x754:25  4 */
+            unsigned long AuditXtendedControlFlowGuard_Deprecated : 1;  /* 0x754:26  4 */
+            unsigned long PointerAuthUserIp : 1;            /* 0x754:27  4 */
+            unsigned long AuditPointerAuthUserIp : 1;       /* 0x754:28  4 */
+            unsigned long AuditPointerAuthUserIpLogged : 1;  /* 0x754:29  4 */
+            unsigned long CetDynamicApisOutOfProcOnly : 1;  /* 0x754:30  4 */
+            unsigned long UserCetSetContextIpValidationRelaxedMode : 1;  /* 0x754:31  4 */
+        } MitigationFlags2Values;                           /* 0x754  4 */
+    };                                                      /* 0x754  4 */
+    void* PartitionObject;                                  /* 0x758  8 */
+    unsigned __int64 SecurityDomain;                        /* 0x760  8 */
+    unsigned __int64 ParentSecurityDomain;                  /* 0x768  8 */
+    void* CoverageSamplerContext;                           /* 0x770  8 */
+    void* MmHotPatchContext;                                /* 0x778  8 */
+
+    /* --- cacheline 30 boundary (1920 bytes) --- */
+    struct _RTL_AVL_TREE DynamicEHContinuationTargetsTree;  /* 0x780  8 */
+    struct _EX_PUSH_LOCK DynamicEHContinuationTargetsLock;  /* 0x788  8 */
+    struct _PS_DYNAMIC_ENFORCED_ADDRESS_RANGES DynamicEnforcedCetCompatibleRanges;  /* 0x790  16 */
+    unsigned long DisabledComponentFlags;                   /* 0x7a0  4 */
+    volatile long PageCombineSequence;                      /* 0x7a4  4 */
+    struct _EX_PUSH_LOCK EnableOptionalXStateFeaturesLock;  /* 0x7a8  8 */
+    unsigned long* PathRedirectionHashes;                   /* 0x7b0  8 */
+    struct _PS_SYSCALL_PROVIDER* SyscallProvider;           /* 0x7b8  8 */
+
+    /* --- cacheline 31 boundary (1984 bytes) --- */
+    struct _LIST_ENTRY SyscallProviderProcessLinks;         /* 0x7c0  16 */
+    struct _PSP_SYSCALL_PROVIDER_DISPATCH_CONTEXT SyscallProviderDispatchContext;  /* 0x7d0  8 */
+    union {
+        unsigned long MitigationFlags3;                     /* 0x7d8  4 */
+        struct {
+            unsigned long RestrictCoreSharing : 1;          /* 0x7d8:0  4 */
+            unsigned long DisallowFsctlSystemCalls : 1;     /* 0x7d8:1  4 */
+            unsigned long AuditDisallowFsctlSystemCalls : 1;  /* 0x7d8:2  4 */
+            unsigned long MitigationFlags3Spare : 29;       /* 0x7d8:3  4 */
+        } MitigationFlags3Values;                           /* 0x7d8  4 */
+    };                                                      /* 0x7d8  4 */
+    union {
+        unsigned long Flags4;                               /* 0x7dc  4 */
+        struct {
+            unsigned long ThreadWasActive : 1;              /* 0x7dc:0  4 */
+            unsigned long MinimalTerminate : 1;             /* 0x7dc:1  4 */
+            unsigned long ImageExpansionDisable : 1;        /* 0x7dc:2  4 */
+            unsigned long SessionFirstProcess : 1;          /* 0x7dc:3  4 */
+        };                                                  /* 0x7dc  4 */
+    };                                                      /* 0x7dc  4 */
+    union {
+        unsigned long SyscallUsage;                         /* 0x7e0  4 */
+        struct {
+            unsigned long SystemModuleInformation : 1;      /* 0x7e0:0  4 */
+            unsigned long SystemModuleInformationEx : 1;    /* 0x7e0:1  4 */
+            unsigned long SystemLocksInformation : 1;       /* 0x7e0:2  4 */
+            unsigned long SystemStackTraceInformation : 1;  /* 0x7e0:3  4 */
+            unsigned long SystemHandleInformation : 1;      /* 0x7e0:4  4 */
+            unsigned long SystemExtendedHandleInformation : 1;  /* 0x7e0:5  4 */
+            unsigned long SystemObjectInformation : 1;      /* 0x7e0:6  4 */
+            unsigned long SystemBigPoolInformation : 1;     /* 0x7e0:7  4 */
+            unsigned long SystemExtendedProcessInformation : 1;  /* 0x7e0:8  4 */
+            unsigned long SystemSessionProcessInformation : 1;  /* 0x7e0:9  4 */
+            unsigned long SystemMemoryTopologyInformation : 1;  /* 0x7e0:10  4 */
+            unsigned long SystemMemoryChannelInformation : 1;  /* 0x7e0:11  4 */
+            unsigned long SystemUnused : 1;                 /* 0x7e0:12  4 */
+            unsigned long SystemPlatformBinaryInformation : 1;  /* 0x7e0:13  4 */
+            unsigned long SystemFirmwareTableInformation : 1;  /* 0x7e0:14  4 */
+            unsigned long SystemBootMetadataInformation : 1;  /* 0x7e0:15  4 */
+            unsigned long SystemWheaIpmiHardwareInformation : 1;  /* 0x7e0:16  4 */
+            unsigned long SystemSuperfetchPrefetch : 1;     /* 0x7e0:17  4 */
+            unsigned long SystemSuperfetchPfnQuery : 1;     /* 0x7e0:18  4 */
+            unsigned long SystemSuperfetchPrivSourceQuery : 1;  /* 0x7e0:19  4 */
+            unsigned long SystemSuperfetchMemoryListQuery : 1;  /* 0x7e0:20  4 */
+            unsigned long SystemSuperfetchMemoryRangesQuery : 1;  /* 0x7e0:21  4 */
+            unsigned long SystemSuperfetchPfnSetPriority : 1;  /* 0x7e0:22  4 */
+            unsigned long SystemSuperfetchMovePages : 1;    /* 0x7e0:23  4 */
+            unsigned long SystemSuperfetchPfnSetPageHeat : 1;  /* 0x7e0:24  4 */
+            unsigned long SysDbgGetTriageDump : 1;          /* 0x7e0:25  4 */
+            unsigned long SysDbgGetLiveKernelDump : 1;      /* 0x7e0:26  4 */
+            unsigned long SyscallUsageValuesSpare : 5;      /* 0x7e0:27  4 */
+        } SyscallUsageValues;                               /* 0x7e0  4 */
+    };                                                      /* 0x7e0  4 */
+    long SupervisorDeviceAsid;                              /* 0x7e4  4 */
+    void* SupervisorSvmData;                                /* 0x7e8  8 */
+    struct _PROCESS_NETWORK_COUNTERS* NetworkCounters;      /* 0x7f0  8 */
+    union _PROCESS_EXECUTION Execution;                     /* 0x7f8  4 */
+    /* 4 bytes padding */
+
+    /* --- cacheline 32 boundary (2048 bytes) --- */
+    void* ThreadIndexTable;                                 /* 0x800  8 */
+    struct _LIST_ENTRY FreezeWorkLinks;                     /* 0x808  16 */
+    struct _EX_PUSH_LOCK PpmPolicyLock;                     /* 0x818  8 */
+    unsigned long BamPpmPolicy;                             /* 0x820  4 */
+};

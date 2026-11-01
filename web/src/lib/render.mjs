@@ -1,27 +1,32 @@
-// Shared type -> C-declaration renderer for the three SSG spikes (port of site/gen.py's
-// Renderer). Framework-agnostic ESM: loads a vergiliplus data JSON and produces the
-// dracula-coloured, str-link-cross-linked code HTML plus the named-type listing.
+// Type -> C-declaration renderer. Framework-agnostic ESM: loads a vergiliplus data
+// JSON and produces the dracula-coloured, str-link-cross-linked code HTML, the
+// pahole-style layout (with anonymous unions/structs reconstructed) and the
+// named-type listing.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { modInfo } from "./modules.mjs";
 
-const PTR = 8;
+// pointer width per arch; everything else in BASE_SIZES is LLP64 on every arch
+const PTR_SIZE = { x86: 4, x64: 8, arm64: 8, arm: 4 };
 const BASE_SIZES = {
   "char": 1, "signed char": 1, "unsigned char": 1, "bool": 1,
   "short": 2, "unsigned short": 2, "wchar_t": 2, "__wchar_t": 2,
   "int": 4, "unsigned int": 4, "long": 4, "unsigned long": 4, "float": 4,
   "__int64": 8, "unsigned __int64": 8, "double": 8, "long long": 8,
 };
+const ANON = /^<(unnamed|anonymous)-tag>$/;
 const KW = new Set(["struct", "union", "enum", "const", "volatile", "void", "char",
   "bool", "short", "int", "long", "float", "double", "signed", "unsigned",
   "__int64", "wchar_t", "__wchar_t"]);
 
 export const esc = (s) => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 export const slug = (s) => s.replace(/[^A-Za-z0-9_.-]/g, "_");
-const hk = (s) => `<span class="hljs-keyword">${s}</span>`;
+const hk = (s) => `<span class="kw">${s}</span>`;
 const hc = (s) => `<span class="hljs-comment">${s}</span>`;
-const hn = (s) => `<span class="hljs-number">${s}</span>`;
-const kwOrPlain = (n) => KW.has(n) ? hk(n) : esc(n);
+const hn = (s) => s;  // numbers are unstyled; no span keeps ~28k pages lean
+// highlight keyword words inside base names too ("unsigned long", "void*")
+const kwOrPlain = (n) => esc(n).replace(/[A-Za-z_]\w*/g, (w) => KW.has(w) ? hk(w) : w);
 
 export function buildKey(b) {
   const p = (b.split(/[.\-]/).concat(["0", "0", "0", "0"])).slice(0, 4);
@@ -34,7 +39,10 @@ export function cmpBuild(a, b) {
 }
 
 export class Renderer {
-  constructor(doc) { this.t = doc.types; this.named = doc.named; }
+  constructor(doc) {
+    this.t = doc.types; this.named = doc.named;
+    this.ptr = PTR_SIZE[doc.arch] ?? 8;
+  }
   get(idx) { return this.t[idx] || { kind: "other" }; }
   derefFwd(idx) {
     const n = this.get(idx);
@@ -44,8 +52,8 @@ export class Renderer {
   sizeof(idx) {
     const n = this.get(idx);
     switch (n.kind) {
-      case "pointer": return PTR;
-      case "base": return BASE_SIZES[n.name] ?? (String(n.name).endsWith("*") ? PTR : 0);
+      case "pointer": return this.ptr;
+      case "base": return BASE_SIZES[n.name] ?? (String(n.name).endsWith("*") ? this.ptr : 0);
       case "modifier": return this.sizeof(n.referent);
       case "array": return n.bytes || 0;
       case "struct": case "union": case "enum": {
@@ -83,7 +91,7 @@ export class Renderer {
       }
       case "pointer": {
         const ref = this.get(n.referent);
-        if (ref.kind === "proc") return [this.renderType(ref.return)[0] + " (*", ")()"];
+        if (ref.kind === "proc") return [this.renderType(ref.return)[0] + " (*", `)(${this.argList(ref)})`];
         const [pre, suf] = this.renderType(n.referent);
         return [pre + "*", suf];
       }
@@ -103,6 +111,17 @@ export class Renderer {
       case "proc": return [hk("void"), "()"];
       default: return ["void", ""];
     }
+  }
+  // function-pointer parameters; older data has no param list -> "()"
+  argList(proc) {
+    if (!proc.args) return "";
+    const al = this.get(proc.args).args || [];
+    if (!al.length) return hk("void");
+    return al.map((a) => {
+      if (a === "0x0") return "...";
+      const [pre, suf] = this.renderType(a);
+      return pre + suf;
+    }).join(", ");
   }
   memberDecl(m, depth) {
     const n = this.get(m.type);
@@ -155,80 +174,214 @@ export class Renderer {
   memberKind(idx) {
     const n = this.get(idx);
     if (n.kind === "modifier") return this.memberKind(n.referent);
+    if (n.kind === "pointer" && this.get(n.referent).kind === "proc") return "proc";
     if (n.kind === "bitfield") return "bitfield";
     if (n.kind === "base") return String(n.name).endsWith("*") ? "pointer" : "base";
     return n.kind; // pointer | array | struct | union | enum | proc
   }
 
-  // pahole-style layout: offset/size per member, explicit holes, cacheline markers, footer
+  // Field members -> storage units. A unit is one non-bitfield member, or a run of
+  // bitfields sharing a storage word (same offset and size, bit position moving up).
+  // A bitfield whose position doesn't move up starts a new unit — that's an
+  // alternative bitfield set in an anonymous union. Old data without `pos`
+  // packs by declared widths instead.
+  units(members) {
+    const out = [];
+    for (const m of members) {
+      const node = this.get(m.type);
+      if (node.kind !== "bitfield") {
+        const size = this.sizeof(m.type);
+        out.push({ bf: false, offset: m.offset, size, end: m.offset + size, ms: [{ m }] });
+        continue;
+      }
+      const size = this.sizeof(node.type);
+      const last = out[out.length - 1];
+      const pos = node.pos ?? (last && last.bf && last.offset === m.offset ? last.next : 0);
+      if (last && last.bf && last.offset === m.offset && last.size === size &&
+          pos >= last.next && pos + node.bits <= size * 8) {
+        last.ms.push({ m, pos }); last.next = pos + node.bits;
+      } else {
+        out.push({ bf: true, offset: m.offset, size, end: m.offset + size,
+                   ms: [{ m, pos }], next: pos + node.bits });
+      }
+    }
+    return out;
+  }
+
+  // Reconstruct anonymous unions/structs from flat units [lo, hi). The PDB flattens
+  // them into the parent's field list, so: a unit whose offset is revisited by a later
+  // unit opens a union; its alternatives start at each revisit; an alternative of more
+  // than one unit is an anonymous struct. Offsets are exact either way; the one
+  // ambiguity is a last alternative longer than the others, whose tail lands after
+  // the union.
+  structItems(us, lo, hi) {
+    const items = [];
+    let i = lo;
+    while (i < hi) {
+      const O = us[i].offset;
+      let r = i;
+      for (let k = i + 1; k < hi && us[k].offset >= O; k++) if (us[k].offset === O) r = k;
+      if (r === i) { items.push({ unit: us[i], offset: O, end: us[i].end }); i++; continue; }
+      let end = O;
+      for (let k = i; k <= r; k++) end = Math.max(end, us[k].end);
+      let k = r + 1;
+      while (k < hi && us[k].offset < end) { end = Math.max(end, us[k].end); k++; }
+      items.push({ union: this.alternatives(us, i, k, O), offset: O, end });
+      i = k;
+    }
+    return items;
+  }
+  alternatives(us, lo, hi, O) {
+    const starts = [];
+    for (let k = lo; k < hi; k++) if (us[k].offset === O) starts.push(k);
+    starts.push(hi);
+    const alts = [];
+    for (let a = 0; a < starts.length - 1; a++) {
+      const s = starts[a], e = starts[a + 1];
+      alts.push(e - s === 1 && us[s].ms.length === 1
+        ? { unit: us[s] }
+        : { struct: this.structItems(us, s, e) });
+    }
+    return alts;
+  }
+
+  // pahole-style layout: rows of members (with depth), anonymous union/struct
+  // open/close rows, explicit holes, cacheline markers, plus a summary footer
   paholeLayout(name) {
     const idx = this.named[name], n = this.get(idx);
     if (!["struct", "union"].includes(n.kind)) return null;
-    const fl = this.get(n.fieldlist);
+    const members = this.get(n.fieldlist).members || [];
     const total = n.size || this.sizeof(idx);
-    const isUnion = n.kind === "union";
+    const us = this.units(members);
     const rows = [];
-    let expected = 0, sumMembers = 0, holes = 0, sumHoles = 0, lastLine = 0;
-    for (const m of fl.members || []) {
+    const st = { holes: 0, sumHoles: 0, lastLine: 0, sum: 0 };
+    const hx = (x) => "0x" + x.toString(16);
+
+    const member = ({ m, pos }, depth) => {
       const node = this.get(m.type);
       const bf = node.kind === "bitfield";
-      const size = bf ? this.sizeof(node.type) : this.sizeof(m.type);
-      if (!isUnion && m.offset > expected) {
-        const h = m.offset - expected;
-        rows.push({ hole: h });
-        holes++; sumHoles += h;
-      }
-      // pahole style: one marker before the first member that starts in a new
-      // cacheline (O(members), even for 276 MB structs like _MI_HYPER_SPACE)
-      const line = Math.floor(m.offset / 64);
-      if (!isUnion && total > 64 && line > lastLine) {
-        rows.push({ cacheline: line, bytes: line * 64 });
-        lastLine = line;
+      // a named member of anonymous type ("struct <unnamed-tag> u;"): inline its body
+      if (["struct", "union"].includes(node.kind)) {
+        const [, d] = this.derefFwd(m.type);
+        if (ANON.test(d.name || node.name || "") && d.fieldlist) {
+          const shifted = (this.get(d.fieldlist).members || [])
+            .map((x) => ({ ...x, offset: x.offset + m.offset }));
+          const nus = this.units(shifted);
+          rows.push({ depth, open: d.kind, offset: m.offset });
+          if (d.kind === "union") emitAlts(this.alternatives(nus, 0, nus.length, m.offset), depth + 1);
+          else emitStruct(this.structItems(nus, 0, nus.length), depth + 1, false);
+          rows.push({ depth, close: true, field: m.name, offset: m.offset, size: this.sizeof(m.type) });
+          return;
+        }
       }
       const tp = this.typeParts(bf ? node.type : m.type);
+      const ref = this.refName(m.type);
       rows.push({
-        typePre: tp.pre, typeSuf: tp.suf, fkind: this.memberKind(m.type),
-        field: m.name, offset: m.offset, size, bits: bf ? node.bits : null,
-        ref: this.refName(m.type),
-        reflink: (this.refName(m.type) in this.named) ? slug(this.refName(m.type)) : null,
+        depth, typePre: tp.pre, typeSuf: tp.suf, sep: tp.pre.endsWith("(*") ? "" : " ",
+        fkind: this.memberKind(m.type), field: m.name, offset: m.offset,
+        size: bf ? this.sizeof(node.type) : this.sizeof(m.type),
+        bits: bf ? node.bits : null, bitpos: bf ? pos : null,
+        ref, reflink: ref in this.named ? slug(ref) : null,
       });
-      sumMembers += size;
-      if (!isUnion) expected = Math.max(expected, m.offset + size);
+    };
+    const emitUnit = (u, depth) => u.ms.forEach((x) => member(x, depth));
+    const emitStruct = (items, depth, top) => {
+      let expected = items.length ? items[0].offset : 0;
+      for (const it of items) {
+        if (it.offset > expected) {
+          const h = it.offset - expected;
+          rows.push({ depth, hole: h });
+          st.holes++; st.sumHoles += h;
+        }
+        // one marker before the first top-level item starting in a new cacheline
+        // (O(members), even for 276 MB structs like _MI_HYPER_SPACE)
+        const line = Math.floor(it.offset / 64);
+        if (top && total > 64 && line > st.lastLine) {
+          rows.push({ depth, cacheline: line, bytes: line * 64 });
+          st.lastLine = line;
+        }
+        if (it.unit) emitUnit(it.unit, depth); else emitUnion(it, depth);
+        if (top) st.sum += it.end - it.offset;
+        expected = Math.max(expected, it.end);
+      }
+      return expected;
+    };
+    const emitUnion = (it, depth) => {
+      rows.push({ depth, open: "union", offset: it.offset });
+      emitAlts(it.union, depth + 1);
+      rows.push({ depth, close: true, offset: it.offset, size: it.end - it.offset });
+    };
+    const emitAlts = (alts, depth) => {
+      for (const alt of alts) {
+        if (alt.unit) { emitUnit(alt.unit, depth); continue; }
+        const first = alt.struct[0], last = alt.struct[alt.struct.length - 1];
+        rows.push({ depth, open: "struct", offset: first.offset });
+        emitStruct(alt.struct, depth + 1, false);
+        rows.push({ depth, close: true, offset: first.offset, size: last.end - first.offset });
+      }
+    };
+
+    let used;
+    if (n.kind === "union") {
+      emitAlts(this.alternatives(us, 0, us.length, us.length ? us[0].offset : 0), 0);
+      used = us.reduce((e, u) => Math.max(e, u.end), 0);
+    } else {
+      used = emitStruct(this.structItems(us, 0, us.length), 0, true);
     }
-    const padding = isUnion ? 0 : Math.max(0, total - expected);
+    const sumMembers = n.kind === "union" ? used : st.sum;
     return {
       name, kind: n.kind, rows,
       summary: {
         size: total, cachelines: Math.max(1, Math.ceil(total / 64)),
-        members: (fl.members || []).length, sumMembers, holes, sumHoles, padding,
+        members: members.length, sumMembers, holes: st.holes, sumHoles: st.sumHoles,
+        padding: n.kind === "union" ? 0 : Math.max(0, total - used),
         lastCacheline: total % 64 || Math.min(total, 64),
       },
     };
   }
 
-  // render a pahole layout as plain annotated C text (feed to Expressive Code / Shiki)
-  paholeText(name) {
-    const L = this.paholeLayout(name);
-    if (!L) { // enum: fall back to the plain declaration
-      return this.plainToplevel(name);
+  // enum value table
+  enumLayout(name) {
+    const idx = this.named[name], n = this.get(idx);
+    if (n.kind !== "enum") return null;
+    const values = (this.get(n.fieldlist).enums || []).map((e) => ({ name: e.name, value: e.value }));
+    return { name, kind: "enum", values, summary: { values: values.length, size: this.sizeof(idx) } };
+  }
+
+  // the C text of a layout (copy button, golden tests); meta=false drops annotations
+  paholeText(name, meta = true) {
+    const strip = (s) => s.replace(/<[^>]+>/g, "")
+      .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+    const IND = "    ", COL = 60;
+    const E = this.enumLayout(name);
+    if (E) {
+      let out = `enum ${name} {`;
+      for (const v of E.values) {
+        const line = `${IND}${v.name} = ${v.value},`;
+        out += "\n" + (meta ? line + " ".repeat(Math.max(2, COL - line.length)) + `/* ${hexv(v.value)} */` : line);
+      }
+      return out + "\n};";
     }
-    const strip = (s) => s.replace(/<[^>]+>/g, "");
-    const IND = "    ", COL = 52;
+    const L = this.paholeLayout(name);
+    if (!L) throw new Error(`no struct/union/enum named ${name}`);
     let out = `${L.kind} ${name} {`;
+    const ann = (line, a) => meta ? line + " ".repeat(Math.max(2, COL - line.length)) + `/* ${a} */` : line;
     for (const r of L.rows) {
+      const ind = IND.repeat(r.depth + 1);
       if (r.hole != null) {
-        out += `\n${IND}/* ${r.hole} ${r.hole === 1 ? "byte" : "bytes"} padding */`;
+        if (meta) out += `\n${ind}/* ${r.hole} ${r.hole === 1 ? "byte" : "bytes"} padding */`;
       } else if (r.cacheline != null) {
-        out += `\n\n${IND}/* --- cacheline ${r.cacheline} boundary (${r.bytes} bytes) --- */`;
+        if (meta) out += `\n\n${ind}/* --- cacheline ${r.cacheline} boundary (${r.bytes} bytes) --- */`;
+      } else if (r.open) {
+        out += `\n${ind}${r.open} {`;
+      } else if (r.close) {
+        out += "\n" + ann(`${ind}}${r.field ? " " + r.field : ""};`, `0x${r.offset.toString(16)}  ${r.size}`);
       } else {
         const suf = strip(r.typeSuf) + (r.bits != null ? ` : ${r.bits}` : "");
-        const decl = `${IND}${strip(r.typePre)} ${r.field}${suf};`;
-        const pad = " ".repeat(Math.max(2, COL - decl.length));
-        out += `\n${decl}${pad}/* 0x${r.offset.toString(16)}  ${r.size} */`;
+        out += "\n" + ann(`${ind}${strip(r.typePre)}${r.sep}${r.field}${suf};`, offAnn(r));
       }
     }
-    out += `\n};`;
-    return out;
+    return out + `\n};`;
   }
 
   usedIn() {
@@ -253,8 +406,18 @@ export class Renderer {
   }
 }
 
-export function loadDoc(p) { return JSON.parse(fs.readFileSync(p, "utf8")); }
-export const MODLABEL = { ntoskrnl: "kernel", ntdll: "userland" };
+// "/* 0x18  8 */" offset annotation; bitfields carry their bit position: 0x18:3
+export const offAnn = (r) =>
+  `0x${r.offset.toString(16)}${r.bitpos != null ? ":" + r.bitpos : ""}  ${r.size}`;
+export const hexv = (v) => (v < 0 ? "-0x" + (-v).toString(16) : "0x" + v.toString(16));
+
+export function loadDoc(p) {
+  const doc = JSON.parse(fs.readFileSync(p, "utf8"));
+  // "<unnamed-tag>" is MSVC's name for every anonymous aggregate: not a real type
+  for (const n of Object.keys(doc.named)) if (ANON.test(n)) delete doc.named[n];
+  return doc;
+}
+export { modInfo };
 
 // Find the repo root (the dir holding data/sources.json) by walking up from the cwd;
 // robust when this module is bundled into a dist/ chunk.

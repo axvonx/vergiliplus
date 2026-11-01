@@ -1,0 +1,170 @@
+struct _PEB {
+    unsigned char InheritedAddressSpace;                    /* 0x0  1 */
+    unsigned char ReadImageFileExecOptions;                 /* 0x1  1 */
+    unsigned char BeingDebugged;                            /* 0x2  1 */
+    union {
+        unsigned char BitField;                             /* 0x3  1 */
+        struct {
+            unsigned char ImageUsesLargePages : 1;          /* 0x3:0  1 */
+            unsigned char IsProtectedProcess : 1;           /* 0x3:1  1 */
+            unsigned char IsImageDynamicallyRelocated : 1;  /* 0x3:2  1 */
+            unsigned char SkipPatchingUser32Forwarders : 1;  /* 0x3:3  1 */
+            unsigned char IsPackagedProcess : 1;            /* 0x3:4  1 */
+            unsigned char IsAppContainer : 1;               /* 0x3:5  1 */
+            unsigned char IsProtectedProcessLight : 1;      /* 0x3:6  1 */
+            unsigned char IsLongPathAwareProcess : 1;       /* 0x3:7  1 */
+        };                                                  /* 0x3  1 */
+    };                                                      /* 0x3  1 */
+    unsigned char Padding0[4];                              /* 0x4  4 */
+    void* Mutant;                                           /* 0x8  8 */
+    void* ImageBaseAddress;                                 /* 0x10  8 */
+    struct _PEB_LDR_DATA* Ldr;                              /* 0x18  8 */
+    struct _RTL_USER_PROCESS_PARAMETERS* ProcessParameters;  /* 0x20  8 */
+    void* SubSystemData;                                    /* 0x28  8 */
+    void* ProcessHeap;                                      /* 0x30  8 */
+    struct _RTL_CRITICAL_SECTION* FastPebLock;              /* 0x38  8 */
+
+    /* --- cacheline 1 boundary (64 bytes) --- */
+    union _SLIST_HEADER* AtlThunkSListPtr;                  /* 0x40  8 */
+    void* IFEOKey;                                          /* 0x48  8 */
+    union {
+        unsigned long CrossProcessFlags;                    /* 0x50  4 */
+        struct {
+            unsigned long ProcessInJob : 1;                 /* 0x50:0  4 */
+            unsigned long ProcessInitializing : 1;          /* 0x50:1  4 */
+            unsigned long ProcessUsingVEH : 1;              /* 0x50:2  4 */
+            unsigned long ProcessUsingVCH : 1;              /* 0x50:3  4 */
+            unsigned long ProcessUsingFTH : 1;              /* 0x50:4  4 */
+            unsigned long ProcessPreviouslyThrottled : 1;   /* 0x50:5  4 */
+            unsigned long ProcessCurrentlyThrottled : 1;    /* 0x50:6  4 */
+            unsigned long ProcessImagesHotPatched : 1;      /* 0x50:7  4 */
+            unsigned long ReservedBits0 : 24;               /* 0x50:8  4 */
+        };                                                  /* 0x50  4 */
+    };                                                      /* 0x50  4 */
+    unsigned char Padding1[4];                              /* 0x54  4 */
+    union {
+        void* KernelCallbackTable;                          /* 0x58  8 */
+        void* UserSharedInfoPtr;                            /* 0x58  8 */
+    };                                                      /* 0x58  8 */
+    unsigned long SystemReserved;                           /* 0x60  4 */
+    unsigned long AtlThunkSListPtr32;                       /* 0x64  4 */
+    void* ApiSetMap;                                        /* 0x68  8 */
+    unsigned long TlsExpansionCounter;                      /* 0x70  4 */
+    unsigned char Padding2[4];                              /* 0x74  4 */
+    struct _RTL_BITMAP* TlsBitmap;                          /* 0x78  8 */
+
+    /* --- cacheline 2 boundary (128 bytes) --- */
+    unsigned long TlsBitmapBits[2];                         /* 0x80  8 */
+    void* ReadOnlySharedMemoryBase;                         /* 0x88  8 */
+    void* SharedData;                                       /* 0x90  8 */
+    void** ReadOnlyStaticServerData;                        /* 0x98  8 */
+    void* AnsiCodePageData;                                 /* 0xa0  8 */
+    void* OemCodePageData;                                  /* 0xa8  8 */
+    void* UnicodeCaseTableData;                             /* 0xb0  8 */
+    unsigned long NumberOfProcessors;                       /* 0xb8  4 */
+    unsigned long NtGlobalFlag;                             /* 0xbc  4 */
+
+    /* --- cacheline 3 boundary (192 bytes) --- */
+    union _LARGE_INTEGER CriticalSectionTimeout;            /* 0xc0  8 */
+    unsigned __int64 HeapSegmentReserve;                    /* 0xc8  8 */
+    unsigned __int64 HeapSegmentCommit;                     /* 0xd0  8 */
+    unsigned __int64 HeapDeCommitTotalFreeThreshold;        /* 0xd8  8 */
+    unsigned __int64 HeapDeCommitFreeBlockThreshold;        /* 0xe0  8 */
+    unsigned long NumberOfHeaps;                            /* 0xe8  4 */
+    unsigned long MaximumNumberOfHeaps;                     /* 0xec  4 */
+    void** ProcessHeaps;                                    /* 0xf0  8 */
+    void* GdiSharedHandleTable;                             /* 0xf8  8 */
+
+    /* --- cacheline 4 boundary (256 bytes) --- */
+    void* ProcessStarterHelper;                             /* 0x100  8 */
+    unsigned long GdiDCAttributeList;                       /* 0x108  4 */
+    unsigned char Padding3[4];                              /* 0x10c  4 */
+    struct _RTL_CRITICAL_SECTION* LoaderLock;               /* 0x110  8 */
+    unsigned long OSMajorVersion;                           /* 0x118  4 */
+    unsigned long OSMinorVersion;                           /* 0x11c  4 */
+    unsigned short OSBuildNumber;                           /* 0x120  2 */
+    unsigned short OSCSDVersion;                            /* 0x122  2 */
+    unsigned long OSPlatformId;                             /* 0x124  4 */
+    unsigned long ImageSubsystem;                           /* 0x128  4 */
+    unsigned long ImageSubsystemMajorVersion;               /* 0x12c  4 */
+    unsigned long ImageSubsystemMinorVersion;               /* 0x130  4 */
+    unsigned char Padding4[4];                              /* 0x134  4 */
+    unsigned __int64 ActiveProcessAffinityMask;             /* 0x138  8 */
+
+    /* --- cacheline 5 boundary (320 bytes) --- */
+    unsigned long GdiHandleBuffer[60];                      /* 0x140  240 */
+
+    /* --- cacheline 8 boundary (512 bytes) --- */
+    void (*PostProcessInitRoutine)(void);                   /* 0x230  8 */
+    struct _RTL_BITMAP* TlsExpansionBitmap;                 /* 0x238  8 */
+
+    /* --- cacheline 9 boundary (576 bytes) --- */
+    unsigned long TlsExpansionBitmapBits[32];               /* 0x240  128 */
+
+    /* --- cacheline 11 boundary (704 bytes) --- */
+    unsigned long SessionId;                                /* 0x2c0  4 */
+    unsigned char Padding5[4];                              /* 0x2c4  4 */
+    union _ULARGE_INTEGER AppCompatFlags;                   /* 0x2c8  8 */
+    union _ULARGE_INTEGER AppCompatFlagsUser;               /* 0x2d0  8 */
+    void* pShimData;                                        /* 0x2d8  8 */
+    void* AppCompatInfo;                                    /* 0x2e0  8 */
+    struct _UNICODE_STRING CSDVersion;                      /* 0x2e8  16 */
+    const struct _ACTIVATION_CONTEXT_DATA* ActivationContextData;  /* 0x2f8  8 */
+
+    /* --- cacheline 12 boundary (768 bytes) --- */
+    struct _ASSEMBLY_STORAGE_MAP* ProcessAssemblyStorageMap;  /* 0x300  8 */
+    const struct _ACTIVATION_CONTEXT_DATA* SystemDefaultActivationContextData;  /* 0x308  8 */
+    struct _ASSEMBLY_STORAGE_MAP* SystemAssemblyStorageMap;  /* 0x310  8 */
+    unsigned __int64 MinimumStackCommit;                    /* 0x318  8 */
+    void* SparePointers[2];                                 /* 0x320  16 */
+    void* PatchLoaderData;                                  /* 0x330  8 */
+    struct _CHPEV2_PROCESS_INFO* ChpeV2ProcessInfo;         /* 0x338  8 */
+
+    /* --- cacheline 13 boundary (832 bytes) --- */
+    unsigned long AppModelFeatureState;                     /* 0x340  4 */
+    unsigned long SpareUlongs[2];                           /* 0x344  8 */
+    unsigned short ActiveCodePage;                          /* 0x34c  2 */
+    unsigned short OemCodePage;                             /* 0x34e  2 */
+    unsigned short UseCaseMapping;                          /* 0x350  2 */
+    unsigned short UnusedNlsField;                          /* 0x352  2 */
+    /* 4 bytes padding */
+    void* WerRegistrationData;                              /* 0x358  8 */
+    void* WerShipAssertPtr;                                 /* 0x360  8 */
+    void* EcCodeBitMap;                                     /* 0x368  8 */
+    void* pImageHeaderHash;                                 /* 0x370  8 */
+    union {
+        unsigned long TracingFlags;                         /* 0x378  4 */
+        struct {
+            unsigned long HeapTracingEnabled : 1;           /* 0x378:0  4 */
+            unsigned long CritSecTracingEnabled : 1;        /* 0x378:1  4 */
+            unsigned long LibLoaderTracingEnabled : 1;      /* 0x378:2  4 */
+            unsigned long SpareTracingBits : 29;            /* 0x378:3  4 */
+        };                                                  /* 0x378  4 */
+    };                                                      /* 0x378  4 */
+    unsigned char Padding6[4];                              /* 0x37c  4 */
+
+    /* --- cacheline 14 boundary (896 bytes) --- */
+    unsigned __int64 CsrServerReadOnlySharedMemoryBase;     /* 0x380  8 */
+    unsigned __int64 TppWorkerpListLock;                    /* 0x388  8 */
+    struct _LIST_ENTRY TppWorkerpList;                      /* 0x390  16 */
+    void* WaitOnAddressHashTable[128];                      /* 0x3a0  1024 */
+
+    /* --- cacheline 30 boundary (1920 bytes) --- */
+    void* TelemetryCoverageHeader;                          /* 0x7a0  8 */
+    unsigned long CloudFileFlags;                           /* 0x7a8  4 */
+    unsigned long CloudFileDiagFlags;                       /* 0x7ac  4 */
+    char PlaceholderCompatibilityMode;                      /* 0x7b0  1 */
+    char PlaceholderCompatibilityModeReserved[7];           /* 0x7b1  7 */
+    struct _LEAP_SECOND_DATA* LeapSecondData;               /* 0x7b8  8 */
+
+    /* --- cacheline 31 boundary (1984 bytes) --- */
+    union {
+        unsigned long LeapSecondFlags;                      /* 0x7c0  4 */
+        struct {
+            unsigned long SixtySecondEnabled : 1;           /* 0x7c0:0  4 */
+            unsigned long Reserved : 31;                    /* 0x7c0:1  4 */
+        };                                                  /* 0x7c0  4 */
+    };                                                      /* 0x7c0  4 */
+    unsigned long NtGlobalFlag2;                            /* 0x7c4  4 */
+    unsigned __int64 ExtendedFeatureDisableMask;            /* 0x7c8  8 */
+};

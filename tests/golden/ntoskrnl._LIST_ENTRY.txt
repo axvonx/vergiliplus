@@ -1,0 +1,4 @@
+struct _LIST_ENTRY {
+    struct _LIST_ENTRY* Flink;                              /* 0x0  8 */
+    struct _LIST_ENTRY* Blink;                              /* 0x8  8 */
+};

@@ -1,48 +1,40 @@
 ---
 import { ClientRouter } from "astro:transitions";
-import Sidebar from "../components/Sidebar.jsx";
-import CmdK from "../components/CmdK.jsx";
+import Chrome from "../components/Chrome.astro";
+import TopNav from "../components/TopNav.astro";
 const { title } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>vergiliplus | {title}</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800;900&display=swap" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="/assets/dracula.css" />
-    <link rel="stylesheet" href="/assets/vergiliplus.css" />
-    <link rel="stylesheet" href="/assets/showcase.css" />
-    <ClientRouter />
-    <script is:inline>
-      try { if (localStorage.getItem("vp-side") === "0") document.documentElement.classList.add("side-collapsed"); } catch (e) {}
-    </script>
-  </head>
+  <Chrome title={title}>
+    <Fragment slot="head">
+      <ClientRouter />
+      <script is:inline>
+        try { if (localStorage.getItem("vp-side") === "0") document.documentElement.classList.add("side-collapsed"); } catch (e) {}
+      </script>
+    </Fragment>
+  </Chrome>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
-      <button class="side-toggle" title="Toggle sidebar"
-        onclick="document.documentElement.classList.toggle('side-collapsed');try{localStorage.setItem('vp-side',document.documentElement.classList.contains('side-collapsed')?'0':'1')}catch(e){}">☰</button>
-      <a class="navbar-brand" href="/">vergili<span class="plus">plus</span></a>
-      <ul class="navbar-nav mr-auto flex-row">
-        <li class="nav-item"><a class="nav-link" href="/">VERSIONS</a></li>
-      </ul>
-      <button class="sb-kind" style="margin-left:auto"
-        onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'k',metaKey:true}))">
-        Search&nbsp;<span class="kbd">⌘K</span>
-      </button>
-    </nav>
+    <TopNav side />
     <div class="docs">
       <aside class="docs-side" transition:persist>
-        <Sidebar client:load />
+        <div class="sb" id="vp-sb">
+          <a class="sb-ctx" href="/"></a>
+          <div class="sb-top">
+            <input class="sb-filter" placeholder="filter types…" />
+            <div class="sb-kinds">
+              <button class="sb-kind on" data-k="all">all</button><button class="sb-kind" data-k="struct">S</button><button class="sb-kind" data-k="union">U</button><button class="sb-kind" data-k="enum">E</button>
+            </div>
+          </div>
+          <div class="sb-count"></div>
+          <nav class="sb-list"></nav>
+        </div>
       </aside>
       <main class="docs-main">
         <slot />
         <div class="meta-bottom"><slot name="rail" /></div>
       </main>
     </div>
-    <CmdK client:load />
     <script is:inline>
       document.addEventListener("astro:page-load", () => {
         try { document.documentElement.classList.toggle("side-collapsed", localStorage.getItem("vp-side") === "0"); } catch (e) {}

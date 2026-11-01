@@ -1,0 +1,99 @@
+struct _DISPATCHER_HEADER {
+    union {
+        volatile long Lock;                                 /* 0x0  4 */
+        long LockNV;                                        /* 0x0  4 */
+        struct {
+            unsigned char Type;                             /* 0x0  1 */
+            unsigned char Signalling;                       /* 0x1  1 */
+            unsigned char Size;                             /* 0x2  1 */
+            unsigned char Reserved1;                        /* 0x3  1 */
+        };                                                  /* 0x0  4 */
+        struct {
+            unsigned char TimerType;                        /* 0x0  1 */
+            union {
+                unsigned char TimerControlFlags;            /* 0x1  1 */
+                struct {
+                    unsigned char Absolute : 1;             /* 0x1:0  1 */
+                    unsigned char Wake : 1;                 /* 0x1:1  1 */
+                    unsigned char EncodedTolerableDelay : 6;  /* 0x1:2  1 */
+                };                                          /* 0x1  1 */
+            };                                              /* 0x1  1 */
+            unsigned char Hand;                             /* 0x2  1 */
+            union {
+                unsigned char TimerMiscFlags;               /* 0x3  1 */
+                struct {
+                    unsigned char Index : 6;                /* 0x3:0  1 */
+                    unsigned char Inserted : 1;             /* 0x3:6  1 */
+                    volatile unsigned char Expired : 1;     /* 0x3:7  1 */
+                };                                          /* 0x3  1 */
+            };                                              /* 0x3  1 */
+        };                                                  /* 0x0  4 */
+        struct {
+            unsigned char Timer2Type;                       /* 0x0  1 */
+            union {
+                unsigned char Timer2Flags;                  /* 0x1  1 */
+                struct {
+                    unsigned char Timer2Inserted : 1;       /* 0x1:0  1 */
+                    unsigned char Timer2Expiring : 1;       /* 0x1:1  1 */
+                    unsigned char Timer2CancelPending : 1;  /* 0x1:2  1 */
+                    unsigned char Timer2SetPending : 1;     /* 0x1:3  1 */
+                    unsigned char Timer2Running : 1;        /* 0x1:4  1 */
+                    unsigned char Timer2Disabled : 1;       /* 0x1:5  1 */
+                    unsigned char Timer2ReservedFlags : 2;  /* 0x1:6  1 */
+                };                                          /* 0x1  1 */
+            };                                              /* 0x1  1 */
+            unsigned char Timer2ComponentId;                /* 0x2  1 */
+            unsigned char Timer2RelativeId;                 /* 0x3  1 */
+        };                                                  /* 0x0  4 */
+        struct {
+            unsigned char QueueType;                        /* 0x0  1 */
+            union {
+                unsigned char QueueControlFlags;            /* 0x1  1 */
+                struct {
+                    unsigned char Abandoned : 1;            /* 0x1:0  1 */
+                    unsigned char DisableIncrement : 1;     /* 0x1:1  1 */
+                    unsigned char QueueReservedControlFlags : 6;  /* 0x1:2  1 */
+                };                                          /* 0x1  1 */
+            };                                              /* 0x1  1 */
+            unsigned char QueueSize;                        /* 0x2  1 */
+            unsigned char QueueReserved;                    /* 0x3  1 */
+        };                                                  /* 0x0  4 */
+        struct {
+            unsigned char ThreadType;                       /* 0x0  1 */
+            unsigned char ThreadReserved;                   /* 0x1  1 */
+            union {
+                unsigned char ThreadControlFlags;           /* 0x2  1 */
+                struct {
+                    unsigned char CycleProfiling : 1;       /* 0x2:0  1 */
+                    unsigned char CounterProfiling : 1;     /* 0x2:1  1 */
+                    unsigned char GroupScheduling : 1;      /* 0x2:2  1 */
+                    unsigned char AffinitySet : 1;          /* 0x2:3  1 */
+                    unsigned char Tagged : 1;               /* 0x2:4  1 */
+                    unsigned char EnergyProfiling : 1;      /* 0x2:5  1 */
+                    unsigned char SchedulerAssist : 1;      /* 0x2:6  1 */
+                    unsigned char ThreadReservedControlFlags : 1;  /* 0x2:7  1 */
+                };                                          /* 0x2  1 */
+            };                                              /* 0x2  1 */
+            union {
+                unsigned char DebugActive;                  /* 0x3  1 */
+                struct {
+                    unsigned char ActiveDR7 : 1;            /* 0x3:0  1 */
+                    unsigned char Instrumented : 1;         /* 0x3:1  1 */
+                    unsigned char Minimal : 1;              /* 0x3:2  1 */
+                    unsigned char Reserved4 : 2;            /* 0x3:3  1 */
+                    unsigned char AltSyscall : 1;           /* 0x3:5  1 */
+                    unsigned char Emulation : 1;            /* 0x3:6  1 */
+                    unsigned char Reserved5 : 1;            /* 0x3:7  1 */
+                };                                          /* 0x3  1 */
+            };                                              /* 0x3  1 */
+        };                                                  /* 0x0  4 */
+        struct {
+            unsigned char MutantType;                       /* 0x0  1 */
+            unsigned char MutantSize;                       /* 0x1  1 */
+            unsigned char DpcActive;                        /* 0x2  1 */
+            unsigned char MutantReserved;                   /* 0x3  1 */
+        };                                                  /* 0x0  4 */
+    };                                                      /* 0x0  4 */
+    long SignalState;                                       /* 0x4  4 */
+    struct _LIST_ENTRY WaitListHead;                        /* 0x8  16 */
+};

@@ -1,0 +1,6 @@
+struct _CACHE_MANAGER_CALLBACKS {
+    unsigned char (*AcquireForLazyWrite)(void*, unsigned char);  /* 0x0  8 */
+    void (*ReleaseFromLazyWrite)(void*);                    /* 0x8  8 */
+    unsigned char (*AcquireForReadAhead)(void*, unsigned char);  /* 0x10  8 */
+    void (*ReleaseFromReadAhead)(void*);                    /* 0x18  8 */
+};

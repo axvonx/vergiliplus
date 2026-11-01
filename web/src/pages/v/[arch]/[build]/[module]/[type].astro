@@ -1,8 +1,9 @@
 ---
 import Docs from "../../../../../layouts/Docs.astro";
-import StructCode from "../../../../../components/StructCode.jsx";
+import StructCode from "../../../../../components/StructCode.astro";
 import VersionBar from "../../../../../components/VersionBar.astro";
-import { catalog, rendererFor, usedInFor, slugNames, slug, ctxPath, MODLABEL } from "../../../../../lib/render.mjs";
+import { catalog, rendererFor, usedInFor, slugNames, slug, ctxPath, modInfo } from "../../../../../lib/render.mjs";
+import { RINGLABEL } from "../../../../../lib/modules.mjs";
 
 export function getStaticPaths() {
   const out = [];
@@ -22,7 +23,7 @@ const { name } = Astro.props;
 const doc = catalog().get(arch, build, module);
 const r = rendererFor(doc);
 const layout = r.paholeLayout(name);
-const plain = r.paholeText(name);
+const enumLayout = layout ? null : r.enumLayout(name);
 const used = usedInFor(doc)[name] || [];
 const refs = layout
   ? [...new Map(layout.rows.filter((x) => x.reflink).map((x) => [x.reflink, x.ref])).entries()]
@@ -42,11 +43,7 @@ const hex = (n) => "0x" + n.toString(16);
   <h2 class="h2-tdata">{name}</h2>
   <VersionBar arch={arch} build={build} module={module} type={name} />
 
-  {layout ? (
-    <StructCode layout={layout} plain={plain} client:visible />
-  ) : (
-    <pre class="sc-pre"><code><div class="sc-line" set:html={r.toplevel(name)} /></code></pre>
-  )}
+  <StructCode layout={layout} enumLayout={enumLayout} />
 
   <Fragment slot="rail">
     {s && (
@@ -59,9 +56,16 @@ const hex = (n) => "0x" + n.toString(16);
         <div class="rail-stat"><span>cachelines</span><b>{s.cachelines}</b></div>
       </div>
     )}
+    {enumLayout && (
+      <div>
+        <div class="rail-h">Enum</div>
+        <div class="rail-stat"><span>values</span><b>{enumLayout.summary.values}</b></div>
+        <div class="rail-stat"><span>size</span><b>{enumLayout.summary.size}</b></div>
+      </div>
+    )}
     <div>
       <div class="rail-h">Version</div>
-      <div class="rail-stat"><span>module</span><b>{module} ({MODLABEL[module]})</b></div>
+      <div class="rail-stat"><span>module</span><b>{module} ({RINGLABEL[modInfo(module).ring]})</b></div>
       <div class="rail-stat"><span>build</span><b>{build}</b></div>
       <div class="rail-stat"><span>defined in</span><b>{catalog().typeBuilds(arch, module, name).length} builds</b></div>
     </div>

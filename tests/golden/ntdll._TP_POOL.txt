@@ -1,0 +1,42 @@
+struct _TP_POOL {
+    struct _TPP_REFCOUNT Refcount;                          /* 0x0  4 */
+    /* 4 bytes padding */
+    volatile union _TPP_POOL_QUEUE_STATE QueueState;        /* 0x8  8 */
+    struct _TPP_QUEUE* TaskQueue[3];                        /* 0x10  24 */
+    struct _TPP_NUMA_NODE* NumaNode;                        /* 0x28  8 */
+    struct _GROUP_AFFINITY* ProximityInfo;                  /* 0x30  8 */
+    void* WorkerFactory;                                    /* 0x38  8 */
+
+    /* --- cacheline 1 boundary (64 bytes) --- */
+    void* CompletionPort;                                   /* 0x40  8 */
+    struct _RTL_SRWLOCK Lock;                               /* 0x48  8 */
+    struct _LIST_ENTRY PoolObjectList;                      /* 0x50  16 */
+    struct _LIST_ENTRY WorkerList;                          /* 0x60  16 */
+    struct _TPP_TIMER_QUEUE TimerQueue;                     /* 0x70  256 */
+
+    /* --- cacheline 5 boundary (320 bytes) --- */
+    struct _RTL_SRWLOCK ShutdownLock;                       /* 0x170  8 */
+    unsigned char ShutdownInitiated;                        /* 0x178  1 */
+    unsigned char Released;                                 /* 0x179  1 */
+    unsigned short PoolFlags;                               /* 0x17a  2 */
+    /* 4 bytes padding */
+
+    /* --- cacheline 6 boundary (384 bytes) --- */
+    struct _LIST_ENTRY PoolLinks;                           /* 0x180  16 */
+    struct _TPP_CALLER AllocCaller;                         /* 0x190  8 */
+    struct _TPP_CALLER ReleaseCaller;                       /* 0x198  8 */
+    volatile long AvailableWorkerCount;                     /* 0x1a0  4 */
+    volatile long LongRunningWorkerCount;                   /* 0x1a4  4 */
+    unsigned long LastProcCount;                            /* 0x1a8  4 */
+    volatile long NodeStatus;                               /* 0x1ac  4 */
+    volatile long BindingCount;                             /* 0x1b0  4 */
+    unsigned long CallbackChecksDisabled : 1;               /* 0x1b4:0  4 */
+    unsigned long TrimTarget : 11;                          /* 0x1b4:1  4 */
+    unsigned long TrimmedThrdCount : 11;                    /* 0x1b4:12  4 */
+    unsigned long SelectedCpuSetCount;                      /* 0x1b8  4 */
+    /* 4 bytes padding */
+
+    /* --- cacheline 7 boundary (448 bytes) --- */
+    struct _RTL_CONDITION_VARIABLE TrimComplete;            /* 0x1c0  8 */
+    struct _LIST_ENTRY TrimmedWorkerList;                   /* 0x1c8  16 */
+};

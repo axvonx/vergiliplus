@@ -1,0 +1,196 @@
+struct _TEB {
+    struct _NT_TIB NtTib;                                   /* 0x0  56 */
+    void* EnvironmentPointer;                               /* 0x38  8 */
+
+    /* --- cacheline 1 boundary (64 bytes) --- */
+    struct _CLIENT_ID ClientId;                             /* 0x40  16 */
+    void* ActiveRpcHandle;                                  /* 0x50  8 */
+    void* ThreadLocalStoragePointer;                        /* 0x58  8 */
+    struct _PEB* ProcessEnvironmentBlock;                   /* 0x60  8 */
+    unsigned long LastErrorValue;                           /* 0x68  4 */
+    unsigned long CountOfOwnedCriticalSections;             /* 0x6c  4 */
+    void* CsrClientThread;                                  /* 0x70  8 */
+    void* Win32ThreadInfo;                                  /* 0x78  8 */
+
+    /* --- cacheline 2 boundary (128 bytes) --- */
+    unsigned long User32Reserved[26];                       /* 0x80  104 */
+
+    /* --- cacheline 3 boundary (192 bytes) --- */
+    unsigned long UserReserved[5];                          /* 0xe8  20 */
+    /* 4 bytes padding */
+
+    /* --- cacheline 4 boundary (256 bytes) --- */
+    void* WOW32Reserved;                                    /* 0x100  8 */
+    unsigned long CurrentLocale;                            /* 0x108  4 */
+    unsigned long FpSoftwareStatusRegister;                 /* 0x10c  4 */
+    void* ReservedForDebuggerInstrumentation[16];           /* 0x110  128 */
+
+    /* --- cacheline 6 boundary (384 bytes) --- */
+    void* SystemReserved1[25];                              /* 0x190  200 */
+
+    /* --- cacheline 9 boundary (576 bytes) --- */
+    void* HeapFlsData;                                      /* 0x258  8 */
+    unsigned __int64 RngState[4];                           /* 0x260  32 */
+
+    /* --- cacheline 10 boundary (640 bytes) --- */
+    char PlaceholderCompatibilityMode;                      /* 0x280  1 */
+    unsigned char PlaceholderHydrationAlwaysExplicit;       /* 0x281  1 */
+    char PlaceholderReserved[10];                           /* 0x282  10 */
+    unsigned long ProxiedProcessId;                         /* 0x28c  4 */
+    struct _ACTIVATION_CONTEXT_STACK _ActivationStack;      /* 0x290  40 */
+    unsigned char WorkingOnBehalfTicket[8];                 /* 0x2b8  8 */
+
+    /* --- cacheline 11 boundary (704 bytes) --- */
+    long ExceptionCode;                                     /* 0x2c0  4 */
+    unsigned char Padding0[4];                              /* 0x2c4  4 */
+    struct _ACTIVATION_CONTEXT_STACK* ActivationContextStackPointer;  /* 0x2c8  8 */
+    unsigned __int64 InstrumentationCallbackSp;             /* 0x2d0  8 */
+    unsigned __int64 InstrumentationCallbackPreviousPc;     /* 0x2d8  8 */
+    unsigned __int64 InstrumentationCallbackPreviousSp;     /* 0x2e0  8 */
+    unsigned long TxFsContext;                              /* 0x2e8  4 */
+    unsigned char InstrumentationCallbackDisabled;          /* 0x2ec  1 */
+    unsigned char UnalignedLoadStoreExceptions;             /* 0x2ed  1 */
+    unsigned char Padding1[2];                              /* 0x2ee  2 */
+    struct _GDI_TEB_BATCH GdiTebBatch;                      /* 0x2f0  1256 */
+
+    /* --- cacheline 31 boundary (1984 bytes) --- */
+    struct _CLIENT_ID RealClientId;                         /* 0x7d8  16 */
+    void* GdiCachedProcessHandle;                           /* 0x7e8  8 */
+    unsigned long GdiClientPID;                             /* 0x7f0  4 */
+    unsigned long GdiClientTID;                             /* 0x7f4  4 */
+    void* GdiThreadLocalInfo;                               /* 0x7f8  8 */
+
+    /* --- cacheline 32 boundary (2048 bytes) --- */
+    unsigned __int64 Win32ClientInfo[62];                   /* 0x800  496 */
+
+    /* --- cacheline 39 boundary (2496 bytes) --- */
+    void* glDispatchTable[233];                             /* 0x9f0  1864 */
+
+    /* --- cacheline 68 boundary (4352 bytes) --- */
+    unsigned __int64 glReserved1[29];                       /* 0x1138  232 */
+
+    /* --- cacheline 72 boundary (4608 bytes) --- */
+    void* glReserved2;                                      /* 0x1220  8 */
+    void* glSectionInfo;                                    /* 0x1228  8 */
+    void* glSection;                                        /* 0x1230  8 */
+    void* glTable;                                          /* 0x1238  8 */
+
+    /* --- cacheline 73 boundary (4672 bytes) --- */
+    void* glCurrentRC;                                      /* 0x1240  8 */
+    void* glContext;                                        /* 0x1248  8 */
+    unsigned long LastStatusValue;                          /* 0x1250  4 */
+    unsigned char Padding2[4];                              /* 0x1254  4 */
+    struct _UNICODE_STRING StaticUnicodeString;             /* 0x1258  16 */
+    wchar_t StaticUnicodeBuffer[261];                       /* 0x1268  522 */
+
+    /* --- cacheline 81 boundary (5184 bytes) --- */
+    unsigned char Padding3[6];                              /* 0x1472  6 */
+    void* DeallocationStack;                                /* 0x1478  8 */
+
+    /* --- cacheline 82 boundary (5248 bytes) --- */
+    void* TlsSlots[64];                                     /* 0x1480  512 */
+
+    /* --- cacheline 90 boundary (5760 bytes) --- */
+    struct _LIST_ENTRY TlsLinks;                            /* 0x1680  16 */
+    void* Vdm;                                              /* 0x1690  8 */
+    void* ReservedForNtRpc;                                 /* 0x1698  8 */
+    void* DbgSsReserved[2];                                 /* 0x16a0  16 */
+    unsigned long HardErrorMode;                            /* 0x16b0  4 */
+    unsigned char Padding4[4];                              /* 0x16b4  4 */
+    void* Instrumentation[11];                              /* 0x16b8  88 */
+
+    /* --- cacheline 92 boundary (5888 bytes) --- */
+    struct _GUID ActivityId;                                /* 0x1710  16 */
+    void* SubProcessTag;                                    /* 0x1720  8 */
+    void* PerflibData;                                      /* 0x1728  8 */
+    void* EtwTraceData;                                     /* 0x1730  8 */
+    void* WinSockData;                                      /* 0x1738  8 */
+
+    /* --- cacheline 93 boundary (5952 bytes) --- */
+    unsigned long GdiBatchCount;                            /* 0x1740  4 */
+    union {
+        struct _PROCESSOR_NUMBER CurrentIdealProcessor;     /* 0x1744  4 */
+        unsigned long IdealProcessorValue;                  /* 0x1744  4 */
+        struct {
+            unsigned char ReservedPad0;                     /* 0x1744  1 */
+            unsigned char ReservedPad1;                     /* 0x1745  1 */
+            unsigned char ReservedPad2;                     /* 0x1746  1 */
+            unsigned char IdealProcessor;                   /* 0x1747  1 */
+        };                                                  /* 0x1744  4 */
+    };                                                      /* 0x1744  4 */
+    unsigned long GuaranteedStackBytes;                     /* 0x1748  4 */
+    unsigned char Padding5[4];                              /* 0x174c  4 */
+    void* ReservedForPerf;                                  /* 0x1750  8 */
+    void* ReservedForOle;                                   /* 0x1758  8 */
+    unsigned long WaitingOnLoaderLock;                      /* 0x1760  4 */
+    unsigned char Padding6[4];                              /* 0x1764  4 */
+    void* SavedPriorityState;                               /* 0x1768  8 */
+    unsigned __int64 ReservedForCodeCoverage;               /* 0x1770  8 */
+    void* ThreadPoolData;                                   /* 0x1778  8 */
+
+    /* --- cacheline 94 boundary (6016 bytes) --- */
+    void** TlsExpansionSlots;                               /* 0x1780  8 */
+    struct _CHPEV2_CPUAREA_INFO* ChpeV2CpuAreaInfo;         /* 0x1788  8 */
+    void* Unused;                                           /* 0x1790  8 */
+    unsigned long MuiGeneration;                            /* 0x1798  4 */
+    unsigned long IsImpersonating;                          /* 0x179c  4 */
+    void* NlsCache;                                         /* 0x17a0  8 */
+    void* pShimData;                                        /* 0x17a8  8 */
+    unsigned long HeapData;                                 /* 0x17b0  4 */
+    unsigned char Padding7[4];                              /* 0x17b4  4 */
+    void* CurrentTransactionHandle;                         /* 0x17b8  8 */
+
+    /* --- cacheline 95 boundary (6080 bytes) --- */
+    struct _TEB_ACTIVE_FRAME* ActiveFrame;                  /* 0x17c0  8 */
+    void* FlsData;                                          /* 0x17c8  8 */
+    void* PreferredLanguages;                               /* 0x17d0  8 */
+    void* UserPrefLanguages;                                /* 0x17d8  8 */
+    void* MergedPrefLanguages;                              /* 0x17e0  8 */
+    unsigned long MuiImpersonation;                         /* 0x17e8  4 */
+    union {
+        volatile unsigned short CrossTebFlags;              /* 0x17ec  2 */
+        unsigned short SpareCrossTebBits : 16;              /* 0x17ec:0  2 */
+    };                                                      /* 0x17ec  2 */
+    union {
+        unsigned short SameTebFlags;                        /* 0x17ee  2 */
+        struct {
+            unsigned short SafeThunkCall : 1;               /* 0x17ee:0  2 */
+            unsigned short InDebugPrint : 1;                /* 0x17ee:1  2 */
+            unsigned short HasFiberData : 1;                /* 0x17ee:2  2 */
+            unsigned short SkipThreadAttach : 1;            /* 0x17ee:3  2 */
+            unsigned short WerInShipAssertCode : 1;         /* 0x17ee:4  2 */
+            unsigned short RanProcessInit : 1;              /* 0x17ee:5  2 */
+            unsigned short ClonedThread : 1;                /* 0x17ee:6  2 */
+            unsigned short SuppressDebugMsg : 1;            /* 0x17ee:7  2 */
+            unsigned short DisableUserStackWalk : 1;        /* 0x17ee:8  2 */
+            unsigned short RtlExceptionAttached : 1;        /* 0x17ee:9  2 */
+            unsigned short InitialThread : 1;               /* 0x17ee:10  2 */
+            unsigned short SessionAware : 1;                /* 0x17ee:11  2 */
+            unsigned short LoadOwner : 1;                   /* 0x17ee:12  2 */
+            unsigned short LoaderWorker : 1;                /* 0x17ee:13  2 */
+            unsigned short SkipLoaderInit : 1;              /* 0x17ee:14  2 */
+            unsigned short SkipFileAPIBrokering : 1;        /* 0x17ee:15  2 */
+        };                                                  /* 0x17ee  2 */
+    };                                                      /* 0x17ee  2 */
+    void* TxnScopeEnterCallback;                            /* 0x17f0  8 */
+    void* TxnScopeExitCallback;                             /* 0x17f8  8 */
+
+    /* --- cacheline 96 boundary (6144 bytes) --- */
+    void* TxnScopeContext;                                  /* 0x1800  8 */
+    unsigned long LockCount;                                /* 0x1808  4 */
+    long WowTebOffset;                                      /* 0x180c  4 */
+    void* ResourceRetValue;                                 /* 0x1810  8 */
+    void* ReservedForWdf;                                   /* 0x1818  8 */
+    unsigned __int64 ReservedForCrt;                        /* 0x1820  8 */
+    struct _GUID EffectiveContainerId;                      /* 0x1828  16 */
+    unsigned __int64 LastSleepCounter;                      /* 0x1838  8 */
+
+    /* --- cacheline 97 boundary (6208 bytes) --- */
+    unsigned long SpinCallCount;                            /* 0x1840  4 */
+    unsigned char Padding8[4];                              /* 0x1844  4 */
+    unsigned __int64 ExtendedFeatureDisableMask;            /* 0x1848  8 */
+    void* SchedulerSharedDataSlot;                          /* 0x1850  8 */
+    void* HeapWalkContext;                                  /* 0x1858  8 */
+    struct _GROUP_AFFINITY PrimaryGroupAffinity;            /* 0x1860  16 */
+    unsigned long Rcu[2];                                   /* 0x1870  8 */
+};

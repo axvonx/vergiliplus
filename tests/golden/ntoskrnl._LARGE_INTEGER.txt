@@ -1,0 +1,11 @@
+union _LARGE_INTEGER {
+    struct {
+        unsigned long LowPart;                              /* 0x0  4 */
+        long HighPart;                                      /* 0x4  4 */
+    };                                                      /* 0x0  8 */
+    struct {
+        unsigned long LowPart;                              /* 0x0  4 */
+        long HighPart;                                      /* 0x4  4 */
+    } u;                                                    /* 0x0  8 */
+    __int64 QuadPart;                                       /* 0x0  8 */
+};

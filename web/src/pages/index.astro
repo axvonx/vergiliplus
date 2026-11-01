@@ -1,23 +1,25 @@
 ---
 import Base from "../layouts/Base.astro";
-import { catalog, cmpBuild, ctxPath } from "../lib/render.mjs";
+import { catalog, cmpBuild, ctxPath, modInfo } from "../lib/render.mjs";
+import { RINGS } from "../lib/modules.mjs";
 const docs = catalog().docs.slice().sort((a, b) => cmpBuild(b.build, a.build));
-const groups = [
-  { label: "Userland", module: "ntdll" },
-  { label: "Kernel", module: "ntoskrnl" },
-].map((g) => ({ ...g, docs: docs.filter((d) => d.module === g.module) }))
- .filter((g) => g.docs.length > 0);
+// ring -> module -> builds; a module heading per module, grouped under its ring
+const mods = [...new Set(docs.map((d) => d.module))].sort();
+const groups = RINGS.flatMap((g) => mods
+  .filter((m) => modInfo(m).ring === g.ring)
+  .map((m) => ({ label: g.label, module: m, docs: docs.filter((d) => d.module === m) })));
+const archs = [...new Set(docs.map((d) => d.arch))].sort();
 const total = docs.reduce((n, d) => n + Object.keys(d.named).length, 0);
 ---
 <Base title="versions">
   <h1 class="page-title">Versions</h1>
   <p class="subtle">
-    {docs.length} module builds · {total.toLocaleString()} documented types, from public PDBs.
+    {docs.length} module builds · {archs.join(" / ")} · {total.toLocaleString()} documented types, from public PDBs.
     Press <span class="kbd">⌘K</span> to search everything.
   </p>
   {groups.map((g) => (
     <>
-      <div class="mod-h">{g.label} <span class="mod-n">{g.module} · {g.docs.length} builds</span></div>
+      <div class="mod-h">{g.label} <span class="mod-n">{modInfo(g.module).label} · {g.docs.length} builds</span></div>
       <div class="ver-grid">
         {g.docs.map((d) => (
           <a class="ver-card" href={`${ctxPath(d.arch, d.build, d.module)}.html`}>

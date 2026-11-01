@@ -1,5 +1,5 @@
 ---
-import { catalog, ctxPath, slug, MODLABEL } from "../lib/render.mjs";
+import { catalog, ctxPath, slug, modInfo } from "../lib/render.mjs";
 const { arch, build, module, type } = Astro.props;
 const cat = catalog();
 const fam = (b, m = module) => cat.get(arch, b, m)?.family || "";
@@ -9,7 +9,6 @@ const listHref = (b, m = module) => `${ctxPath(arch, b, m)}.html`;
 const mods = cat.modules(arch, build);
 const builds = cat.builds(arch, module);
 const has = type ? new Set(cat.typeBuilds(arch, module, type)) : null;
-const target = (b) => (type && has.has(b) ? typeHref(b) : listHref(b));
 
 let prev = null, next = null;
 if (type) {
@@ -24,14 +23,19 @@ if (type) {
   <span class="vb-mods">
     {mods.map((m) => {
       const inOther = type && cat.get(arch, build, m)?.named[type];
+      const info = modInfo(m);
       return m === module
-        ? <span class="vb-mod on">{MODLABEL[m]}</span>
-        : <a class="vb-mod" href={inOther ? typeHref(build, m) : listHref(build, m)}>{MODLABEL[m]}</a>;
+        ? <span class={`vb-mod on r-${info.ring}`}>{info.label}</span>
+        : <a class={`vb-mod r-${info.ring}`} href={inOther ? typeHref(build, m) : listHref(build, m)}
+             title={inOther ? `${type} in ${info.label}` : info.label}>{info.label}</a>;
     })}
   </span>
-  <select class="vb-build" onchange="location.href=this.value" aria-label="Build">
+  {/* option value = build; the page's URL shape is rebuilt client-side (keeps ~28k pages lean) */}
+  <select class="vb-build" aria-label="Build" data-t={type ? `/v/${arch}/@/${module}/${slug(type)}.html` : ""}
+    data-l={`/v/${arch}/@/${module}.html`}
+    onchange="var o=this.selectedOptions[0];location.href=(o.dataset.n||!this.dataset.t?this.dataset.l:this.dataset.t).replace('@',this.value)">
     {builds.map((b) => (
-      <option value={target(b)} selected={b === build}>
+      <option value={b} selected={b === build} data-n={type && !has.has(b) ? "1" : undefined}>
         {fam(b)} — {b}{type && !has.has(b) ? "  (not defined)" : ""}
       </option>
     ))}
