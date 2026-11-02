@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Fail the build if web/dist outgrows its budget (GitHub Pages caps a site at ~1 GB).
 
-Each module build adds ~12 MB / ~1k files; the default budget leaves headroom for
-~25 more before it trips. Raise it deliberately, not reflexively.
-Usage: check_budget.py [web/dist] [--max-mb 600] [--max-files 60000]
+Each build (two modules) adds ~9 MB / ~2.4k files: one shell per type plus only the
+panels whose layout changed. Pages documents no file-count limit; --max-files is a
+guard against runaway generation, not a hosting limit. Raise either deliberately.
+Usage: check_budget.py [web/dist] [--max-mb 600] [--max-files 150000]
 """
 import argparse
 import os
@@ -15,7 +16,7 @@ def main():
     ap.add_argument("dist", nargs="?",
                     default=os.path.join(os.path.dirname(__file__), "..", "web", "dist"))
     ap.add_argument("--max-mb", type=float, default=600)
-    ap.add_argument("--max-files", type=int, default=60000)
+    ap.add_argument("--max-files", type=int, default=150000)
     args = ap.parse_args()
     size = files = 0
     for d, _, fs in os.walk(args.dist):

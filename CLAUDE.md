@@ -97,10 +97,9 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 ## Open (undecided)
 
 **Scale ceiling:** about 9 MB of `dist` per build (two modules: ~2.9 KB page shells plus
-only the panels that changed), so 22 builds ≈ 195 MB of the ~1 GB Pages cap. The file
-count binds first: ~2.4k files per build against check_budget's 60k (52k at 22 builds).
-Before x86/ARM64 or per-update builds, decide that limit or stop emitting one shell per
-build x type (e.g. one page per type, the build chosen client-side).
+only the panels that changed), so 22 builds ≈ 195 MB of the ~1 GB Pages cap. Files: ~2.4k
+per build; check_budget's 150k is a runaway guard (Pages documents no file limit).
+Before x86/ARM64 or per-update builds, stop emitting one shell per build x type.
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
 x86/ARM64 (winbindex has them; budget first) · more canary builds (UUP sets) · home
 grouping (client/server/insider).
