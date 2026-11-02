@@ -2,7 +2,7 @@
 
 Static browser of Windows struct/union/enum layouts from Microsoft's **public PDBs** (and,
 before those carried types, the type records in its DDKs, SDKs and debuggers): kernel
-(`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), 23 x86 (Oct 1991
+(`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), 26 x86 (Oct 1991
 pre-release, NT 3.5 → Windows 10 22H2), 3 IA-64 (2003 SP1 → 2008 SP2), NT on MIPS (Apr 1991,
 3.51, 4.0), Alpha (3.51, 4.0, 2000 RC2) and PowerPC (3.51, 4.0), live at
 https://vergiliplus.com. Not a fork of Vergilius; it borrows only its look.
@@ -153,10 +153,10 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 ## Open (undecided)
 
-**Scale:** 56 builds over 6 arches ≈ 77 MB in ~17.4k files; a build adds ~1 MB (its new
+**Scale:** 59 builds over 6 arches ≈ 78 MB in ~17.4k files; a build adds ~1 MB (its new
 types' pages and changed views); a new arch is another /t/ tree (x86 added ~23 MB).
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
-ARM64 / IA-64 · x86 Win10 1507/1709/1803/1903/1909 · more canary builds (UUP sets) · home
+ARM64 · more canary builds (UUP sets) · home
 grouping (client/server/insider).
 
 ## Attribution
