@@ -23,15 +23,15 @@ const next = i >= 0 && i < tb.length - 1 ? tb[i + 1] : null;
 ---
 <div class="cbar">
   {multiArch && <span class="cb-arch">{arch}</span>}
-  {/* option value = build; nav.js rebuilds the target URL (@ = build), falling back
-      to the listing where the type isn't defined (data-n) */}
-  <select class="cb-build" aria-label="Build" data-t={type ? `/v/${arch}/@/${module}/${slug(type)}.html` : undefined}
-    data-l={`/v/${arch}/@/${module}.html`}>
-    {builds.map((b) => (
-      <option value={b} selected={b === build} data-n={type && !has.has(b) ? "1" : undefined}>
-        {fam(b)} — {b}{type && !has.has(b) ? "  (not defined)" : type && cat.get(arch, b, module).opaque[type] ? "  (opaque)" : ""}
-      </option>
-    ))}
+  {/* Only the current build is rendered; nav.js fills the rest from /builds.json
+      (one copy, not ~2 KB in every page). data-has has one char per build of
+      cat.builds(arch, module): d defined, o opaque, - absent. option value = build;
+      nav.js rebuilds the target URL (@ = build), falling back to the listing where
+      the type isn't defined */}
+  <select class="cb-build" aria-label="Build" data-am={`${arch}/${module}`}
+    data-has={type ? builds.map((b) => !has.has(b) ? "-" : cat.get(arch, b, module).opaque[type] ? "o" : "d").join("") : undefined}
+    data-t={type ? `/v/${arch}/@/${module}/${slug(type)}.html` : undefined} data-l={`/v/${arch}/@/${module}.html`}>
+    <option value={build} selected>{fam(build)} — {build}{type && cat.get(arch, build, module).opaque[type] ? "  (opaque)" : ""}</option>
   </select>
   <span class="cb-sep">/</span>
   <span class="cb-mods">

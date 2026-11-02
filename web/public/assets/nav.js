@@ -91,6 +91,24 @@
   });
 
   // ---- context bar build switcher: same type in the chosen build, else its listing ----
+  // The page ships only its own build's <option>; the rest come from /builds.json.
+  let builds = null;
+  const fillBuilds = () => {
+    const s = document.querySelector(".cb-build[data-am]");
+    if (!s || s.dataset.filled) return;
+    (builds ||= fetch("/builds.json").then((r) => r.ok ? r.json() : Promise.reject(r.status)))
+      .then((all) => {
+        const list = all[s.dataset.am], has = s.dataset.has, cur = s.value;
+        if (!list || s.dataset.filled) return;
+        s.innerHTML = list.map(([b, fam], i) => {
+          const st = has ? has[i] : "d";
+          return `<option value="${esc(b)}"${b === cur ? " selected" : ""}${st === "-" ? ' data-n="1"' : ""}>` +
+            `${esc(fam)} — ${esc(b)}${st === "-" ? "  (not defined)" : st === "o" ? "  (opaque)" : ""}</option>`;
+        }).join("");
+        s.dataset.filled = "1";
+      })
+      .catch(() => { builds = null; });  // keep the one option; retry on the next page
+  };
   document.addEventListener("change", (e) => {
     const s = e.target;
     if (!s.matches?.(".cb-build")) return;
@@ -108,6 +126,12 @@
   F.kind ||= "all"; F.mOff ||= []; F.vOff ||= []; F.op ??= true;
   const saveF = () => store("vp-ck", JSON.stringify(F));
   const el = () => document.getElementById("vp-ck");
+  // created on first open, not shipped in every page (ClientRouter swaps <body>, so
+  // it is re-created after a navigation if opened again)
+  const PALETTE = `<div id="vp-ck" class="ck-ov" hidden><div class="ck">` +
+    `<input class="ck-input" placeholder="Search every type in every build…">` +
+    `<div class="ck-filters"></div><div class="ck-list"></div>` +
+    `<div class="ck-foot">↑↓ move · ↵ open · click a square for that build · esc close · / or ⌘K to open</div></div></div>`;
   const short = (fam) => fam.replace(/^Windows /, "");
   // per-version on/off, recomputed only when F.vOff is replaced (it is never mutated)
   let onFor = null, on = [];
@@ -197,6 +221,7 @@
 
   const ckOpen = (open) => {
     ck.open = open;
+    if (open && !el()) document.body.insertAdjacentHTML("beforeend", PALETTE);
     const root = el();
     if (!root) return;
     if (open) {
@@ -288,7 +313,7 @@
   });
 
   const sync = () => {
-    ck.open = false; ckRender(); sbSync(); homeLinks();
+    ck.open = false; ckRender(); sbSync(); homeLinks(); fillBuilds();
     tl.q = ""; tl.kind = "all";
     document.documentElement.classList.toggle("side-collapsed", store("vp-side") === "0");
   };

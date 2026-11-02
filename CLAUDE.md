@@ -81,6 +81,9 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 - `<unnamed-tag>` is MSVC's name for every anonymous aggregate. `loadDoc` drops it from
   `named`; layout inlines such members; `usedIn` credits the enclosing type.
 - Pointer size comes from the doc's arch (`PTR_SIZE` in types.mjs).
+- Per-page chrome is the budget's biggest line: anything listing every build belongs in
+  a shared file. The build `<select>` ships one option + `data-has` (d/o/- per build);
+  nav.js fills it from `/builds.json`. The palette markup is created by nav.js.
 - `/search-index.json` is grouped: `{v: versions, m: modules, t: [[name, kind, slug,
   module#, [defined v#], [opaque v#]]]}` (~380 KB). Palette filters (kind, PDB, opaque,
   versions checklist) persist in localStorage `vp-ck`; it opens with `/` or ⌘K.
@@ -89,8 +92,8 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 ## Open (undecided)
 
-**Scale ceiling:** about 20 MB of `dist` per build (two modules), so 22 builds ≈ 428 MB.
-GitHub Pages caps at ~1 GB, so roughly 45 builds is the limit without an architecture
+**Scale ceiling:** about 13 MB of `dist` per build (two modules), so 22 builds ≈ 294 MB.
+GitHub Pages caps at ~1 GB, so roughly 70 builds is the limit without an architecture
 change (e.g. client-rendering older builds from JSON). Plan that before x86/ARM64 or
 per-update builds.
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
