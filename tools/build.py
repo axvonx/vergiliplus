@@ -53,7 +53,10 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # one machine, fetched like "pkg" (archive.org
                                                # serves single files inside disc images).
                                                # "format": "cv3" instead computes 32-bit
-                                               # layouts from a 1991 debugger's CodeView 3.
+                                               # layouts from a 1991 debugger's CodeView 3;
+                                               # "kdext": names+offsets only, from a debugger
+                                               # extension. "names" limits what a cv4 doc
+                                               # documents (what they reach comes along).
                                                # "build" is required (a sort key; buildLabel
                                                # is what shows when there is no real number);
                                                # "note" becomes the layouts' provenance line;
@@ -349,9 +352,11 @@ def handle(entry, base, pdbdir):
         build, src = entry["build"], fetch_pkg(entry, pdbdir, "lib")
         if entry.get("format") == "cv3":
             doc = cv3.convert(src, entry["module"], arch, build, family, entry["note"])
+        elif entry.get("format") == "kdext":
+            doc = kdext.convert(src, entry["module"], arch, build, family, entry["note"])
         else:
             doc = cv4.convert([src], entry["machine"], entry["module"], arch, build, family,
-                              entry["note"])
+                              entry["note"], set(entry["names"]) if entry.get("names") else None)
         if entry.get("kdext"):
             ext = fetch_pkg(dict(entry["kdext"], member=[]), pdbdir, "url")
             ok, n, _, bad = kdext.check(doc, ext)

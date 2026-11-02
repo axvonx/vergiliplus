@@ -10,6 +10,9 @@ string's address. A pair matches when _EPROCESS or _ETHREAD of the doc has that 
 (the extension's !tokenfields, say) is unresolved, not a mismatch.
 
   kdext.py DOC.json KDEXT.DLL      -> "matched N/M", mismatches listed; exit 1 on any
+
+convert() instead makes a doc of the printed names and offsets alone (NT 3.51, whose
+libraries carry no kernel types).
 """
 import json
 import re
@@ -46,6 +49,45 @@ def fields(path):
             elif b[p - 5] == 0x68:          # push imm32
                 out.append((m.group(1).decode(), struct.unpack_from("<I", b, p - 4)[0]))
     return out
+
+
+# each command's lines come out as one block ending with its offset-0 member
+BLOCK_STRUCT = {"Pcb": "_EPROCESS", "Tcb": "_ETHREAD", "TokenSource": "_TOKEN"}
+
+
+def structs(dll):
+    """{struct name: [(member, offset)] by offset}: what the extension's !processfields,
+    !threadfields and !tokenfields print, split into their blocks."""
+    out, cur = {}, []
+    for name, off in fields(dll):
+        cur.append((re.sub(r"\[\d+\]$", "", name), off))
+        if off == 0:
+            if name not in BLOCK_STRUCT:
+                raise ValueError("unexpected block end %s in %s" % (name, dll))
+            out[BLOCK_STRUCT[name]] = sorted(set(cur), key=lambda x: (x[1], x[0]))
+            cur = []
+    if cur:
+        raise ValueError("trailing fields without an offset-0 member in %s" % dll)
+    return out
+
+
+def convert(dll, module, arch, build, family="", note=""):
+    """A names-and-offsets-only doc from a debugger extension: one struct per block,
+    members without types ("untyped" structs render "/* type unknown */")."""
+    types, named, nxt = {}, {}, 0x1000
+    for name, members in sorted(structs(dll).items()):
+        s, fl = "0x%X" % nxt, "0x%X" % (nxt + 1)
+        nxt += 2
+        types[s] = {"kind": "struct", "name": name, "size": 0, "fieldlist": fl,
+                    "forward": None, "untyped": True}
+        types[fl] = {"kind": "fieldlist", "enums": [],
+                     "members": [{"name": m, "type": None, "offset": o} for m, o in members]}
+        named[name] = s
+    return {
+        "module": module, "arch": arch, "build": build, "family": family,
+        "fileVersion": None, "pdb": None, "provenance": {"kind": "source", "note": note},
+        "named": named, "opaque": {}, "types": types,
+    }
 
 
 def member_offsets(doc, struct_name):

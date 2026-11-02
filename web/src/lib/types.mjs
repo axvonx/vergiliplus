@@ -90,6 +90,8 @@ export class Types {
 
   // C declarator split around the field name: `${pre} name${suf}`, as segments
   typeParts(idx) {
+    // names+offsets-only structs (an "incomplete" build's debugger-extension data)
+    if (idx == null) return { pre: [{ t: "/* type unknown */" }], suf: [] };
     const n = this.get(idx);
     switch (n.kind) {
       case "base": return { pre: words(n.name || "void"), suf: [] };

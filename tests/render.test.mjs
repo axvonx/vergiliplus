@@ -26,6 +26,7 @@ const NTDLL = "ntdll-10.0.26100.7824-x64.json";
 const NTOS = "ntoskrnl-10.0.26100.7824-x64.json";
 const NT40 = "ntoskrnl-4.0.1381.1-x86.json";
 const OCT91 = "ntoskrnl-0.1991.10.0-x86.json";
+const NT351 = "ntoskrnl-3.51.1057.1-x86.json";
 // fixture file: <module>.<type>.txt for the 24H2 docs, <doc>.<type>.txt for any other
 const fixture = (file, name) =>
   `${[NTDLL, NTOS].includes(file) ? file.split("-")[0] : file.replace(/\.json$/, "")}.${name}.txt`;
@@ -49,6 +50,8 @@ const CASES = [
   // computed: October 1991 I386KD.EXE CodeView 3 (tools/legacy/cv3.py), relaid out
   // naturally; IRR at 0x28 (host 0x25) is the NT 3.1 offset
   [OCT91, "_KPCR"],
+  // incomplete: NT 3.51 names+offsets from KDEXTX86.DLL, no types ("untyped")
+  [NT351, "_EPROCESS"],
 ];
 
 for (const [file, name] of CASES) {

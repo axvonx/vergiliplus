@@ -202,6 +202,9 @@ def convert(paths, machine, module, arch, build, family="", note="", names=None)
                     and n["name"] not in ANON and (n["kind"], n["name"]) not in m.chosen:
                 declared.setdefault(n["name"], n["kind"])
     types = P.reachable(m.types, named.values())
+    if names is not None:  # what the chosen roots reach is documented too
+        named = {n: m.ids[("N", k, n)] for (k, n) in sorted(m.chosen)
+                 if ("N", k, n) in m.ids and m.ids[("N", k, n)] in types}
     # an opaque name a documented type reaches (as a pointer target, say) is kept
     opaque = {n: k for n, k in sorted(declared.items())
               if n not in named and ("N", k, n) in m.ids and m.ids[("N", k, n)] in types}

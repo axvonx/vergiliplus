@@ -40,7 +40,8 @@ export function panelHtml(T, name, doc = null) {
     const s = L.summary;
     head = `<span class="kw">${L.kind}</span> ${esc(L.name)} {`;
     body = L.rows.map((r) => rowHtml(r, T)).join("");
-    stats = [["size", `${s.size} (0x${s.size.toString(16)})`], [plural(s.members, "member"), ""],
+    stats = s.untyped ? [[plural(s.members, "member"), ""], ["size", "unknown"]]
+      : [["size", `${s.size} (0x${s.size.toString(16)})`], [plural(s.members, "member"), ""],
              [plural(s.holes, "hole"), s.holes ? `${s.sumHoles} bytes` : ""], ["padding", s.padding],
              [plural(s.cachelines, "cacheline"), ""]];
   }

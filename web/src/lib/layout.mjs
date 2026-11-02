@@ -78,6 +78,8 @@ export function structLayout(T, name) {
   const us = units(T, members);
   const rows = [];
   const st = { holes: 0, sumHoles: 0, lastLine: 0, sum: 0 };
+  // names and offsets only (no member types, no size): no holes, sizes or padding
+  const untyped = !!n.untyped;
   const hx = (x) => "0x" + x.toString(16);
 
   const member = ({ m, pos }, depth) => {
@@ -102,7 +104,7 @@ export function structLayout(T, name) {
     rows.push({
       depth, typePre: tp.pre, typeSuf: tp.suf, sep: text(tp.pre).endsWith("(*") ? "" : " ",
       fkind: T.memberKind(m.type), field: m.name, offset: m.offset,
-      size: bf ? T.sizeof(node.type) : T.sizeof(m.type),
+      size: untyped ? null : bf ? T.sizeof(node.type) : T.sizeof(m.type),
       bits: bf ? node.bits : null, bitpos: bf ? pos : null,
       ref, linked: T.hasPage(ref),
     });
@@ -111,7 +113,7 @@ export function structLayout(T, name) {
   const emitStruct = (items, depth, top) => {
     let expected = items.length ? items[0].offset : 0;
     for (const it of items) {
-      if (it.offset > expected) {
+      if (it.offset > expected && !untyped) {
         const h = it.offset - expected;
         rows.push({ depth, hole: h });
         st.holes++; st.sumHoles += h;
@@ -155,7 +157,7 @@ export function structLayout(T, name) {
   return {
     name, kind: n.kind, rows,
     summary: {
-      size: total, cachelines: Math.max(1, Math.ceil(total / 64)),
+      untyped, size: total, cachelines: Math.max(1, Math.ceil(total / 64)),
       members: members.length, sumMembers, holes: st.holes, sumHoles: st.sumHoles,
       padding: n.kind === "union" ? 0 : Math.max(0, total - used),
       lastCacheline: total % 64 || Math.min(total, 64),
@@ -233,5 +235,5 @@ export function layoutText(T, name, meta = true) {
 
 // "/* 0x18  8 */" offset annotation; bitfields carry their bit position: 0x18:3
 export const offAnn = (r) =>
-  `0x${r.offset.toString(16)}${r.bitpos != null ? ":" + r.bitpos : ""}  ${r.size}`;
+  `0x${r.offset.toString(16)}${r.bitpos != null ? ":" + r.bitpos : ""}${r.size == null ? "" : "  " + r.size}`;
 export const hexv = (v) => (v < 0 ? "-0x" + (-v).toString(16) : "0x" + v.toString(16));

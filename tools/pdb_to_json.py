@@ -447,8 +447,18 @@ def cv_fieldlist(d):
             _, o = cv_pstr(d, o + 8)
         elif sub == 0x1408:    # LF_NESTTYPE_ST: pad, type, name
             _, o = cv_pstr(d, o + 8)
-        elif sub == 0x0409:    # LF_NESTTYPE (16-bit): type, name
+        elif sub in (0x0409, 0x0404):  # LF_NESTTYPE / LF_FRIENDFCN (16-bit): type, name
             _, o = cv_pstr(d, o + 4)
+        elif sub in (0x0407, 0x0408):  # LF_STMEMBER / LF_METHOD (16-bit): 2 words, name
+            _, o = cv_pstr(d, o + 6)
+        elif sub in (0x040A, 0x040B):  # LF_VFUNCTAB / LF_FRIENDCLS (16-bit): type
+            o += 4
+        elif sub in (0x0401, 0x0402):  # LF_VBCLASS/IVBCLASS (16-bit): 3 words, 2 numerics
+            _, p = cv_numeric(d, o + 8)
+            _, o = cv_numeric(d, p)
+        elif sub == 0x040C:    # LF_ONEMETHOD (16-bit): attr, type, [vbase offset], name
+            attr = struct.unpack_from("<H", d, o + 2)[0]
+            _, o = cv_pstr(d, o + 6 + (4 if ((attr >> 2) & 7) in (4, 6) else 0))
         elif sub in (0x1409, 0x140a):  # LF_VFUNCTAB / LF_FRIENDCLS: pad, type
             o += 8
         elif sub == 0x140b:    # LF_ONEMETHOD_ST: attr, type, [vbase offset], name
