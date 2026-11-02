@@ -1,10 +1,9 @@
 ---
 import Layout from "../../../../../layouts/Layout.astro";
-import StructCode from "../../../../../components/StructCode.astro";
 import ContextBar from "../../../../../components/ContextBar.astro";
-import { catalog, cmpBuild, typesFor, usedInFor, typeList, ctxPath } from "../../../../../lib/catalog.mjs";
+import { catalog, cmpBuild, usedInFor, typeList, ctxPath } from "../../../../../lib/catalog.mjs";
 import { slug } from "../../../../../lib/types.mjs";
-import { structLayout, enumLayout as enumOf } from "../../../../../lib/layout.mjs";
+import { fragmentOf } from "../../../../../lib/panel.mjs";
 
 export function getStaticPaths() {
   const out = [];
@@ -23,11 +22,9 @@ const { arch, build, module } = Astro.params;
 const { name, opaque, kind } = Astro.props;
 const cat = catalog();
 const doc = cat.get(arch, build, module);
-const T = typesFor(doc);
 const used = usedInFor(doc)[name] || [];
-const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
 
-let layout = null, enumLayout = null, stats = [], definedIn = [];
+let frag = null, definedIn = [];
 if (opaque) {
   // where this name does have a layout: other modules of this build first, then other builds
   definedIn = cat.docs
@@ -35,14 +32,7 @@ if (opaque) {
     .map((d) => ({ d, here: d.build === build }))
     .sort((x, y) => (y.here - x.here) || cmpBuild(y.d.build, x.d.build) || (x.d.module < y.d.module ? -1 : 1));
 } else {
-  layout = structLayout(T, name);
-  enumLayout = layout ? null : enumOf(T, name);
-  const s = layout?.summary;
-  stats = enumLayout
-    ? [[plural(enumLayout.summary.values, "value"), ""], ["size", enumLayout.summary.size]]
-    : [["size", `${s.size} (0x${s.size.toString(16)})`], [plural(s.members, "member"), ""],
-       [plural(s.holes, "hole"), s.holes ? `${s.sumHoles} bytes` : ""], ["padding", s.padding],
-       [plural(s.cachelines, "cacheline"), ""]];
+  frag = `/f/${fragmentOf(doc, name)}.html`;  // shared panel, injected by struct.js
 }
 ---
 <Layout title={`${name} · ${module} ${build}`} side>
@@ -61,14 +51,7 @@ if (opaque) {
       )}
     </div>
   ) : (
-    <div class="panel">
-      <StructCode layout={layout} enumLayout={enumLayout} T={T} />
-      <div class="stats">
-        {stats.map(([k, v]) => /^\d/.test(k)
-          ? <span><b>{k.split(" ")[0]}</b> {k.split(" ").slice(1).join(" ")}{v !== "" ? ` (${v})` : ""}</span>
-          : <span>{k} <b>{v}</b></span>)}
-      </div>
-    </div>
+    <div class="panel" data-frag={frag}><noscript>The layout loads with JavaScript: <a href={frag}>plain view</a>.</noscript></div>
   )}
   {used.length > 0 && (
     <section class="panel">

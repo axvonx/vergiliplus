@@ -3,7 +3,9 @@
 
 Scans href/src attributes in all .html files, resolves them against the page
 (relative) or the site root (absolute), and reports targets that don't exist.
-Also checks that each type listing has the /ti/ sidebar index nav.js fetches.
+Also checks that each type listing has the /ti/ sidebar index nav.js fetches, and
+that each type page's shared panel (data-frag, /f/<hash>.html) exists and its links
+resolve against that page, since struct.js injects it there.
 Stdlib only. Exit 1 on any broken link.
 
 Usage: check_links.py [web/dist]
@@ -13,7 +15,8 @@ import re
 import sys
 from urllib.parse import unquote, urlsplit
 
-ATTR = re.compile(r'(?:href|src)="([^"#?]*)')
+ATTR = re.compile(r'(?:href|src|data-frag)="([^"#?]*)')
+FRAG = re.compile(r'data-frag="([^"]*)"')
 
 
 def main():
@@ -24,12 +27,23 @@ def main():
         for f in fs:
             files.add(os.path.relpath(os.path.join(d, f), root))
 
-    checked, broken = 0, []
-    for rel in sorted(f for f in files if f.endswith(".html")):
-        base = os.path.dirname(rel)
+    def read(rel):
         with open(os.path.join(root, rel), encoding="utf-8") as fh:
-            html = fh.read()
-        for url in set(ATTR.findall(html)):
+            return fh.read()
+
+    frags = {}  # fragment -> its link set, read once
+    checked, broken = 0, []
+    for rel in sorted(f for f in files if f.endswith(".html") and not f.startswith("f/")):
+        base = os.path.dirname(rel)
+        html = read(rel)
+        urls = set(ATTR.findall(html))
+        for fr in FRAG.findall(html):
+            fr = fr.lstrip("/")
+            if fr in files:
+                if fr not in frags:
+                    frags[fr] = set(ATTR.findall(read(fr)))
+                urls |= frags[fr]
+        for url in urls:
             if not url or urlsplit(url).scheme or url.startswith("//"):
                 continue  # external, mailto:, or a pure fragment
             path = unquote(url)

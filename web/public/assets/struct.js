@@ -1,5 +1,6 @@
-// Struct view behaviour for StructCode.astro: Metadata toggle (remembered), copy,
-// row click-through. Document-level delegation, so it survives ClientRouter swaps.
+// Struct view: loads each page's shared panel (/f/<hash>.html, see lib/panel.mjs), then
+// Metadata toggle (remembered), copy, row click-through. Document-level delegation, so
+// it survives ClientRouter swaps.
 (() => {
   if (window.__vpStruct) return;
   window.__vpStruct = true;
@@ -43,7 +44,20 @@
       if (a && !t.closest("a") && !getSelection().toString()) a.click();
     }
   });
-  document.addEventListener("astro:page-load", apply);
-  if (document.readyState !== "loading") apply();
-  else document.addEventListener("DOMContentLoaded", apply);
+  // inject the panel; its relative links resolve against this page, as if inline
+  const load = () => {
+    apply();
+    document.querySelectorAll("[data-frag]:not([data-loaded])").forEach((p) => {
+      p.dataset.loaded = "1";
+      fetch(p.dataset.frag).then((r) => (r.ok ? r.text() : Promise.reject(r.status)))
+        .then((h) => { p.innerHTML = h; apply(); })
+        .catch(() => {
+          delete p.dataset.loaded;
+          p.innerHTML = `<p class="opaque-note">Couldn't load this layout. <a href="${p.dataset.frag}">Open it directly</a>.</p>`;
+        });
+    });
+  };
+  document.addEventListener("astro:page-load", load);
+  if (document.readyState !== "loading") load();
+  else document.addEventListener("DOMContentLoaded", load);
 })();

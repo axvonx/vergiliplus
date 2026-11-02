@@ -13,6 +13,7 @@ tools/build.py        manifest data/sources.json -> data/<module>-<build>-<arch>
   check_links.py, check_budget.py   post-build gates (CI runs both)
 web/src/lib/types.mjs    type graph + C declarators as segments ({t}, {t,kw}, {t,ref})
 web/src/lib/layout.mjs   pahole rows: anonymous union/struct reconstruction, enums, usedIn, layoutText
+web/src/lib/panel.mjs    layout -> panel HTML; each distinct panel is one /f/<hash>.html, shared by builds
 web/src/lib/catalog.mjs  all docs loaded once + cross-build indexes + memoized per-doc views
 web/src/lib/modules.mjs  module -> ring/label
 web/public/assets/       site.css, nav.js (sidebar, ⌘K, filters, home links), struct.js (Metadata/copy)
@@ -51,7 +52,7 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 - **`data/*.json` is the committed artifact**: compact, and pruned to types reachable
   from the documented ones. Never commit PDBs, PEs or `web/dist/`.
 - **Text first, HTML at the edge.** layout/types produce segments; only
-  `StructCode.astro` (via `html()`) emits markup. Plain-text output never strips tags.
+  `panel.mjs` (via `html()`) emits markup. Plain-text output never strips tags.
 - **Golden fixtures are the spec.** Change rendering → `UPDATE_GOLDEN=1 node --test
   tests/render.test.mjs` → review the fixture diff like code.
 - **Page weight is a budget.** About 47k pages: 1 KB of template is about 47 MB of
@@ -81,6 +82,9 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 - `<unnamed-tag>` is MSVC's name for every anonymous aggregate. `loadDoc` drops it from
   `named`; layout inlines such members; `usedIn` credits the enclosing type.
 - Pointer size comes from the doc's arch (`PTR_SIZE` in types.mjs).
+- Type pages carry no layout: `data-frag` names a shared `/f/<hash>.html` panel that
+  struct.js injects. Identical HTML ⇒ identical relative links, so sharing is safe;
+  check_links.py checks each panel's links against every page that loads it.
 - Per-page chrome is the budget's biggest line: anything listing every build belongs in
   a shared file. The build `<select>` ships one option + `data-has` (d/o/- per build);
   nav.js fills it from `/builds.json`. The palette markup is created by nav.js.
@@ -92,10 +96,11 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 ## Open (undecided)
 
-**Scale ceiling:** about 13 MB of `dist` per build (two modules), so 22 builds ≈ 294 MB.
-GitHub Pages caps at ~1 GB, so roughly 70 builds is the limit without an architecture
-change (e.g. client-rendering older builds from JSON). Plan that before x86/ARM64 or
-per-update builds.
+**Scale ceiling:** about 9 MB of `dist` per build (two modules: ~2.9 KB page shells plus
+only the panels that changed), so 22 builds ≈ 195 MB of the ~1 GB Pages cap. The file
+count binds first: ~2.4k files per build against check_budget's 60k (52k at 22 builds).
+Before x86/ARM64 or per-update builds, decide that limit or stop emitting one shell per
+build x type (e.g. one page per type, the build chosen client-side).
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
 x86/ARM64 (winbindex has them; budget first) · more canary builds (UUP sets) · home
 grouping (client/server/insider).
