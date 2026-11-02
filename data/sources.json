@@ -89,5 +89,6 @@
   {"msdl": "ntoskrnl.exe", "timestamp": 1523419677, "size": 7159808, "sha256": "90637dacddd4feed15d8852b74fc8bb0c12b33146f4b3f36bc8ade30ac1103fd", "version": "10.0.17134.1", "module": "ntoskrnl", "arch": "x86", "family": "Windows 10 1803"},
   {"msdl": "ntdll.dll", "timestamp": 2724457330, "size": 1638400, "sha256": "df749da35a6dd0c89182d5f3320e3a9204f48faebf97d5423521557326cfa738", "version": "10.0.17134.12", "module": "ntdll", "arch": "x86", "family": "Windows 10 1803", "build": "10.0.17134.1"},
   {"msdl": "ntoskrnl.exe", "timestamp": 1451409409, "size": 7688192, "sha256": "fa552fcf4d9b8a91a810b160396b0a9dfa07f6c3338b1d83cd20a6ce8eec38ba", "version": "10.0.18362.1016", "module": "ntoskrnl", "arch": "x86", "family": "Windows 10 1903 / 1909"},
-  {"msdl": "ntdll.dll", "timestamp": 1028861310, "size": 1675264, "sha256": "5ab305e92aac2dfe5640af22d9924e47d83c6f292e64c7d0a0b6b379e0333e30", "version": "10.0.18362.815", "module": "ntdll", "arch": "x86", "family": "Windows 10 1903 / 1909", "build": "10.0.18362.1016"}
+  {"msdl": "ntdll.dll", "timestamp": 1028861310, "size": 1675264, "sha256": "5ab305e92aac2dfe5640af22d9924e47d83c6f292e64c7d0a0b6b379e0333e30", "version": "10.0.18362.815", "module": "ntdll", "arch": "x86", "family": "Windows 10 1903 / 1909", "build": "10.0.18362.1016"},
+  {"uup": "${VP_IMAGES}/windows/arm64/uup/26100.9725", "arch": "arm64", "family": "Windows 11 24H2"}
 ]
