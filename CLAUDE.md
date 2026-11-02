@@ -2,9 +2,10 @@
 
 Static browser of Windows struct/union/enum layouts from Microsoft's **public PDBs** (and,
 before those carried types, the type records in its DDKs, SDKs and debuggers): kernel
-(`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), 26 x86 (Oct 1991
-pre-release, NT 3.5 → Windows 10 22H2), 3 IA-64 (2003 SP1 → 2008 SP2), NT on MIPS (Apr 1991,
-3.51, 4.0), Alpha (3.51, 4.0, 2000 RC2), PowerPC (3.51, 4.0) and ARM64 (24H2), live at
+(`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), 27 x86 (Oct/Dec 1991
+pre-releases, NT 3.5 → Windows 10 22H2), 3 IA-64 (2003 SP1 → 2008 SP2), NT on MIPS (Apr/Dec
+1991, Jul 1992, 3.1 beta 404, 3.51, 4.0), Alpha (3.51, 4.0, 2000 RC2), PowerPC (3.51, 4.0)
+and ARM64 (24H2), live at
 https://vergiliplus.com. Not a fork of Vergilius; it borrows only its look.
 
 ## Map
@@ -148,6 +149,11 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   definition most objects agree on; the C runtime's own `_EXCEPTION_RECORD` disagrees and
   is reported, not mixed in) and hash-conses the rest. `__unnamed` → `<unnamed-tag>`.
   16-bit `LF_INDEX` is 0x0405 (0x0404 is `LF_FRIENDFCN`).
+- Before NT 4.0 no Microsoft-published file found defines `_KTHREAD`/`_EPROCESS`
+  (scanned: 1991-93 pre-release CDs and SDK/DDKs, NT 3.1 retail .dbg/kernels, 3.5/3.51
+  DDKs). 1991 debuggers carry only what they decode; MIPS 1992-93 binaries carry NB08
+  CodeView inline (`cv4.pe_type_tables`), Native-API/TEB/PEB/KPCR level. Build numbers
+  only where the media state them (404.1: the DDK's version.h); else "no build number".
 - ARM64 isn't in winbindex (x64 only): it comes from UUP sets. Only the edition's metadata
   ESD + `Microsoft-Windows-Client-Desktop-Required-Package.esd` (~1.35 GB) are needed;
   the image is the base build (26100.1), whatever the UUP set's update level.
@@ -156,7 +162,7 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 ## Open (undecided)
 
-**Scale:** 60 builds over 7 arches ≈ 99 MB in ~23k files; a build adds ~1 MB (its new
+**Scale:** 64 builds over 7 arches ≈ 101 MB in ~24k files; a build adds ~1 MB (its new
 types' pages and changed views); a new arch is another /t/ tree (x86 added ~23 MB).
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
 more ARM64 builds · more canary builds (UUP sets) · home

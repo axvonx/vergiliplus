@@ -22,9 +22,13 @@ inventories stay in `$VP_IMAGES/research/` (not in the repo).
 - **x86 Win10 1903 ISO** downloaded (`$VP_IMAGES/windows/x86/iso/`) but redundant: 1903 and
   1909 share the 18362 kernel, already built from the 1909 ISO. Delete if space matters.
 - **K (lower value)**: NT 4.0 SP-era DDKs (`CDAC-131500`, April 1997) and NT 4.0 Beta 2
-  DDK for more 4.0 builds; NT 3.1 retail CD (`winnt-as-511`/`-528`) KDEXT offsets (would
-  be another `"format": "kdext"` incomplete build); Win2000 Oct 2000 DDK (7z, not
-  unpacked); other unstripped drivers in DDK/SDK DRVLIB.
+  DDK for more 4.0 builds; Win2000 Oct 2000 DDK (7z, not unpacked); other unstripped
+  drivers in DDK/SDK DRVLIB. Dead ends (checked 2026-11-02): NT 3.1 retail CDs (builds
+  511/528: no KDEXT, no field dumps in I386KD, zero types in .dbg/kernels); builds 311 and
+  340.1 DDK (= the Oct 1992 DDK already scanned); no pre-4.0 `_KTHREAD` anywhere.
+- More MIPS 1992-93: build 297 SDK's `USER32.DLL` and build 404's `DISKPERF.EXE` carry
+  types too (same level; 404's two binaries disagree on `_PEB`, 112 vs 100 bytes). x86
+  binaries of those media carry few types.
 - MIPS NT 4.0 `_KPRCB`: CRASHLIB's MIPS object disagrees with the DDK (`_KTRAP_FRAME`
   512 vs 600), so none is shown; another source would be needed.
 

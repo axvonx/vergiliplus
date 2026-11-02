@@ -32,7 +32,7 @@ import pdb_to_json as P  # noqa: E402
 MACHINES = {"i386": 0x14C, "mips": 0x166, "alpha": 0x184, "ppc": 0x1F0}
 # MSVC 2.x-6 name every anonymous aggregate "__unnamed"; the site's convention (and
 # llvm-pdbutil's for later PDBs) is "<unnamed-tag>", which layout inlines
-ANON = ("__unnamed", "<unnamed-tag>", "(untagged)")
+ANON = ("__unnamed", "<unnamed-tag>", "(untagged)", "")
 
 
 def ar_members(b):
@@ -63,9 +63,42 @@ def coff_type_tables(obj, machine):
     return out
 
 
+def pe_type_tables(b, machine):
+    """The CodeView 4 type tables (NB05-NB11 sstGlobalTypes / sstTypes) a PE image built
+    for `machine` carries inline: early NT builds (1992-93) shipped some binaries with
+    their debug information still in them."""
+    pe = struct.unpack_from("<I", b, 0x3C)[0]
+    if b[pe:pe + 4] != b"PE\0\0" or struct.unpack_from("<H", b, pe + 4)[0] != machine:
+        return []
+    opt = pe + 24
+    nsec, optsize = struct.unpack_from("<H", b, pe + 6)[0], struct.unpack_from("<H", b, pe + 20)[0]
+    dd = opt + (96 if struct.unpack_from("<H", b, opt)[0] == 0x10B else 112) + 6 * 8
+    rva, size = struct.unpack_from("<II", b, dd)
+    secs = [struct.unpack_from("<IIII", b, opt + optsize + 40 * i + 8) for i in range(nsec)]
+    base = next((rva - va + rp for vs, va, rs, rp in secs if va <= rva < va + max(vs, rs)), None)
+    out = []
+    for i in range(size // 28 if base is not None else 0):
+        kind, cb, _, ptr = struct.unpack_from("<IIII", b, base + 28 * i + 12)
+        cv = b[ptr:ptr + cb]
+        if kind != 2 or cv[:4] not in (b"NB05", b"NB08", b"NB09", b"NB11"):
+            continue
+        lfo = struct.unpack_from("<I", cv, 4)[0]
+        cbh, cbe, cdir = struct.unpack_from("<HHI", cv, lfo)
+        for j in range(cdir):
+            sst, _, off, n = struct.unpack_from("<HHII", cv, lfo + cbh + j * cbe)
+            if sst == 0x12B:    # sstGlobalTypes: flags, count, offsets[count], records
+                count = struct.unpack_from("<I", cv, off + 4)[0]
+                out.append(cv[off + 8 + 4 * count:off + n])
+            elif sst == 0x121:  # sstTypes (per module): signature, records
+                out.append(cv[off + 4:off + n])
+    return out
+
+
 def type_tables(path, machine):
-    """[(object name, {hex index: node})] of a .lib or .obj, for one machine."""
+    """[(object name, {hex index: node})] of a .lib, .obj or PE image, for one machine."""
     b = open(path, "rb").read()
+    if b[:2] == b"MZ":
+        return [(os.path.basename(path), P.cv_records(t)) for t in pe_type_tables(b, machine)]
     objs = ar_members(b) if b.startswith(b"!<arch>\n") else [(os.path.basename(path), b)]
     out = []
     for name, obj in objs:
@@ -205,8 +238,8 @@ def matching_tables(doc, tables, names):
 
 def convert(paths, machine, module, arch, build, family="", note="", names=None, extra=()):
     """One or more COFF libraries/objects -> the vergiliplus doc for module x build x arch.
-    `names` (optional) limits the documented types; everything they reach comes along.
-    `extra`: more (object, records) tables merged in (see matching_tables); the library's
+    `names` (optional: a set, or a predicate on the name) limits the documented types;
+    everything they reach comes along. `extra`: more (object, records) tables merged in (see matching_tables); the library's
     own definitions outvote theirs."""
     mach = MACHINES[machine] if isinstance(machine, str) else machine
     tables = [t for p in paths for t in type_tables(p, mach)] + list(extra)
@@ -214,8 +247,9 @@ def convert(paths, machine, module, arch, build, family="", note="", names=None,
         raise ValueError("no CodeView types for machine 0x%x in %s" % (mach, ", ".join(paths)))
     m = Merger(tables)
     named, declared = {}, {}
+    keep = names if callable(names) else (lambda n: n in names) if names is not None else None
     for (kind, name) in sorted(m.chosen):
-        if names is None or name in names:
+        if keep is None or keep(name):
             named[name] = m.named(kind, name)
     # every named aggregate any table mentions without defining: opaque
     for _, tbl in tables:

@@ -56,7 +56,10 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # layouts from a 1991 debugger's CodeView 3;
                                                # "kdext": names+offsets only, from a debugger
                                                # extension. "names" limits what a cv4 doc
-                                               # documents (what they reach comes along).
+                                               # documents (what they reach comes along);
+                                               # "namesRe" does it by a regex on the name.
+                                               # A "lib" may also be a PE image carrying its
+                                               # CodeView 4 inline (MIPS 1992-93 binaries).
                                                # "supplement": {lib, sha256, [member], machine,
                                                # match: [names], take: [names], note} adds
                                                # "take" (+ what it reaches) from the one object
@@ -361,7 +364,8 @@ def handle(entry, base, pdbdir):
             doc = kdext.convert(src, entry["module"], arch, build, family, entry["note"])
         else:
             doc = cv4.convert([src], entry["machine"], entry["module"], arch, build, family,
-                              entry["note"], set(entry["names"]) if entry.get("names") else None)
+                              entry["note"], set(entry["names"]) if entry.get("names") else
+                              re.compile(entry["namesRe"]).fullmatch if entry.get("namesRe") else None)
         sup = entry.get("supplement")
         if sup:  # more types from one object of another library, if one matches this arch
             tables = cv4.type_tables(fetch_pkg(sup, pdbdir, "lib"), cv4.MACHINES[sup["machine"]])

@@ -27,6 +27,7 @@ const NTOS = "ntoskrnl-10.0.26100.7824-x64.json";
 const NT40 = "ntoskrnl-4.0.1381.1-x86.json";
 const OCT91 = "ntoskrnl-0.1991.10.0-x86.json";
 const NT351 = "ntoskrnl-3.51.1057.1-x86.json";
+const JUL92 = "ntdll-0.1992.7.0-mips.json";
 // fixture file: <module>.<type>.txt for the 24H2 docs, <doc>.<type>.txt for any other
 const fixture = (file, name) =>
   `${[NTDLL, NTOS].includes(file) ? file.split("-")[0] : file.replace(/\.json$/, "")}.${name}.txt`;
@@ -52,6 +53,8 @@ const CASES = [
   [OCT91, "_KPCR"],
   // incomplete: NT 3.51 names+offsets from KDEXTX86.DLL, no types ("untyped")
   [NT351, "_EPROCESS"],
+  // recorded, not computed: MIPS USERSRV.DLL's inline CodeView 4, July 1992
+  [JUL92, "_PEB"],
 ];
 
 for (const [file, name] of CASES) {

@@ -1,0 +1,24 @@
+struct _PEB {
+    unsigned char InheritedAddressSpace;                    /* 0x0  1 */
+    /* 3 bytes padding */
+    void* Mutant;                                           /* 0x4  4 */
+    void* ImageBaseAddress;                                 /* 0x8  4 */
+    struct _PEB_LDR_DATA* Ldr;                              /* 0xc  4 */
+    struct _RTL_USER_PROCESS_PARAMETERS* ProcessParameters;  /* 0x10  4 */
+    void* SubSystemData;                                    /* 0x14  4 */
+    void* ProcessHeap;                                      /* 0x18  4 */
+    void* FastPebLock;                                      /* 0x1c  4 */
+    void* FastPebLockRoutine;                               /* 0x20  4 */
+    void* FastPebUnlockRoutine;                             /* 0x24  4 */
+    void* Spare[4];                                         /* 0x28  16 */
+    struct _PEB_FREE_BLOCK* FreeList;                       /* 0x38  4 */
+    unsigned long TlsExpansionCounter;                      /* 0x3c  4 */
+
+    /* --- cacheline 1 boundary (64 bytes) --- */
+    void* TlsBitmap;                                        /* 0x40  4 */
+    unsigned long TlsBitmapBits[2];                         /* 0x44  8 */
+    void* ReadOnlySharedMemoryBase;                         /* 0x4c  4 */
+    void* ReadOnlySharedMemoryHeap;                         /* 0x50  4 */
+    void** ReadOnlyStaticServerData;                        /* 0x54  4 */
+};
+/* source: July 1992 pre-release Win32 SDK CD, MIPS/USERSRV.DLL inline CodeView 4 (NB08) type records */
