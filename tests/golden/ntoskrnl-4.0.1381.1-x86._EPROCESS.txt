@@ -1,0 +1,90 @@
+struct _EPROCESS {
+    struct _KPROCESS Pcb;                                   /* 0x0  104 */
+
+    /* --- cacheline 1 boundary (64 bytes) --- */
+    long ExitStatus;                                        /* 0x68  4 */
+    struct _KEVENT LockEvent;                               /* 0x6c  16 */
+    unsigned long LockCount;                                /* 0x7c  4 */
+
+    /* --- cacheline 2 boundary (128 bytes) --- */
+    union _LARGE_INTEGER CreateTime;                        /* 0x80  8 */
+    union _LARGE_INTEGER ExitTime;                          /* 0x88  8 */
+    struct _KTHREAD* LockOwner;                             /* 0x90  4 */
+    void* UniqueProcessId;                                  /* 0x94  4 */
+    struct _LIST_ENTRY ActiveProcessLinks;                  /* 0x98  8 */
+    unsigned long QuotaPeakPoolUsage[2];                    /* 0xa0  8 */
+    unsigned long QuotaPoolUsage[2];                        /* 0xa8  8 */
+    unsigned long PagefileUsage;                            /* 0xb0  4 */
+    unsigned long CommitCharge;                             /* 0xb4  4 */
+    unsigned long PeakPagefileUsage;                        /* 0xb8  4 */
+    unsigned long PeakVirtualSize;                          /* 0xbc  4 */
+
+    /* --- cacheline 3 boundary (192 bytes) --- */
+    unsigned long VirtualSize;                              /* 0xc0  4 */
+    /* 4 bytes padding */
+    struct _MMSUPPORT Vm;                                   /* 0xc8  48 */
+    void* LastProtoPteFault;                                /* 0xf8  4 */
+    void* DebugPort;                                        /* 0xfc  4 */
+
+    /* --- cacheline 4 boundary (256 bytes) --- */
+    void* ExceptionPort;                                    /* 0x100  4 */
+    struct _HANDLE_TABLE* ObjectTable;                      /* 0x104  4 */
+    void* Token;                                            /* 0x108  4 */
+    struct _FAST_MUTEX WorkingSetLock;                      /* 0x10c  32 */
+    unsigned long WorkingSetPage;                           /* 0x12c  4 */
+    unsigned char ProcessOutswapEnabled;                    /* 0x130  1 */
+    unsigned char ProcessOutswapped;                        /* 0x131  1 */
+    unsigned char AddressSpaceInitialized;                  /* 0x132  1 */
+    unsigned char AddressSpaceDeleted;                      /* 0x133  1 */
+    struct _FAST_MUTEX AddressCreationLock;                 /* 0x134  32 */
+
+    /* --- cacheline 5 boundary (320 bytes) --- */
+    unsigned long HyperSpaceLock;                           /* 0x154  4 */
+    struct _ETHREAD* ForkInProgress;                        /* 0x158  4 */
+    unsigned short VmOperation;                             /* 0x15c  2 */
+    unsigned char ForkWasSuccessful;                        /* 0x15e  1 */
+    unsigned char MmAgressiveWsTrimMask;                    /* 0x15f  1 */
+    struct _KEVENT* VmOperationEvent;                       /* 0x160  4 */
+    struct _HARDWARE_PTE PageDirectoryPte;                  /* 0x164  4 */
+    unsigned long LastFaultCount;                           /* 0x168  4 */
+    unsigned long ModifiedPageCount;                        /* 0x16c  4 */
+    void* VadRoot;                                          /* 0x170  4 */
+    void* VadHint;                                          /* 0x174  4 */
+    void* CloneRoot;                                        /* 0x178  4 */
+    unsigned long NumberOfPrivatePages;                     /* 0x17c  4 */
+
+    /* --- cacheline 6 boundary (384 bytes) --- */
+    unsigned long NumberOfLockedPages;                      /* 0x180  4 */
+    unsigned short NextPageColor;                           /* 0x184  2 */
+    unsigned char ExitProcessCalled;                        /* 0x186  1 */
+    unsigned char CreateProcessReported;                    /* 0x187  1 */
+    void* SectionHandle;                                    /* 0x188  4 */
+    struct _PEB* Peb;                                       /* 0x18c  4 */
+    void* SectionBaseAddress;                               /* 0x190  4 */
+    struct _EPROCESS_QUOTA_BLOCK* QuotaBlock;               /* 0x194  4 */
+    long LastThreadExitStatus;                              /* 0x198  4 */
+    struct _PAGEFAULT_HISTORY* WorkingSetWatch;             /* 0x19c  4 */
+    void* Win32WindowStation;                               /* 0x1a0  4 */
+    void* InheritedFromUniqueProcessId;                     /* 0x1a4  4 */
+    unsigned long GrantedAccess;                            /* 0x1a8  4 */
+    unsigned long DefaultHardErrorProcessing;               /* 0x1ac  4 */
+    void* LdtInformation;                                   /* 0x1b0  4 */
+    void* VadFreeHint;                                      /* 0x1b4  4 */
+    void* VdmObjects;                                       /* 0x1b8  4 */
+    struct _KMUTANT ProcessMutant;                          /* 0x1bc  32 */
+
+    /* --- cacheline 7 boundary (448 bytes) --- */
+    unsigned char ImageFileName[16];                        /* 0x1dc  16 */
+    unsigned long VmTrimFaultValue;                         /* 0x1ec  4 */
+    unsigned char SetTimerResolution;                       /* 0x1f0  1 */
+    unsigned char PriorityClass;                            /* 0x1f1  1 */
+    union {
+        struct {
+            unsigned char SubSystemMinorVersion;            /* 0x1f2  1 */
+            unsigned char SubSystemMajorVersion;            /* 0x1f3  1 */
+        };                                                  /* 0x1f2  2 */
+        unsigned short SubSystemVersion;                    /* 0x1f2  2 */
+    };                                                      /* 0x1f2  2 */
+    void* Win32Process;                                     /* 0x1f4  4 */
+};
+/* source: NT 4.0 DDK (August 1996) I386 LIBCNTPR.LIB CodeView type records; _EPROCESS/_ETHREAD offsets match KDEXTX86.DLL (NT 4.0 Server CD) */

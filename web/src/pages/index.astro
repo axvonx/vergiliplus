@@ -19,7 +19,8 @@ const multiArch = cat.archs().length > 1;
       <li><a class={`vrow ch-${channel(v.family)}`} href={`${ctxPath(v.arch, v.build, v.kernel)}.html`}
              data-ab={`${v.arch}/${v.build}`} data-mods={v.mods.join(",")} data-def={v.kernel}>
         <span class="vr-fam">{v.family}</span>
-        <span class="vr-build">{v.build}{multiArch ? ` · ${v.arch}` : ""}</span>
+        <span class="vr-build">{v.label}{multiArch ? ` · ${v.arch}` : ""}</span>
+        {v.inc && <span class="inc" title={v.inc}>incomplete</span>}
       </a></li>
     ))}
   </ul>

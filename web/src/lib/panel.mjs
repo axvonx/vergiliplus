@@ -26,8 +26,9 @@ function rowHtml(r, T) {
   return `<div class="sc-member k-${r.fkind}${r.linked ? " link" : ""}"><span class="sc-code">${ind(r.depth)}${html(r.typePre, T)}${r.sep}<span class="sc-field">${esc(r.field)}</span>${html(r.typeSuf, T)}${bits};</span><span class="sc-ann">/* ${offAnn(r)} */</span></div>`;
 }
 
-// a documented type's view: code + stats line
-export function panelHtml(T, name) {
+// a documented type's view: code + stats line. A layout not from a public PDB ends with
+// its provenance as a last code line (so copy carries it); a partial build says so.
+export function panelHtml(T, name, doc = null) {
   const L = structLayout(T, name), E = L ? null : enumLayout(T, name);
   let head, body, stats;
   if (E) {
@@ -46,10 +47,17 @@ export function panelHtml(T, name) {
   const st = stats.map(([k, v]) => /^\d/.test(k)
     ? `<span><b>${k.split(" ")[0]}</b> ${k.split(" ").slice(1).join(" ")}${v !== "" ? ` (${esc(v)})` : ""}</span>`
     : `<span>${k} <b>${esc(v)}</b></span>`).join("");
-  return `<div class="sc" data-sc><pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-tgl" data-sc-meta aria-pressed="true"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div>` +
-    `<div class="sc-line sc-head"><span class="sc-code">${head}</span></div>${body}<div class="sc-line"><span class="sc-code">};</span></div></code></pre></div>` +
+  const p = T.provenance(name);
+  return (doc?.incomplete ? incompleteHtml(doc) : "") +
+    `<div class="sc" data-sc><pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-tgl" data-sc-meta aria-pressed="true"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div>` +
+    `<div class="sc-line sc-head"><span class="sc-code">${head}</span></div>${body}<div class="sc-line"><span class="sc-code">};</span></div>` +
+    (p ? `<div class="sc-line sc-prov"><span class="sc-code">/* ${esc(p)} */</span></div>` : "") +
+    `</code></pre></div>` +
     `<div class="stats">${st}</div>`;
 }
+
+const incompleteHtml = (doc) =>
+  `<p class="inc-note"><span class="inc">incomplete</span> ${esc(doc.incomplete)}</p>`;
 
 // an opaque name's view in one build: its declaration, and where it does have a layout
 // (other modules of this build first, then other builds, newest first)
@@ -58,11 +66,15 @@ export function opaqueHtml(doc, name, kind) {
     .filter((d) => d.arch === doc.arch && name in d.named)
     .sort((x, y) => ((y.build === doc.build) - (x.build === doc.build)) || cmpBuild(y.build, x.build) ||
       (x.module < y.module ? -1 : 1));
-  return `<pre class="sc-pre"><code><div class="sc-line"><span class="sc-code"><span class="kw">${esc(kind)}</span> ${esc(name)};</span><span class="sc-ann">/* opaque */</span></div></code></pre>` +
-    `<p class="opaque-note">Declared but not defined in <b>${esc(doc.module)}</b>'s public PDB for this build: a forward ` +
-    `declaration, or a name that only appears in mangled C++ symbols. The layout isn't public here.</p>` +
+  return (doc.incomplete ? incompleteHtml(doc) : "") +
+    `<pre class="sc-pre"><code><div class="sc-line"><span class="sc-code"><span class="kw">${esc(kind)}</span> ${esc(name)};</span><span class="sc-ann">/* opaque */</span></div></code></pre>` +
+    (doc.provenance
+      ? `<p class="opaque-note">Named but not defined in the type records <b>${esc(doc.module)}</b>'s layouts for this build ` +
+        `come from (a forward declaration or pointer target). The layout isn't known here.</p>`
+      : `<p class="opaque-note">Declared but not defined in <b>${esc(doc.module)}</b>'s public PDB for this build: a forward ` +
+        `declaration, or a name that only appears in mangled C++ symbols. The layout isn't public here.</p>`) +
     (defs.length ? `<div class="defined-in">Defined in: ${defs.map((d) =>
-      `<a href="${esc(typePath(d.arch, d.module, name))}#${esc(d.build)}">${esc(d.module)} ${esc(d.build)}</a>`).join("")}</div>` : "");
+      `<a href="${esc(typePath(d.arch, d.module, name))}#${esc(d.build)}">${esc(d.module)} ${esc(d.buildLabel || d.build)}</a>`).join("")}</div>` : "");
 }
 
 // Every type page: [{arch, module, name, slug, aliases, kind, builds, has, def, names}].
@@ -111,7 +123,7 @@ export function viewOf(page, build) {
   if (st === "-" || st == null) return null;
   const doc = catalog().get(page.arch, build, page.module), name = page.names.get(build);
   return {
-    view: st === "d" ? panelHtml(typesFor(doc), name) : opaqueHtml(doc, name, page.kind),
+    view: st === "d" ? panelHtml(typesFor(doc), name, doc) : opaqueHtml(doc, name, page.kind),
     used: usedInFor(doc)[name] || [],
   };
 }

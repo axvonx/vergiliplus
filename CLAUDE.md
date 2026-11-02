@@ -1,8 +1,9 @@
 # CLAUDE.md — vergiliplus
 
 Static browser of Windows struct/union/enum layouts from Microsoft's **public PDBs**:
-kernel (`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary) and 16 x86
-builds (Windows 2000 SP3 → Windows 10 22H2), live at
+kernel (`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), 18 x86
+(NT 4.0, Windows 2000 SP3 → Windows 10 22H2), 3 IA-64 (2003 SP1 → 2008 SP2) and NT 4.0 on
+MIPS / Alpha / PowerPC, live at
 https://vergiliplus.com. Not a fork of Vergilius; it borrows only its look.
 
 ## Map
@@ -11,7 +12,10 @@ https://vergiliplus.com. Not a fork of Vergilius; it borrows only its look.
 tools/build.py        manifest data/sources.json -> data/<module>-<build>-<arch>.json
   pe_pdbid.py         PE -> RSDS identity + FileVersion        (importable)
   pdb_to_json.py      llvm-pdbutil dump -types -> doc          (importable: convert/write);
-                      parse20() reads PDB 2.0 (Windows 2000) itself, stdlib
+                      parse20() reads PDB 2.0 (Windows 2000) itself, stdlib;
+                      cv_records() = the one CodeView leaf decoder (16-bit + _ST)
+  legacy/cv4.py       COFF .lib/.obj .debug$T (CV4) tables merged into one doc
+  legacy/kdext.py     cross-check _EPROCESS/_ETHREAD vs a KDEXT*.DLL's !processfields
   check_links.py, check_budget.py   post-build gates (CI runs both)
 web/src/lib/types.mjs    type graph + C declarators as segments ({t}, {t,kw}, {t,ref})
 web/src/lib/layout.mjs   pahole rows: anonymous union/struct reconstruction, enums, usedIn, layoutText
@@ -56,6 +60,15 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   extracted once from an ISO/ESD (msdl serves them). When the image's ntdll is a different
   revision than its kernel, the ntdll entry carries `"build"` = the kernel's label, as an
   image entry would (Win10 1703, 22H2).
+- **Before public PDBs had types** (NT 3.x/4.0, Windows 2000 RTM-SP2) layouts come from
+  type records Microsoft itself shipped: DDK/SDK libraries (`lib` manifest kind,
+  `tools/legacy/`), 1991 kernel debuggers. Only Microsoft-published material (or an
+  archive.org mirror of it, pinned by sha256) — never leaked source. Such a doc carries
+  `provenance: {kind: "source"|"computed", note}` (per type: `provenanceTypes`), rendered as
+  a last `/* kind: note */` code line (copy includes it). Pre-release builds without a
+  number have a sortable `build` key (`0.1991.10.0`) and `buildLabel: "no build number"`,
+  shown wherever builds are (the exception to "labels come from binaries"). Partial builds
+  carry `incomplete: "<why>"`: a red `incomplete` marker on home, select and type page.
 - **Opaque types**: names a PDB declares or mentions but never defines (forward
   declarations, plus struct/union/enum names that `llvm-undname` finds in public
   symbols, kept fully qualified, e.g. `AutoBoost::_AB_PRIORITY`). They live in
@@ -126,11 +139,17 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   no hash/public streams: forward refs resolve by name, no mangled-name opaque types.
 - Same build string on two arches is normal (`ntoskrnl-6.1.7601.17514-{x64,x86}.json`);
   the palette names the arch once there are two.
+- CodeView 4 objects each restart type indices at 0x1000: `cv4.py` merges by name (the
+  definition most objects agree on; the C runtime's own `_EXCEPTION_RECORD` disagrees and
+  is reported, not mixed in) and hash-conses the rest. `__unnamed` → `<unnamed-tag>`.
+  16-bit `LF_INDEX` is 0x0405 (0x0404 is `LF_FRIENDFCN`).
+- IA-64 2008 R2's kernel only ships as PA30 deltas in catalog updates (needs msdelta,
+  i.e. Windows): absent. IA-64 2008 SP2 came from the SP's appended payload CAB.
 
 ## Open (undecided)
 
-**Scale:** 38 builds (22 x64 + 16 x86) ≈ 62 MB in ~13.5k files; a build adds ~1 MB (its
-new types' pages and changed views); a new arch is another /t/ tree (x86 added ~23 MB).
+**Scale:** 46 builds over 6 arches ≈ 75 MB in ~17k files; a build adds ~1 MB (its new
+types' pages and changed views); a new arch is another /t/ tree (x86 added ~23 MB).
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
 ARM64 / IA-64 · x86 Win10 1507/1709/1803/1903/1909 · more canary builds (UUP sets) · home
 grouping (client/server/insider).

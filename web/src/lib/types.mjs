@@ -40,6 +40,12 @@ export class Types {
   constructor(doc) {
     this.t = doc.types; this.named = doc.named; this.opaque = doc.opaque || {};
     this.ptr = PTR_SIZE[doc.arch] ?? 8;
+    this.prov = doc.provenance || null; this.provTypes = doc.provenanceTypes || {};
+  }
+  // where a layout not from a public PDB came from: "source: …" / "computed: …", or null
+  provenance(name) {
+    const p = this.provTypes[name] || this.prov;
+    return p ? `${p.kind}: ${p.note}` : null;
   }
   // has a page in this doc: documented, or opaque (declared/mentioned only)
   hasPage(name) { return name in this.named || name in this.opaque; }

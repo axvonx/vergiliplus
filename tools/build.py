@@ -43,6 +43,22 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # then 7z out each member of the chain in turn.
                                                # PDB 2.0 (Windows 2000) is read by pdb_to_json
 
+  {"lib": "https://archive.org/download/<item>/<image>/DDK/LIB/MIPS/FREE/LIBCNTPR.LIB",
+   "sha256": "...", ["member": [...]], "machine": "mips", "build": "4.0.1381.1",
+   "note": "NT 4.0 DDK ... LIBCNTPR.LIB type records", ["kdext": {"url", "sha256"}],
+   ["buildLabel": "no build number"], ["incomplete": "why"],
+   "module":"ntoskrnl", "arch":"mips", "family":"..."}
+                                               # pre-PDB layouts (tools/legacy/): CodeView 4
+                                               # type records of a COFF library's objects for
+                                               # one machine, fetched like "pkg" (archive.org
+                                               # serves single files inside disc images).
+                                               # "build" is required (a sort key; buildLabel
+                                               # is what shows when there is no real number);
+                                               # "note" becomes the layouts' provenance line;
+                                               # "kdext" cross-checks _EPROCESS/_ETHREAD
+                                               # against the offsets that debugger extension
+                                               # prints, and fails the entry on a mismatch
+
 Build labels come from the binaries, not the manifest (A1): images use the image's
 own Build.ServicePackBuild (e.g. 6.3.9600.17050), single PEs their FileVersion. An
 explicit "build" overrides. Paths may use $VARS / ~ and are relative to the manifest;
@@ -67,6 +83,7 @@ import urllib.request
 
 import pdb_to_json
 import pe_pdbid
+from legacy import cv4, kdext
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -161,31 +178,34 @@ def fetch_sym(entry, outdir):
     return out
 
 
-def fetch_pkg(entry, outdir):
+def fetch_pkg(entry, outdir, url_key="pkg"):
     """A PDB out of a symbol package: GET the archive, verify sha256, then unpack each
-    name of "member" from the previous archive with 7z. Cached as one file in outdir."""
-    key = hashlib.sha256((entry["pkg"] + "|" + "|".join(entry["member"])).encode()).hexdigest()[:16]
-    out = os.path.join(outdir, "pkg-%s-%s" % (key, os.path.basename(entry["member"][-1])))
+    name of "member" from the previous archive with 7z. Cached as one file in outdir.
+    (Also any other pinned download: "lib" entries, their "kdext".)"""
+    url, members = entry[url_key], entry.get("member", [])
+    key = hashlib.sha256((url + "|" + "|".join(members)).encode()).hexdigest()[:16]
+    out = os.path.join(outdir, "pkg-%s-%s" % (key, os.path.basename(
+        (members[-1] if members else url).replace("\\", "/"))))
     if os.path.exists(out):
         return out
     sevenzip = tool("7z", "7zz", "7za")
-    if not sevenzip:
-        raise Skip("need 7-Zip (7z/7zz) to unpack symbol packages")
     with tempfile.TemporaryDirectory() as work:
-        cur = download(entry["pkg"], os.path.join(work, "pkg"))
+        cur = download(url, os.path.join(work, "pkg"))
         h = hashlib.sha256()
         with open(cur, "rb") as f:
             for chunk in iter(lambda: f.read(1 << 20), b""):
                 h.update(chunk)
         if h.hexdigest() != entry["sha256"].lower():
-            raise RuntimeError("sha256 mismatch for %s: %s" % (entry["pkg"], h.hexdigest()))
-        for i, member in enumerate(entry["member"]):
+            raise RuntimeError("sha256 mismatch for %s: %s" % (url, h.hexdigest()))
+        if members and not sevenzip:
+            raise Skip("need 7-Zip (7z/7zz) to unpack " + url)
+        for i, member in enumerate(members):
             step = os.path.join(work, "step%d" % i)
             subprocess.run([sevenzip, "e", "-y", "-o" + step, cur, member], check=True,
                            capture_output=True)
             cur = os.path.join(step, os.path.basename(member.replace("\\", "/")))
             if not os.path.exists(cur):
-                raise RuntimeError("%s not found in %s" % (member, entry["pkg"]))
+                raise RuntimeError("%s not found in %s" % (member, url))
         shutil.copyfile(cur, out + ".part")
         os.replace(out + ".part", out)
     return out
@@ -306,6 +326,25 @@ def handle(entry, base, pdbdir):
     if "pkg" in entry:
         fv = entry["version"]
         emit(fetch_pkg(entry, pdbdir), entry["module"], entry.get("build") or fv, fv)
+        return produced
+
+    if "lib" in entry:
+        build = entry["build"]
+        doc = cv4.convert([fetch_pkg(entry, pdbdir, "lib")], entry["machine"], entry["module"],
+                          arch, build, family, entry["note"])
+        if entry.get("kdext"):
+            ext = fetch_pkg(dict(entry["kdext"], member=[]), pdbdir, "url")
+            ok, n, _, bad = kdext.check(doc, ext)
+            if bad or not n:
+                raise RuntimeError("%s disagrees with %s on %s" % (
+                    entry["lib"], entry["kdext"]["url"], ", ".join(b[0] for b in bad) or "everything"))
+            print("  kdext: %d/%d _EPROCESS/_ETHREAD offsets agree" % (ok, n), file=sys.stderr)
+        for k in ("buildLabel", "incomplete"):
+            if entry.get(k):
+                doc[k] = entry[k]
+        out = json_name(entry["module"], build, arch)
+        pdb_to_json.write(doc, out)
+        produced.append(out)
         return produced
 
     if "pdb" in entry or "pe" in entry:

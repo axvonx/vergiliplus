@@ -62,9 +62,13 @@ export function catalog() {
     builds: (a, m) => builds.get(key(a, m)) || [],
     modules: (a, b) => (modules.get(key(a, b)) || []).slice().sort(),
     archs: () => [...new Set(docs.map((d) => d.arch))].sort(),
-    // one entry per arch × build, newest first: {arch, build, family}
+    // what a build is called on screen: its build string, or doc.buildLabel where that is
+    // only a sort key ("no build number" pre-releases); inc = why it is incomplete, if so
+    label: (a, b) => docs.find((d) => d.arch === a && d.build === b)?.buildLabel || b,
+    // one entry per arch × build, newest first: {arch, build, family, label, inc}
     versions: () => [...new Map(docs.slice().sort((x, y) => cmpBuild(y.build, x.build))
-      .map((d) => [d.arch + "/" + d.build, { arch: d.arch, build: d.build, family: d.family }])).values()],
+      .map((d) => [d.arch + "/" + d.build, { arch: d.arch, build: d.build, family: d.family,
+        label: d.buildLabel || d.build, inc: d.incomplete || null }])).values()],
   };
   return _cat;
 }
@@ -108,12 +112,18 @@ export function typeList(doc) {
 
 export const ctxPath = (a, b, m) => `/v/${a}/${b}/${m}`;
 
+// a build's row with its display label and incomplete flag appended where they apply:
+// [...row] | [...row, label] | [...row, label, 1]
+export const vrow = (x, row) =>
+  x.inc ? [...row, x.label, 1] : x.label !== x.build ? [...row, x.label] : row;
+
 // release channel from the family name, for colour-coding versions
 export const channel = (family) =>
   /server/i.test(family) ? "server" : /canary|insider|dev|beta|preview/i.test(family) ? "insider" : "client";
 
 // The search palette's rows (/search-index.json; /member-index.json refers to t by
-// position): v = [[arch, build, family, channel]] newest first, m = [module],
+// position): v = [[arch, build, family, channel[, label, incomplete]]] newest first (label
+// only where it isn't the build string, the flag only on incomplete builds), m = [module],
 // t = [[name, kind, slug, module#, [v# defining it], [v# where opaque]]] by name.
 let _rows = null;
 export function searchRows() {
@@ -134,7 +144,7 @@ export function searchRows() {
   }
   for (const e of t.values()) { e[4].sort((a, b) => a - b); e[5].sort((a, b) => a - b); }
   return (_rows = {
-    v: v.map((x) => [x.arch, x.build, x.family, channel(x.family)]),
+    v: v.map((x) => vrow(x, [x.arch, x.build, x.family, channel(x.family)])),
     m,
     t: [...t.values()].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[3] - b[3])),
   });

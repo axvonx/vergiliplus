@@ -408,14 +408,20 @@ def cv_pstr(d, o):
     return d[o + 1:o + 1 + n].decode("latin1"), o + 1 + n
 
 
-def parse20_fieldlist(d):
-    """Members and enumerators of an LF_FIELDLIST body (32-bit type indices, _ST names)."""
-    members, enums, o = [], [], 0
+def cv_fieldlist(d):
+    """Members, enumerators and the continuation (LF_INDEX) of an LF_FIELDLIST body:
+    32-bit _ST sub-leaves (VC 4-6) and 16-bit ones (CodeView 4 in NT 3.x/4.0 objects)."""
+    members, enums, nxt, o = [], [], None, 0
     while o < len(d):
         sub = struct.unpack_from("<H", d, o)[0]
         if sub == 0x1405:      # LF_MEMBER_ST: attr, type, offset, name
             ti = struct.unpack_from("<I", d, o + 4)[0]
             off, p = cv_numeric(d, o + 8)
+            name, o = cv_pstr(d, p)
+            members.append({"name": name, "type": hexi(ti), "offset": off})
+        elif sub == 0x0406:    # LF_MEMBER (16-bit): type, attr, offset, name
+            ti = struct.unpack_from("<H", d, o + 2)[0]
+            off, p = cv_numeric(d, o + 6)
             name, o = cv_pstr(d, p)
             members.append({"name": name, "type": hexi(ti), "offset": off})
         elif sub == 0x0403:    # LF_ENUMERATE: attr, value, name
@@ -424,17 +430,25 @@ def parse20_fieldlist(d):
             enums.append({"name": name, "value": val})
         elif sub == 0x1400:    # LF_BCLASS: attr, type, offset
             _, o = cv_numeric(d, o + 8)
+        elif sub == 0x0400:    # LF_BCLASS (16-bit): type, attr, offset
+            _, o = cv_numeric(d, o + 6)
         elif sub in (0x1401, 0x1402):  # LF_VBCLASS/IVBCLASS: attr, type, vbptr, 2 numerics
             _, p = cv_numeric(d, o + 12)
             _, o = cv_numeric(d, p)
-        elif sub == 0x1404:    # LF_INDEX: pad, continuation type (lists are not split here)
+        elif sub == 0x1404:    # LF_INDEX: pad, continuation type
+            nxt = hexi(struct.unpack_from("<I", d, o + 4)[0])
             o += 8
+        elif sub == 0x0405:    # LF_INDEX (16-bit): continuation type
+            nxt = hexi(struct.unpack_from("<H", d, o + 2)[0])
+            o += 4
         elif sub == 0x1406:    # LF_STMEMBER_ST: attr, type, name
             _, o = cv_pstr(d, o + 8)
         elif sub == 0x1407:    # LF_METHOD_ST: count, method list, name
             _, o = cv_pstr(d, o + 8)
         elif sub == 0x1408:    # LF_NESTTYPE_ST: pad, type, name
             _, o = cv_pstr(d, o + 8)
+        elif sub == 0x0409:    # LF_NESTTYPE (16-bit): type, name
+            _, o = cv_pstr(d, o + 4)
         elif sub in (0x1409, 0x140a):  # LF_VFUNCTAB / LF_FRIENDCLS: pad, type
             o += 8
         elif sub == 0x140b:    # LF_ONEMETHOD_ST: attr, type, [vbase offset], name
@@ -444,61 +458,103 @@ def parse20_fieldlist(d):
             raise ValueError("unknown field list sub-leaf 0x%04x" % sub)
         while o < len(d) and d[o] >= 0xF0:  # LF_PADn
             o += d[o] & 0x0F
-    return members, enums
+    return members, enums, nxt
 
 
-def parse20(path):
-    """TPI of a PDB 2.0 -> {hex index: node}, as parse() does for llvm-pdbutil text."""
-    tpi = pdb20_streams(path)[2]
-    ver, hdr, tmin, tmax, cb = struct.unpack_from("<IIIII", tpi, 0)
-    if ver != 19961031:
-        raise ValueError("unexpected TPI version %d in %s" % (ver, path))
-    types, o, ti = {}, hdr, tmin
-    while o < hdr + cb and ti < tmax:
-        ln, leaf = struct.unpack_from("<HH", tpi, o)
-        d = tpi[o + 4:o + 2 + ln]
+def cv_records(blob, tmin=0x1000, tmax=None):
+    """A CodeView type table (records from type index tmin on) -> {hex index: node}, the
+    nodes parse() makes. Reads the 32-bit _ST leaves of PDB 2.0 and the 16-bit leaves of
+    CodeView 4 objects (.debug$T in NT 3.x/4.0 DDK libraries). Primitive types are
+    added for the indices referenced; forward references are left unresolved."""
+    types, o, ti = {}, 0, tmin
+    while o + 4 <= len(blob) and (tmax is None or ti < tmax):
+        ln, leaf = struct.unpack_from("<HH", blob, o)
+        if ln < 2:
+            break
+        d = blob[o + 4:o + 2 + ln]
         o, key = o + 2 + ln, hexi(ti)
         ti += 1
-        if leaf in (0x1004, 0x1005, 0x1006):   # LF_CLASS_ST / LF_STRUCTURE_ST / LF_UNION_ST
-            _, prop, fl = struct.unpack_from("<HHI", d, 0)
-            p = 8 if leaf == 0x1006 else 16  # structs also carry derived + vshape
+        if leaf in (0x1004, 0x1005, 0x1006, 0x0004, 0x0005, 0x0006):
+            # LF_CLASS/STRUCTURE/UNION, _ST (32-bit indices) or 16-bit
+            if leaf >= 0x1000:     # count, property, field (u32)[, derived, vshape]
+                _, prop, fl = struct.unpack_from("<HHI", d, 0)
+                p = 8 if leaf == 0x1006 else 16
+            else:                  # count, field (u16), property[, derived, vshape]
+                _, fl, prop = struct.unpack_from("<HHH", d, 0)
+                p = 6 if leaf == 0x0006 else 10
             size, p = cv_numeric(d, p)
             name, _ = cv_pstr(d, p)
             fwd = bool(prop & 0x80)
-            types[key] = {"kind": "union" if leaf == 0x1006 else "struct", "name": name,
+            types[key] = {"kind": "union" if leaf & 0xFFF == 6 else "struct", "name": name,
                           "size": 0 if fwd else size,
                           "fieldlist": hexi(fl) if fl and not fwd else None, "forward": None}
-        elif leaf == 0x1007:                   # LF_ENUM_ST: count, property, type, field, name
-            _, prop, _, fl = struct.unpack_from("<HHII", d, 0)
-            name, _ = cv_pstr(d, 12)
+        elif leaf in (0x1007, 0x0007):
+            if leaf == 0x1007:     # LF_ENUM_ST: count, property, type, field, name
+                _, prop, _, fl = struct.unpack_from("<HHII", d, 0)
+                name, _ = cv_pstr(d, 12)
+            else:                  # LF_ENUM (16-bit): count, type, field, property, name
+                _, _, fl, prop = struct.unpack_from("<HHHH", d, 0)
+                name, _ = cv_pstr(d, 8)
             types[key] = {"kind": "enum", "name": name,
                           "fieldlist": hexi(fl) if fl and not prop & 0x80 else None,
                           "forward": None}
-        elif leaf == 0x1203:                   # LF_FIELDLIST
-            members, enums = parse20_fieldlist(d)
+        elif leaf in (0x1203, 0x0204):         # LF_FIELDLIST
+            members, enums, nxt = cv_fieldlist(d)
             types[key] = {"kind": "fieldlist", "members": members, "enums": enums}
+            if nxt:
+                types[key]["next"] = nxt
         elif leaf == 0x1002:                   # LF_POINTER: referent, attributes
             types[key] = {"kind": "pointer", "referent": hexi(struct.unpack_from("<I", d, 0)[0])}
-        elif leaf == 0x1003:                   # LF_ARRAY_ST: element, index, size, name
-            el = struct.unpack_from("<I", d, 0)[0]
-            size, _ = cv_numeric(d, 8)
+        elif leaf == 0x0002:                   # LF_POINTER (16-bit): attributes, referent
+            types[key] = {"kind": "pointer", "referent": hexi(struct.unpack_from("<H", d, 2)[0])}
+        elif leaf in (0x1003, 0x0003):         # LF_ARRAY: element, index, size, name
+            if leaf == 0x1003:
+                el, p = struct.unpack_from("<I", d, 0)[0], 8
+            else:
+                el, p = struct.unpack_from("<H", d, 0)[0], 4
+            size, _ = cv_numeric(d, p)
             types[key] = {"kind": "array", "element": hexi(el), "bytes": size}
-        elif leaf == 0x1001:                   # LF_MODIFIER: type, attributes
-            ref, attr = struct.unpack_from("<IH", d, 0)
+        elif leaf in (0x1001, 0x0001):         # LF_MODIFIER
+            if leaf == 0x1001:     # type, attributes
+                ref, attr = struct.unpack_from("<IH", d, 0)
+            else:                  # attributes, type
+                attr, ref = struct.unpack_from("<HH", d, 0)
             types[key] = {"kind": "modifier", "referent": hexi(ref),
                           "const": bool(attr & 1), "volatile": bool(attr & 2)}
         elif leaf == 0x1205:                   # LF_BITFIELD: type, length, position
             ty, bits, pos = struct.unpack_from("<IBB", d, 0)
             types[key] = {"kind": "bitfield", "type": hexi(ty), "bits": bits, "pos": pos}
+        elif leaf == 0x0206:                   # LF_BITFIELD (16-bit): length, position, type
+            bits, pos, ty = struct.unpack_from("<BBH", d, 0)
+            types[key] = {"kind": "bitfield", "type": hexi(ty), "bits": bits, "pos": pos}
         elif leaf == 0x1008:                   # LF_PROCEDURE: return, conv, res, count, args
             ret, _, _, _, args = struct.unpack_from("<IBBHI", d, 0)
+            types[key] = {"kind": "proc", "return": hexi(ret), "args": hexi(args)}
+        elif leaf == 0x0008:                   # LF_PROCEDURE (16-bit), u16 indices
+            ret, _, _, _, args = struct.unpack_from("<HBBHH", d, 0)
             types[key] = {"kind": "proc", "return": hexi(ret), "args": hexi(args)}
         elif leaf == 0x1201:                   # LF_ARGLIST: count, types
             n = struct.unpack_from("<I", d, 0)[0]
             types[key] = {"kind": "arglist",
                           "args": [hexi(a) for a in struct.unpack_from("<%dI" % n, d, 4)]}
+        elif leaf == 0x0201:                   # LF_ARGLIST (16-bit)
+            n = struct.unpack_from("<H", d, 0)[0]
+            types[key] = {"kind": "arglist",
+                          "args": [hexi(a) for a in struct.unpack_from("<%dH" % n, d, 2)]}
         else:
             types[key] = {"kind": "other", "lf": "LF_0x%04X" % leaf}
+
+    # a long field list continues in another record (LF_INDEX): splice the chain
+    for t in types.values():
+        seen = set()
+        while t.get("next") in types and t["next"] not in seen:
+            seen.add(t["next"])
+            more = types[t.pop("next")]
+            t["members"] += more.get("members", [])
+            t["enums"] += more.get("enums", [])
+            if more.get("next"):
+                t["next"] = more["next"]
+        t.pop("next", None)
 
     # primitive types are implicit: add the ones the records refer to
     seen = set()
@@ -507,11 +563,21 @@ def parse20(path):
             seen.add(t.get(f))
         seen.update(t.get("args") if isinstance(t.get("args"), list) else [])
         seen.update(m["type"] for m in t.get("members", []))
-    for s in seen:
-        if s and int(s, 16) < 0x1000 and s not in types:
+    for s in sorted(x for x in seen if x):  # sorted: stable output across runs
+        if int(s, 16) < 0x1000 and s not in types:
             name = cv_simple_name(int(s, 16))
             if name:
                 types[s] = {"kind": "base", "name": name}
+    return types
+
+
+def parse20(path):
+    """TPI of a PDB 2.0 -> {hex index: node}, as parse() does for llvm-pdbutil text."""
+    tpi = pdb20_streams(path)[2]
+    ver, hdr, tmin, tmax, cb = struct.unpack_from("<IIIII", tpi, 0)
+    if ver != 19961031:
+        raise ValueError("unexpected TPI version %d in %s" % (ver, path))
+    types = cv_records(tpi[hdr:hdr + cb], tmin, tmax)
     resolve_forwards(types)
     return types
 

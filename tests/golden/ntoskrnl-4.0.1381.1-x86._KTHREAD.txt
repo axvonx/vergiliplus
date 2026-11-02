@@ -1,0 +1,79 @@
+struct _KTHREAD {
+    struct _DISPATCHER_HEADER Header;                       /* 0x0  16 */
+    struct _LIST_ENTRY MutantListHead;                      /* 0x10  8 */
+    void* InitialStack;                                     /* 0x18  4 */
+    void* StackLimit;                                       /* 0x1c  4 */
+    void* Teb;                                              /* 0x20  4 */
+    void* TlsArray;                                         /* 0x24  4 */
+    void* KernelStack;                                      /* 0x28  4 */
+    unsigned char DebugActive;                              /* 0x2c  1 */
+    unsigned char State;                                    /* 0x2d  1 */
+    unsigned char Alerted[2];                               /* 0x2e  2 */
+    unsigned char Iopl;                                     /* 0x30  1 */
+    unsigned char NpxState;                                 /* 0x31  1 */
+    unsigned char Saturation;                               /* 0x32  1 */
+    char Priority;                                          /* 0x33  1 */
+    struct _KAPC_STATE ApcState;                            /* 0x34  24 */
+
+    /* --- cacheline 1 boundary (64 bytes) --- */
+    unsigned long ContextSwitches;                          /* 0x4c  4 */
+    long WaitStatus;                                        /* 0x50  4 */
+    unsigned char WaitIrql;                                 /* 0x54  1 */
+    char WaitMode;                                          /* 0x55  1 */
+    unsigned char WaitNext;                                 /* 0x56  1 */
+    unsigned char WaitReason;                               /* 0x57  1 */
+    struct _KWAIT_BLOCK* WaitBlockList;                     /* 0x58  4 */
+    struct _LIST_ENTRY WaitListEntry;                       /* 0x5c  8 */
+    unsigned long WaitTime;                                 /* 0x64  4 */
+    char BasePriority;                                      /* 0x68  1 */
+    unsigned char DecrementCount;                           /* 0x69  1 */
+    char PriorityDecrement;                                 /* 0x6a  1 */
+    char Quantum;                                           /* 0x6b  1 */
+    struct _KWAIT_BLOCK WaitBlock[4];                       /* 0x6c  96 */
+
+    /* --- cacheline 3 boundary (192 bytes) --- */
+    void* LegoData;                                         /* 0xcc  4 */
+    unsigned long KernelApcDisable;                         /* 0xd0  4 */
+    unsigned long UserAffinity;                             /* 0xd4  4 */
+    unsigned char SystemAffinityActive;                     /* 0xd8  1 */
+    unsigned char Pad[7];                                   /* 0xd9  7 */
+    struct _KQUEUE* Queue;                                  /* 0xe0  4 */
+    unsigned long ApcQueueLock;                             /* 0xe4  4 */
+    struct _KTIMER Timer;                                   /* 0xe8  40 */
+
+    /* --- cacheline 4 boundary (256 bytes) --- */
+    struct _LIST_ENTRY QueueListEntry;                      /* 0x110  8 */
+    unsigned long Affinity;                                 /* 0x118  4 */
+    unsigned char Preempted;                                /* 0x11c  1 */
+    unsigned char ProcessReadyQueue;                        /* 0x11d  1 */
+    unsigned char KernelStackResident;                      /* 0x11e  1 */
+    unsigned char NextProcessor;                            /* 0x11f  1 */
+    void* CallbackStack;                                    /* 0x120  4 */
+    void* Win32Thread;                                      /* 0x124  4 */
+    struct _KTRAP_FRAME* TrapFrame;                         /* 0x128  4 */
+    struct _KAPC_STATE* ApcStatePointer[2];                 /* 0x12c  8 */
+    unsigned char EnableStackSwap;                          /* 0x134  1 */
+    unsigned char LargeStack;                               /* 0x135  1 */
+    unsigned char ResourceIndex;                            /* 0x136  1 */
+    char PreviousMode;                                      /* 0x137  1 */
+    unsigned long KernelTime;                               /* 0x138  4 */
+    unsigned long UserTime;                                 /* 0x13c  4 */
+
+    /* --- cacheline 5 boundary (320 bytes) --- */
+    struct _KAPC_STATE SavedApcState;                       /* 0x140  24 */
+    unsigned char Alertable;                                /* 0x158  1 */
+    unsigned char ApcStateIndex;                            /* 0x159  1 */
+    unsigned char ApcQueueable;                             /* 0x15a  1 */
+    unsigned char AutoAlignment;                            /* 0x15b  1 */
+    void* StackBase;                                        /* 0x15c  4 */
+    struct _KAPC SuspendApc;                                /* 0x160  48 */
+
+    /* --- cacheline 6 boundary (384 bytes) --- */
+    struct _KSEMAPHORE SuspendSemaphore;                    /* 0x190  20 */
+    struct _LIST_ENTRY ThreadListEntry;                     /* 0x1a4  8 */
+    char FreezeCount;                                       /* 0x1ac  1 */
+    char SuspendCount;                                      /* 0x1ad  1 */
+    unsigned char IdealProcessor;                           /* 0x1ae  1 */
+    unsigned char DisableBoost;                             /* 0x1af  1 */
+};
+/* source: NT 4.0 DDK (August 1996) I386 LIBCNTPR.LIB CodeView type records; _EPROCESS/_ETHREAD offsets match KDEXTX86.DLL (NT 4.0 Server CD) */

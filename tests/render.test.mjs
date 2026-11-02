@@ -24,6 +24,10 @@ const renderer = (file) => {
 
 const NTDLL = "ntdll-10.0.26100.7824-x64.json";
 const NTOS = "ntoskrnl-10.0.26100.7824-x64.json";
+const NT40 = "ntoskrnl-4.0.1381.1-x86.json";
+// fixture file: <module>.<type>.txt for the 24H2 docs, <doc>.<type>.txt for any other
+const fixture = (file, name) =>
+  `${[NTDLL, NTOS].includes(file) ? file.split("-")[0] : file.replace(/\.json$/, "")}.${name}.txt`;
 const CASES = [
   [NTDLL, "_TP_POOL"],                 // full in ntdll, opaque in ntoskrnl
   [NTDLL, "_PEB"],                     // anonymous unions of bitfield structs
@@ -37,12 +41,16 @@ const CASES = [
   [NTOS, "_LARGE_INTEGER"],            // top-level union + inlined <unnamed-tag> member
   [NTOS, "_CACHE_MANAGER_CALLBACKS"],  // function-pointer signatures
   [NTOS, "_DISPATCHER_HEADER"],        // unions nested three deep
+  // pre-PDB: CodeView 4 records of NT 4.0's DDK LIBCNTPR.LIB (tools/legacy/cv4.py),
+  // offsets cross-checked against KDEXTX86.DLL; ends with its provenance line
+  [NT40, "_EPROCESS"],
+  [NT40, "_KTHREAD"],
 ];
 
 for (const [file, name] of CASES) {
-  test(`golden ${file.split("-x64")[0]} ${name}`, () => {
+  test(`golden ${file.replace(/-x64\.json$|\.json$/, "")} ${name}`, () => {
     const got = layoutText(renderer(file), name) + "\n";
-    const fx = path.join(GOLDEN, `${file.split("-")[0]}.${name}.txt`);
+    const fx = path.join(GOLDEN, fixture(file, name));
     if (UPDATE || !fs.existsSync(fx)) {
       fs.writeFileSync(fx, got);
       if (!UPDATE) assert.fail(`wrote missing fixture ${path.basename(fx)}; review and re-run`);
@@ -64,9 +72,12 @@ test("perf canary _MI_HYPER_SPACE", () => {
 });
 
 // Every documented struct/union in a doc lays out without throwing, with every row
-// offset inside the type and member counts preserved.
-test("all ntoskrnl 24H2 layouts are well-formed", () => {
-  const r = renderer(NTOS);
+// offset inside the type and member counts preserved: 24H2's kernel, and every doc
+// whose layouts don't come from a public PDB (tools/legacy/).
+const legacy = fs.readdirSync(DATA).filter((f) => /^(ntoskrnl|ntdll)-.*\.json$/.test(f) &&
+  JSON.parse(fs.readFileSync(path.join(DATA, f), "utf8")).provenance);
+for (const file of [NTOS, ...legacy]) test(`all ${file} layouts are well-formed`, () => {
+  const r = renderer(file);
   for (const name of Object.keys(r.named)) {
     const L = structLayout(r, name);
     if (!L) continue;

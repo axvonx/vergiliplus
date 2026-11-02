@@ -203,11 +203,12 @@ export function usedIn(T) {
 export function layoutText(T, name, meta = true) {
   const IND = "    ", COL = 60;
   const ann = (line, a) => meta ? line + " ".repeat(Math.max(2, COL - line.length)) + `/* ${a} */` : line;
+  const p = T.provenance?.(name), prov = p ? `\n/* ${p} */` : "";
   const E = enumLayout(T, name);
   if (E) {
     let out = `enum ${name} {`;
     for (const v of E.values) out += "\n" + ann(`${IND}${v.name} = ${v.value},`, hexv(v.value));
-    return out + "\n};";
+    return out + "\n};" + prov;
   }
   const L = structLayout(T, name);
   if (!L) throw new Error(`no struct/union/enum named ${name}`);
@@ -227,7 +228,7 @@ export function layoutText(T, name, meta = true) {
       out += "\n" + ann(`${ind}${text(r.typePre)}${r.sep}${r.field}${text(r.typeSuf)}${bits};`, offAnn(r));
     }
   }
-  return out + "\n};";
+  return out + "\n};" + prov;
 }
 
 // "/* 0x18  8 */" offset annotation; bitfields carry their bit position: 0x18:3

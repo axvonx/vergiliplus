@@ -23,7 +23,7 @@ for (const it of items) it.o ? counts.opaque++ : counts[it.k]++;
 const lens = names.map((n) => n.length).sort((a, b) => a - b);
 const colCh = Math.max(20, lens[Math.floor(lens.length * 0.9)] || 20) + 3;
 ---
-<Layout title={`${module} ${build}`} wide>
+<Layout title={`${module} ${doc.buildLabel || build}`} wide>
   <ContextBar arch={arch} build={build} module={module} />
   <div class="tl-top" data-tl-ctrl>
     <input class="tl-filter" placeholder="filter types…" />

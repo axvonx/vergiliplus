@@ -11,6 +11,8 @@ import { typePath } from "../lib/panel.mjs";
 const { arch, build, module, type, page } = Astro.props;
 const cat = catalog();
 const fam = (b) => cat.get(arch, b, module)?.family || "";
+const lab = (b) => cat.get(arch, b, module)?.buildLabel || b;
+const inc = (b) => !!cat.get(arch, b, module)?.incomplete;
 const listHref = (b, m = module) => `${ctxPath(arch, b, m)}.html`;
 const multiArch = cat.archs().length > 1;
 
@@ -33,7 +35,7 @@ const inMod = (m) => page && catalog().docs.some((d) => d.arch === arch && d.mod
       or loads that build's listing where the type is absent. */}
   <select class="cb-build" aria-label="Build" data-am={`${arch}/${module}`}
     data-has={page ? page.has : undefined} data-tsel={page ? "1" : undefined} data-l={`/v/${arch}/@/${module}.html`}>
-    <option value={build} selected>{fam(build)} — {build}{page && page.has[builds.indexOf(build)] === "o" ? "  (opaque)" : ""}</option>
+    <option value={build} selected class={inc(build) ? "inc" : undefined}>{fam(build)} — {lab(build)}{inc(build) ? "  (incomplete)" : ""}{page && page.has[builds.indexOf(build)] === "o" ? "  (opaque)" : ""}</option>
   </select>
   <span class="cb-sep">/</span>
   <span class="cb-mods">
@@ -50,9 +52,9 @@ const inMod = (m) => page && catalog().docs.some((d) => d.arch === arch && d.mod
   {type && <h1 class="cb-type">{type}</h1>}
   {page && (
     <span class="cb-step" data-step>
-      {prev ? <a href={`#${prev}`} title={`${fam(prev)} ${prev}`}>← {prev}</a> : <span class="off">← first</span>}
+      {prev ? <a href={`#${prev}`} title={`${fam(prev)} ${lab(prev)}`}>← {lab(prev)}</a> : <span class="off">← first</span>}
       <span class="n">{tb.length} build{tb.length === 1 ? "" : "s"}</span>
-      {next ? <a href={`#${next}`} title={`${fam(next)} ${next}`}>{next} →</a> : <span class="off">latest →</span>}
+      {next ? <a href={`#${next}`} title={`${fam(next)} ${lab(next)}`}>{lab(next)} →</a> : <span class="off">latest →</span>}
     </span>
   )}
 </div>

@@ -115,18 +115,19 @@
         const list = all[s.dataset.am], has = s.dataset.has;
         if (!list) return;
         const mark = (i) => (has ? has[i] : "d");
-        s.innerHTML = list.map(([b, fam], i) => {
+        s.innerHTML = list.map(([b, fam, lab = b, inc], i) => {
           const st = mark(i);
-          return `<option value="${esc(b)}"${b === cur ? " selected" : ""}${st === "-" ? ' data-n="1"' : ""}>` +
-            `${esc(fam)} — ${esc(b)}${st === "-" ? "  (not defined)" : st === "o" ? "  (opaque)" : ""}</option>`;
+          return `<option value="${esc(b)}"${b === cur ? " selected" : ""}${st === "-" ? ' data-n="1"' : ""}${inc ? ' class="inc"' : ""}>` +
+            `${esc(fam)} — ${esc(lab)}${inc ? "  (incomplete)" : ""}${st === "-" ? "  (not defined)" : st === "o" ? "  (opaque)" : ""}</option>`;
         }).join("");
         const step = document.querySelector("[data-step]");
         if (!step || !has) return;
         const tb = list.filter((_, i) => mark(i) !== "-"), i = tb.findIndex(([b]) => b === cur);
-        const link = (x, txt) => `<a href="#${esc(encodeURIComponent(x[0]))}" title="${esc(x[1])} ${esc(x[0])}">${esc(txt)}</a>`;
-        step.innerHTML = (i > 0 ? link(tb[i - 1], `← ${tb[i - 1][0]}`) : `<span class="off">← first</span>`) +
+        const lab = (x) => x[2] ?? x[0];
+        const link = (x, txt) => `<a href="#${esc(encodeURIComponent(x[0]))}" title="${esc(x[1])} ${esc(lab(x))}">${esc(txt)}</a>`;
+        step.innerHTML = (i > 0 ? link(tb[i - 1], `← ${lab(tb[i - 1])}`) : `<span class="off">← first</span>`) +
           `<span class="n">${tb.length} build${tb.length === 1 ? "" : "s"}</span>` +
-          (i >= 0 && i < tb.length - 1 ? link(tb[i + 1], `${tb[i + 1][0]} →`) : `<span class="off">latest →</span>`);
+          (i >= 0 && i < tb.length - 1 ? link(tb[i + 1], `${lab(tb[i + 1])} →`) : `<span class="off">latest →</span>`);
       })
       .catch(() => { builds = null; });  // keep what the page shipped; retry next time
   };
@@ -160,7 +161,8 @@
   const short = (fam) => fam.replace(/^Windows /, "");
   // once there is more than one architecture a build is named "<build> · <arch>"
   const arched = () => new Set(ck.ix.v.map((v) => v[0])).size > 1;
-  const vname = (v) => (arched() ? `${v[1]} · ${v[0]}` : v[1]);
+  // v = [arch, build, family, channel[, label, incomplete]]: the label is what to show
+  const vname = (v) => (arched() ? `${v[4] ?? v[1]} · ${v[0]}` : v[4] ?? v[1]);
   // per-version on/off, recomputed only when F.vOff is replaced (it is never mutated)
   let onFor = null, on = [];
   const vOn = (i) => {
