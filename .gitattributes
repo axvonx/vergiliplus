@@ -2,6 +2,8 @@
 # or clutter diffs, but keep it in the repo (it is the publishable artifact).
 data/*.json linguist-generated=true
 data/*.json -diff
+# ...except the hand-edited manifest, whose diffs are reviewed like code
+data/sources.json diff
 
 # Normalize line endings; shell/py stay LF even if cloned on Windows.
 * text=auto eol=lf

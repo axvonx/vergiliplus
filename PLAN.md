@@ -56,20 +56,27 @@ archive.org URLs). Verify each with the item's `metadata/<id>/files` md5.
   never redistribute binaries/PDBs (README License section stays true).
 - Every layout's provenance is shown when it isn't a public PDB (see §3.D).
 
-## 2. Decisions for you (recommendation first)
+## 2. Decisions (settled by the user, 2026-11-02)
 
-1. **How to show non-PDB provenance.** Recommend a one-line badge in the context bar /
-   panel ("from DDK library type records, cross-checked with KDEXTX86" / "computed
-   layout: 1991 debugger types, natural alignment") + a field in the doc JSON.
-2. **Build labels for pre-release 1991 builds** (no FileVersion exists). `cmpBuild`
-   sorts numerically on 4 dot parts. Recommend `0.1991.4.0` (April) / `0.1991.10.0`
-   (October) with families "NT pre-release, Apr 1991 (MIPS)" / "… Oct 1991 (x86)". Needs
-   an exception to the "labels come from binaries" rule; document it in CLAUDE.md.
-3. **Partial data (NT 3.5/3.51):** typed user-mode structs only + names/offsets of
-   EPROCESS/ETHREAD from kdext. Recommend: include the typed structs as normal builds;
-   skip the names-only view (or a later "offsets only" panel kind).
-4. **Fix `.gitattributes`:** `data/*.json -diff` also hides diffs of the hand-edited
-   manifest — add `data/sources.json diff` after it. (This is why git shows it as "Bin".)
+1. **Provenance = a tag at the end of the type definition.** After the closing `};` of
+   any non-PDB layout, a comment line naming the source, e.g.
+   `/* source: NT 4.0 DDK libcntpr.lib type records; offsets verified against KDEXTX86 */`
+   or `/* computed: 1991 I386KD.EXE CodeView 3 types, natural 32-bit alignment */`.
+   Store it as `doc.provenance` (per doc, overridable per type) and render it in
+   `panel.mjs` as the last code line (so `copy` includes it); golden fixture for one.
+2. **Pre-release builds with no version show "no build number".** The visible build
+   label is literally `no build number`; families carry the date/arch ("NT pre-release,
+   April 1991 (MIPS)", "… October 1991 (x86)"). URLs and sorting still need a key:
+   use an internal sortable key (e.g. `0.1991.4.0`) for `#<build>`/`cmpBuild`, and a
+   separate display label (`doc.buildLabel`) wherever builds are shown (select, steps,
+   home, palette). Document the exception to "labels come from binaries" in CLAUDE.md.
+3. **Partial data is included, marked in red "incomplete".** NT 3.5/3.51 (typed
+   user-mode structs; 3.51 names+offsets of EPROCESS/ETHREAD from kdext) go in as builds
+   whose rows/pages carry a red `incomplete` marker (CSS class, not inline style; on the
+   home row, the select option, and the type page). A names+offsets-only struct renders
+   with `/* type unknown */` in place of the declarator and no size/holes stats.
+4. **`.gitattributes` fixed** (done, on main): `data/sources.json diff` after
+   `data/*.json -diff`, so manifest diffs are reviewable again.
 
 ## 3. Work, in dependency order
 
