@@ -1,7 +1,7 @@
 # CLAUDE.md — vergiliplus
 
 Static browser of Windows struct/union/enum layouts from Microsoft's **public PDBs**:
-kernel (`ntoskrnl`) and userland (`ntdll`) across 20 x64 builds (Win7 → Canary), live at
+kernel (`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), live at
 https://vergiliplus.com. Not a fork of Vergilius; it borrows only its look.
 
 ## Map
@@ -54,7 +54,7 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   `StructCode.astro` (via `html()`) emits markup. Plain-text output never strips tags.
 - **Golden fixtures are the spec.** Change rendering → `UPDATE_GOLDEN=1 node --test
   tests/render.test.mjs` → review the fixture diff like code.
-- **Page weight is a budget.** About 28k pages: 1 KB of template is about 28 MB of
+- **Page weight is a budget.** About 47k pages: 1 KB of template is about 47 MB of
   `dist` (budget 600 MB; GitHub Pages caps at ~1 GB). Behaviour belongs in
   `public/assets/*.js`, not inline. No islands, no frameworks.
 - **Client JS:** use document-level delegation and re-sync on `astro:page-load`
@@ -67,6 +67,11 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 - `pdb_to_json.py` parses `llvm-pdbutil` **text**. If a new LLVM yields empty or short
   output, look at its regexes first.
+- VC 7.x PDBs (XP x64 / 2003) have a V70 TPI header LLVM rejects. `readable()` dumps a
+  patched temp copy without the hash stream, so pdbutil prints no forward-ref targets
+  and `parse` resolves them by name. Check a nested struct's size after touching either.
+- Vista/2008 and XP/2003 SP2 binaries came from the SP standalone packages on the
+  Microsoft Update Catalog (`catalog.update.microsoft.com`), then pinned as `msdl`.
 - "Documented" = the PDB record has a real field list. ntdll and ntoskrnl each define
   what they own and forward-declare the rest (`_TP_POOL` is full only in ntdll).
 - Union reconstruction ambiguity: when the *last* alternative is the longest, its tail
@@ -77,15 +82,15 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   `named`; layout inlines such members; `usedIn` credits the enclosing type.
 - Pointer size comes from the doc's arch (`PTR_SIZE` in types.mjs).
 - `/search-index.json` is grouped: `{v: versions, m: modules, t: [[name, kind, slug,
-  module#, [defined v#], [opaque v#]]]}` (~340 KB). Palette filters (kind, PDB, opaque,
+  module#, [defined v#], [opaque v#]]]}` (~380 KB). Palette filters (kind, PDB, opaque,
   versions checklist) persist in localStorage `vp-ck`; it opens with `/` or ⌘K.
 - PDBs cache in `$TMPDIR/vergiliplus-pdbs`, keyed by GUID+age.
 - Stale `astro preview` servers keep their port; a new one silently moves.
 
 ## Open (undecided)
 
-**Scale ceiling:** about 20 MB of `dist` per build (two modules), so 20 builds ≈ 394 MB.
-GitHub Pages caps at ~1 GB, so roughly 40 builds is the limit without an architecture
+**Scale ceiling:** about 20 MB of `dist` per build (two modules), so 22 builds ≈ 428 MB.
+GitHub Pages caps at ~1 GB, so roughly 45 builds is the limit without an architecture
 change (e.g. client-rendering older builds from JSON). Plan that before x86/ARM64 or
 per-update builds.
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·

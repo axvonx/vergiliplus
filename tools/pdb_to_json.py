@@ -17,12 +17,15 @@ is kept as a best-effort {kind:"other"} node so rendering degrades instead of
 crashing.
 """
 import argparse
+import contextlib
 import json
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
+import tempfile
 from typing import Callable
 
 HEADER = re.compile(r"^\s*0x([0-9A-Fa-f]+) \| (LF_\w+)(.*)$")
@@ -55,8 +58,55 @@ def run_tool(argv, stdin=None, check=True):
     return out.stdout
 
 
+TPI_V70, TPI_V80 = 19990903, 20040203
+
+
+def tpi_header_offset(f):
+    """File offset of the TPI stream (MSF stream 2) header in an open PDB."""
+    f.seek(0)
+    sb = f.read(56)
+    if not sb.startswith(b"Microsoft C/C++ MSF 7.00\r\n\x1aDS\0\0\0"):
+        return None
+    bs, _, _, dirsize, _, dirmap = struct.unpack_from("<6I", sb, 32)
+    f.seek(dirmap * bs)
+    blocks = struct.unpack("<%dI" % (-(-dirsize // bs)), f.read(4 * -(-dirsize // bs)))
+    d = b""
+    for b in blocks:  # the directory up to stream 2's block list
+        f.seek(b * bs)
+        d += f.read(bs)
+    n = struct.unpack_from("<I", d)[0]
+    sizes = struct.unpack_from("<%dI" % n, d, 4)
+    off = 4 + 4 * n + sum(4 * -(-z // bs) for z in sizes[:2] if z != 0xFFFFFFFF)
+    return struct.unpack_from("<I", d, off)[0] * bs
+
+
+@contextlib.contextmanager
+def readable(pdb):
+    """A path llvm-pdbutil can read. VC 7.x PDBs (Server 2003 era) have a V70 TPI
+    header that LLVM refuses (and -publics crashes on); the records themselves are
+    the V80 ones. Such a PDB is read from a temporary copy whose header says V80 with
+    4-byte hash keys and no hash stream (only name lookup uses it)."""
+    with open(pdb, "rb") as f:
+        hdr = tpi_header_offset(f)
+        f.seek(hdr or 0)
+        ver = struct.unpack("<I", f.read(4))[0] if hdr is not None else None
+    if ver != TPI_V70:
+        yield pdb
+        return
+    with tempfile.TemporaryDirectory() as tmp:
+        copy = os.path.join(tmp, os.path.basename(pdb))
+        shutil.copyfile(pdb, copy)
+        with open(copy, "r+b") as f:
+            f.seek(hdr)
+            f.write(struct.pack("<I", TPI_V80))
+            f.seek(hdr + 20)  # HashStreamIndex, HashAuxStreamIndex, HashKeySize
+            f.write(struct.pack("<HHI", 0xFFFF, 0xFFFF, 4))
+        yield copy
+
+
 def run_pdbutil(pdb, pdbutil):
-    return run_tool([find_pdbutil(pdbutil), "dump", "-types", pdb]).splitlines()
+    with readable(pdb) as p:
+        return run_tool([find_pdbutil(pdbutil), "dump", "-types", p]).splitlines()
 
 
 def find_undname(pdbutil):
@@ -107,7 +157,8 @@ def mangled_type_names(pdb, pdbutil):
     """Aggregate names that appear only inside mangled C++ public symbols. Newer
     internals (e.g. the canary AutoBoost _AB_* family) have no type records in the
     public PDB at all, so their signatures are the only place the names exist."""
-    out = run_tool([find_pdbutil(pdbutil), "dump", "-publics", pdb])
+    with readable(pdb) as p:
+        out = run_tool([find_pdbutil(pdbutil), "dump", "-publics", p])
     syms = re.findall(r"`(\?[^`]+)`", out)
     if not syms:
         return {}
@@ -249,6 +300,15 @@ def parse(lines):
 
     for bk, bn in bases.items():
         types.setdefault(bk, {"kind": "base", "name": bn})
+
+    # llvm-pdbutil prints a forward ref's target ("-> 0x..") only via the TPI hash
+    # stream, which readable() drops for VC 7.x PDBs; resolve those by name instead
+    defs = {(t["kind"], t["name"]): k for k, t in types.items()
+            if t.get("fieldlist") and t.get("name")}
+    for t in types.values():
+        if t.get("kind") in ("struct", "union", "enum") and not t.get("fieldlist") \
+                and not t.get("forward"):
+            t["forward"] = defs.get((t["kind"], t.get("name")))
 
     return types
 
