@@ -152,3 +152,16 @@ test("union of a word and a bitfield struct", () => {
     "};",
   ].join("\n"));
 });
+
+// a type the sources define in more than one way renders every definition, the first
+// shown and the rest hidden, picked by a select; each names its source in its last line
+test("variants: build 404's two _PEB definitions", async () => {
+  const { panelHtml } = await import("../web/src/lib/panel.mjs");
+  const doc = loadDoc(path.join(DATA, "ntdll-3.10.404.1-mips.json"));
+  const html = panelHtml(new Types(doc), "_PEB", doc);
+  assert.equal((html.match(/data-var="/g) || []).length, 2);
+  assert.match(html, /data-var="1" hidden/);
+  assert.match(html, /MIPS\/CDPLAYER\.EXE \(112 bytes\)/);
+  assert.match(html, /MIPS\/DISKPERF\.EXE \(100 bytes\)/);
+  assert.match(html, /this definition: MIPS\/DISKPERF\.EXE/);
+});

@@ -189,6 +189,11 @@ a.str-link:hover { color: yellow; }
   font-family: var(--mono); text-transform: lowercase; white-space: nowrap; }
 .inc-note { color: var(--mute); font-size: 1.6rem; margin: 0 0 1rem; }
 option.inc { color: var(--red); }
+/* ---- several definitions of one type in a build's sources ---- */
+.var { color: var(--orange); border: 1px solid var(--orange); border-radius: 3px; padding: 0 0.5rem; font-size: 1.3rem;
+  font-family: var(--mono); white-space: nowrap; }
+.var-note { color: var(--mute); font-size: 1.6rem; margin: 0 0 1rem; }
+.var-sel { background: var(--input); color: var(--mint); border: 1px solid var(--input-line); padding: 2px 4px; font-size: 1.5rem; max-width: 100%; }
 
 /* ---- search palette ---- */
 .ck-ov { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; justify-content: center; align-items: flex-start; padding-top: 8vh; }

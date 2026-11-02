@@ -75,6 +75,9 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   carry `incomplete: "<why>"`: a red `incomplete` marker on home, select and type page.
   An `untyped` struct (NT 3.51 kernel: names+offsets from KDEXT's !processfields) has
   members with `type: null`, rendered `/* type unknown */`, without holes, sizes or size.
+  Where a build's sources define a type differently (`"variants": true` on a multi-file
+  `lib` entry), `doc.variants = {name: [{type, note}]}` keeps each definition (the chosen
+  one is `named[name]`); the page shows one at a time under a select (struct.js).
 - **Opaque types**: names a PDB declares or mentions but never defines (forward
   declarations, plus struct/union/enum names that `llvm-undname` finds in public
   symbols, kept fully qualified, e.g. `AutoBoost::_AB_PRIORITY`). They live in

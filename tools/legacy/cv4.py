@@ -130,10 +130,15 @@ class Merger:
                         and n.get("name") not in ANON:
                     self.defs[(n["kind"], n["name"])].append((i, k))
         self.chosen, self.disagree = {}, {}
+        # nk -> [(shape, [(table#, key)])], the chosen definition first
+        self.shapes = {}
         for nk, cands in self.defs.items():
             votes = collections.Counter(shape(tables[i][1], k) for i, k in cands)
             best = max(votes, key=lambda s: (votes[s], len(s[1]) + len(s[2])))
             self.chosen[nk] = next((i, k) for i, k in cands if shape(tables[i][1], k) == best)
+            order = sorted(votes, key=lambda s: (s != best, -votes[s], -(len(s[1]) + len(s[2]))))
+            self.shapes[nk] = [(sh, [(i, k) for i, k in cands if shape(tables[i][1], k) == sh])
+                               for sh in order]
             if len(votes) > 1:
                 self.disagree[nk[1]] = {"kept": votes[best], "others": sum(votes.values()) - votes[best]}
 
@@ -160,6 +165,19 @@ class Merger:
             if kind != "enum":
                 node["size"] = src.get("size", 0)
             node["fieldlist"] = self.fieldlist(i, src["fieldlist"])
+        return idx
+
+    def variant(self, kind, name, i, k):
+        """A node for another definition of a named aggregate (table i's record k)."""
+        skey = ("V", kind, name, i, k)
+        if skey in self.ids:
+            return self.ids[skey]
+        node = {"kind": kind, "name": name, "fieldlist": None, "forward": None}
+        idx = self.intern(skey, node)
+        src = self.tables[i][1][k]
+        if kind != "enum":
+            node["size"] = src.get("size", 0)
+        node["fieldlist"] = self.fieldlist(i, src["fieldlist"])
         return idx
 
     def fieldlist(self, i, key):
@@ -236,13 +254,19 @@ def matching_tables(doc, tables, names):
     return out
 
 
-def convert(paths, machine, module, arch, build, family="", note="", names=None, extra=()):
+def convert(paths, machine, module, arch, build, family="", note="", names=None, extra=(),
+            variants=False, labels=None):
     """One or more COFF libraries/objects -> the vergiliplus doc for module x build x arch.
     `names` (optional: a set, or a predicate on the name) limits the documented types;
-    everything they reach comes along. `extra`: more (object, records) tables merged in (see matching_tables); the library's
-    own definitions outvote theirs."""
+    everything they reach comes along. `extra`: more (object, records) tables merged in
+    (see matching_tables); the library's own definitions outvote theirs. `variants`: a documented name the sources define in
+    more than one way gets every definition, labelled by the objects it came from
+    (doc.variants = {name: [{type, note}]}, the chosen one first); `labels` names each of
+    `paths` for that (default: the file name)."""
     mach = MACHINES[machine] if isinstance(machine, str) else machine
-    tables = [t for p in paths for t in type_tables(p, mach)] + list(extra)
+    labels = labels or [os.path.basename(p) for p in paths]
+    tables = [(lab if obj == os.path.basename(p) else "%s %s" % (lab, obj), t)
+              for p, lab in zip(paths, labels) for obj, t in type_tables(p, mach)] + list(extra)
     if not tables:
         raise ValueError("no CodeView types for machine 0x%x in %s" % (mach, ", ".join(paths)))
     m = Merger(tables)
@@ -264,7 +288,16 @@ def convert(paths, machine, module, arch, build, family="", note="", names=None,
     # an opaque name a documented type reaches (as a pointer target, say) is kept
     opaque = {n: k for n, k in sorted(declared.items())
               if n not in named and ("N", k, n) in m.ids and m.ids[("N", k, n)] in types}
-    if m.disagree:
+    var = {}
+    if variants:
+        for (k, n) in sorted(m.chosen):
+            if n in named and len(m.shapes[(k, n)]) > 1:
+                label = lambda locs: ", ".join(sorted({tables[i][0] for i, _ in locs}))
+                var[n] = [{"type": named[n] if j == 0 else m.variant(k, n, *locs[0]),
+                           "note": label(locs)} for j, (_, locs) in enumerate(m.shapes[(k, n)])]
+        types = P.reachable(m.types, list(named.values()) +
+                            [v["type"] for vs in var.values() for v in vs])
+    if m.disagree and not var:
         print("  ~~ %s: %d names with disagreeing definitions (majority kept): %s"
               % (arch, len(m.disagree), ", ".join(sorted(m.disagree))), file=sys.stderr)
     return {
@@ -272,6 +305,7 @@ def convert(paths, machine, module, arch, build, family="", note="", names=None,
         "fileVersion": None, "pdb": None,
         "provenance": {"kind": "source", "note": note},
         "named": named, "opaque": opaque, "types": types,
+        **({"variants": var} if var else {}),
     }
 
 

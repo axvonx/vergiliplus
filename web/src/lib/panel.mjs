@@ -28,7 +28,29 @@ function rowHtml(r, T) {
 
 // a documented type's view: code + stats line. A layout not from a public PDB ends with
 // its provenance as a last code line (so copy carries it); a partial build says so.
+// A type the sources define in more than one way (doc.variants) shows every definition,
+// one at a time, picked from a select under the notices (struct.js switches them).
 export function panelHtml(T, name, doc = null) {
+  const notes = doc?.incomplete ? incompleteHtml(doc) : "";
+  const vs = doc?.variants?.[name];
+  if (!vs) return notes + layoutHtml(T, name);
+  const base = T.provenance(name);
+  const views = vs.map((v) => {
+    const TV = Object.create(T);  // the same doc, with this definition under the name
+    TV.named = { ...T.named, [name]: v.type };
+    TV.provenance = (n) => (n === name ? `${base ? base + "; " : ""}this definition: ${v.note}` : T.provenance(n));
+    return { v, T: TV, size: TV.sizeof(v.type) };
+  });
+  return notes +
+    `<div data-vars><p class="var-note"><span class="var">${vs.length} variants</span> the sources define ${esc(name)} differently: ` +
+    `<select class="var-sel" data-var-sel aria-label="Definition">${views.map((x, i) =>
+      `<option value="${i}">${esc(x.v.note)} (${x.size} bytes)</option>`).join("")}</select></p>` +
+    views.map((x, i) => `<div class="var-view" data-var="${i}"${i ? " hidden" : ""}>${layoutHtml(x.T, name)}</div>`).join("") +
+    `</div>`;
+}
+
+// one layout's code + stats
+function layoutHtml(T, name) {
   const L = structLayout(T, name), E = L ? null : enumLayout(T, name);
   let head, body, stats;
   if (E) {
@@ -49,8 +71,7 @@ export function panelHtml(T, name, doc = null) {
     ? `<span><b>${k.split(" ")[0]}</b> ${k.split(" ").slice(1).join(" ")}${v !== "" ? ` (${esc(v)})` : ""}</span>`
     : `<span>${k} <b>${esc(v)}</b></span>`).join("");
   const p = T.provenance(name);
-  return (doc?.incomplete ? incompleteHtml(doc) : "") +
-    `<div class="sc meta-off" data-sc><pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-tgl" data-sc-meta aria-pressed="false"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div>` +
+  return `<div class="sc meta-off" data-sc><pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-tgl" data-sc-meta aria-pressed="false"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div>` +
     `<div class="sc-line sc-head"><span class="sc-code">${head}</span></div>${body}<div class="sc-line"><span class="sc-code">};</span></div>` +
     (p ? `<div class="sc-line sc-prov"><span class="sc-code">/* ${esc(p)} */</span></div>` : "") +
     `</code></pre></div>` +

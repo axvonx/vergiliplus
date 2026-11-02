@@ -44,6 +44,14 @@
       if (a && !t.closest("a") && !getSelection().toString()) a.click();
     }
   });
+  // a type the sources define in more than one way: the select shows one definition
+  document.addEventListener("change", (e) => {
+    const sel = e.target.closest?.("[data-var-sel]");
+    if (!sel) return;
+    sel.closest("[data-vars]").querySelectorAll("[data-var]").forEach((v) => {
+      v.hidden = v.dataset.var !== sel.value;
+    });
+  });
   // ---- type pages: #<build> picks the build (default: data-def, inlined) ----------
   // Other builds' views come from the type's pack, {n: [build], v: [view html],
   // u: [[used-in names]], b: [[v#, u#] | 0 per n]}, gzipped (lib/panel.mjs packOf).

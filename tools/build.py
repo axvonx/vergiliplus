@@ -58,6 +58,9 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # extension. "names" limits what a cv4 doc
                                                # documents (what they reach comes along);
                                                # "namesRe" does it by a regex on the name.
+                                               # "also": [{lib, sha256, [member]}] more files
+                                               # read together; "variants": true keeps every
+                                               # definition sources disagree on (labelled).
                                                # A "lib" may also be a PE image carrying its
                                                # CodeView 4 inline (MIPS 1992-93 binaries).
                                                # "supplement": {lib, sha256, [member], machine,
@@ -92,6 +95,7 @@ import subprocess
 import sys
 import tempfile
 import urllib.error
+import urllib.parse
 import urllib.request
 
 import pdb_to_json
@@ -239,6 +243,17 @@ def fetch_pkg(entry, outdir, url_key="pkg"):
     return out
 
 
+def source_label(entry):
+    """A short name for a "lib" source: its last member, else the URL path's last two
+    parts ("MIPS/CDPLAYER.EXE")."""
+    m = entry.get("member") or []
+    if m and isinstance(m[-1], str):
+        return m[-1]
+    if m:
+        return next(iter(m[-1].values()))
+    return "/".join(urllib.parse.unquote(entry["lib"]).split("/")[-2:])
+
+
 def json_name(module, build, arch):
     return os.path.join(DATA, "%s-%s-%s.json" % (module, build, arch))
 
@@ -358,14 +373,18 @@ def handle(entry, base, pdbdir):
 
     if "lib" in entry:
         build, src = entry["build"], fetch_pkg(entry, pdbdir, "lib")
+        more = [fetch_pkg(dict(x, member=x.get("member", [])), pdbdir, "lib")
+                for x in entry.get("also", [])]
         if entry.get("format") == "cv3":
             doc = cv3.convert(src, entry["module"], arch, build, family, entry["note"])
         elif entry.get("format") == "kdext":
             doc = kdext.convert(src, entry["module"], arch, build, family, entry["note"])
         else:
-            doc = cv4.convert([src], entry["machine"], entry["module"], arch, build, family,
+            doc = cv4.convert([src] + more, entry["machine"], entry["module"], arch, build, family,
                               entry["note"], set(entry["names"]) if entry.get("names") else
-                              re.compile(entry["namesRe"]).fullmatch if entry.get("namesRe") else None)
+                              re.compile(entry["namesRe"]).fullmatch if entry.get("namesRe") else None,
+                              variants=entry.get("variants", False),
+                              labels=[source_label(x) for x in [entry] + entry.get("also", [])])
         sup = entry.get("supplement")
         if sup:  # more types from one object of another library, if one matches this arch
             tables = cv4.type_tables(fetch_pkg(sup, pdbdir, "lib"), cv4.MACHINES[sup["machine"]])

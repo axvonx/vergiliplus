@@ -21,4 +21,4 @@ struct _PEB {
     void* ReadOnlySharedMemoryHeap;                         /* 0x50  4 */
     void** ReadOnlyStaticServerData;                        /* 0x54  4 */
 };
-/* source: July 1992 pre-release Win32 SDK CD, MIPS/USERSRV.DLL inline CodeView 4 (NB08) type records */
+/* source: July 1992 pre-release Win32 SDK CD, MIPS/USERSRV.DLL and MIPS/USER32.DLL inline CodeView 4 (NB08) type records */
