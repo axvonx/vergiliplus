@@ -61,7 +61,8 @@ export function catalog() {
     get: (a, b, m) => byKey.get(key(a, b, m)),
     builds: (a, m) => builds.get(key(a, m)) || [],
     modules: (a, b) => (modules.get(key(a, b)) || []).slice().sort(),
-    archs: () => [...new Set(docs.map((d) => d.arch))].sort(),
+    // current ones first, then the historical ones
+    archs: () => [...new Set(docs.map((d) => d.arch))].sort((a, b) => archRank(a) - archRank(b) || (a < b ? -1 : 1)),
     // what a build is called on screen: its build string, or doc.buildLabel where that is
     // only a sort key ("no build number" pre-releases); inc = why it is incomplete, if so
     label: (a, b) => docs.find((d) => d.arch === a && d.build === b)?.buildLabel || b,
@@ -110,12 +111,24 @@ export function typeList(doc) {
   return _l.get(doc);
 }
 
+const ARCHS = ["x64", "x86", "arm64", "ia64", "alpha", "mips", "ppc"];
+const archRank = (a) => (ARCHS.includes(a) ? ARCHS.indexOf(a) : ARCHS.length);
+
 export const ctxPath = (a, b, m) => `/v/${a}/${b}/${m}`;
 
 // a build's row with its display label and incomplete flag appended where they apply:
 // [...row] | [...row, label] | [...row, label, 1]
 export const vrow = (x, row) =>
   x.inc ? [...row, x.label, 1] : x.label !== x.build ? [...row, x.label] : row;
+
+// a family name split for display: product = the group heading, release = what a row
+// shows. "Windows 10 1703" -> {Windows 10, 1703}, "Windows Server 2016" -> {Windows
+// Server, 2016}; a bare product ("Windows 8") is its own release ("8").
+export function product(family) {
+  const m = /^Windows (NT|Server|Vista|XP|\d+(?:\.\d+)?)\b[ ,]*(.*)$/.exec(family || "");
+  if (!m) return { product: family || "", release: family || "" };
+  return { product: "Windows " + m[1], release: m[2] || m[1] };
+}
 
 // release channel from the family name, for colour-coding versions
 export const channel = (family) =>

@@ -1,16 +1,19 @@
 ---
 // Where am I + where can I go, in one row (replaces breadcrumbs, the type heading,
 // the old version bar and the sidebar header):
-//   [arch]  build ▾  /  module | module  /  Type        ← prev · n builds · next →
+//   arch | arch  build ▾  /  module | module          ← prev · n builds · next →
+//   Type
 // On a listing the build is the page's. On a type page (`page` from lib/panel.mjs) it
 // is the URL's #<build>: this renders the default build and nav.js re-syncs the select,
 // steps and module links when struct.js switches builds (vp:build).
-import { catalog, ctxPath } from "../lib/catalog.mjs";
+import { catalog, ctxPath, product } from "../lib/catalog.mjs";
 import { modInfo } from "../lib/modules.mjs";
 import { typePath } from "../lib/panel.mjs";
 const { arch, build, module, type, page } = Astro.props;
 const cat = catalog();
 const fam = (b) => cat.get(arch, b, module)?.family || "";
+// the button names the build as nav.js does: short product, release where it differs
+const cp = product(fam(build)), cpShort = cp.product.replace(/^Windows /, "");
 const lab = (b) => cat.get(arch, b, module)?.buildLabel || b;
 const inc = (b) => !!cat.get(arch, b, module)?.incomplete;
 const listHref = (b, m = module) => `${ctxPath(arch, b, m)}.html`;
@@ -24,19 +27,37 @@ const i = tb.indexOf(build);
 const prev = i > 0 ? tb[i - 1] : null;
 const next = i >= 0 && i < tb.length - 1 ? tb[i + 1] : null;
 // other modules: their page for this type where they have one (any build)
+// other arches: this type's page there (a type page), else the module's newest listing;
+// only arches that have it
+const archs = multiArch ? cat.archs().filter((a) => a === arch || (page
+  ? cat.docs.some((d) => d.arch === a && d.module === module && (type in d.named || type in d.opaque))
+  : cat.builds(a, module).length)) : [];
+const archHref = (a) => page ? typePath(a, module, type) : `${ctxPath(a, cat.builds(a, module).at(-1), module)}.html`;
+// break long names after _ and :: only, never mid-word
+const parts = type ? type.split(/(?<=[^_:][_:]+)(?=[^_:])/) : [];
 const inMod = (m) => page && catalog().docs.some((d) => d.arch === arch && d.module === m && (type in d.named || type in d.opaque));
 ---
 <div class="cbar">
-  {multiArch && <span class="cb-arch">{arch}</span>}
-  {/* Only the current build is rendered; nav.js fills the rest from /builds.json
+  {archs.length > 0 && (
+    <span class="cb-archs">
+      {archs.map((a) => a === arch ? <span class="arch on">{a}</span>
+        : <a class="arch" href={archHref(a)} title={page ? `${type} on ${a}` : `${module} on ${a}`}>{a}</a>)}
+    </span>
+  )}
+  {/* Only the current build is rendered; nav.js builds the popover from /builds.json
       (one copy, not ~2 KB in every page). data-has has one char per build of
       cat.builds(arch, module): d defined, o opaque, - absent. On a listing, picking a
       build loads its listing (data-l, @ = build); on a type page it sets #<build>,
       or loads that build's listing where the type is absent. */}
-  <select class="cb-build" aria-label="Build" data-am={`${arch}/${module}`}
+  <button type="button" class="cb-build" aria-haspopup="listbox" aria-expanded="false" title={fam(build)}
+    data-am={`${arch}/${module}`} data-cur={build}
     data-has={page ? page.has : undefined} data-tsel={page ? "1" : undefined} data-l={`/v/${arch}/@/${module}.html`}>
-    <option value={build} selected class={inc(build) ? "inc" : undefined}>{fam(build)} — {lab(build)}{inc(build) ? "  (incomplete)" : ""}{page && page.has[builds.indexOf(build)] === "o" ? "  (opaque)" : ""}</option>
-  </select>
+    <span class="cbb-p">{cpShort}</span>
+    {cp.release !== cpShort && <span class="cbb-r">{cp.release}</span>}
+    <span class="cbb-l">{lab(build)}</span>
+    {inc(build) && <span class="inc">incomplete</span>}
+    {page && page.has[builds.indexOf(build)] === "o" && <span class="cbb-o">opaque</span>}
+  </button>
   <span class="cb-sep">/</span>
   <span class="cb-mods">
     {mods.map((m) => {
@@ -48,8 +69,8 @@ const inMod = (m) => page && catalog().docs.some((d) => d.arch === arch && d.mod
                 title={other ? `${type} in ${label}` : label}>{label}</a>;
     })}
   </span>
-  {type && <span class="cb-sep">/</span>}
-  {type && <h1 class="cb-type">{type}</h1>}
+  {type && <span class="cb-br"></span>}
+  {type && <h1 class="cb-type">{parts.map((p, i) => <>{i > 0 && <wbr />}{p}</>)}</h1>}
   {page && (
     <span class="cb-step" data-step>
       {prev ? <a href={`#${prev}`} title={`${fam(prev)} ${lab(prev)}`}>← {lab(prev)}</a> : <span class="off">← first</span>}

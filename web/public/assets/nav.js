@@ -99,13 +99,25 @@
   });
 
   // ---- context bar build switcher: same type in the chosen build, else its listing ----
-  // The page ships only its own build's <option>; the rest come from /builds.json.
-  // On a type page this also re-syncs the steps and module links to the shown build.
+  // The page ships only its own build's button; the popover (created here, grouped by
+  // product, newest first) comes from /builds.json: rows [build, family, product,
+  // release[, label, incomplete]]. On a type page this also re-syncs the button, steps
+  // and module links to the shown build.
   let builds = null;
+  const bp = { list: null, has: "", cur: "", sel: -1, shown: [] };
+  const btn = () => document.querySelector(".cb-build[data-am]");
+  const pop = () => document.getElementById("vp-bp");
+  const short = (p) => p.replace(/^Windows /, "");
+  const lab = (x) => x[4] ?? x[0];
+  // the build's name as the button and rows show it: "10 1703", "Server 2016", "8"
+  const bname = (x) => `<span class="cbb-p">${esc(short(x[2]))}</span>` +
+    (x[3] !== short(x[2]) ? `<span class="cbb-r">${esc(x[3])}</span>` : "");
+  const status = (st, inc) => (inc ? `<span class="inc">incomplete</span>` : "") +
+    (st === "o" ? `<span class="cbb-o">opaque</span>` : st === "-" ? `<span class="cbb-o">not defined</span>` : "");
   const barSync = () => {
-    const s = document.querySelector(".cb-build[data-am]");
+    const s = btn();
     if (!s) return;
-    const tp = tpage(), cur = tp ? tp.dataset.cur : s.dataset.cur || s.value;
+    const tp = tpage(), cur = tp ? tp.dataset.cur : s.dataset.cur;
     s.dataset.cur = cur;
     document.querySelectorAll(".cb-mod[data-tpage]").forEach((a) => {
       a.href = a.getAttribute("href").split("#")[0] + "#" + encodeURIComponent(cur);
@@ -115,15 +127,14 @@
         const list = all[s.dataset.am], has = s.dataset.has;
         if (!list) return;
         const mark = (i) => (has ? has[i] : "d");
-        s.innerHTML = list.map(([b, fam, lab = b, inc], i) => {
-          const st = mark(i);
-          return `<option value="${esc(b)}"${b === cur ? " selected" : ""}${st === "-" ? ' data-n="1"' : ""}${inc ? ' class="inc"' : ""}>` +
-            `${esc(fam)} — ${esc(lab)}${inc ? "  (incomplete)" : ""}${st === "-" ? "  (not defined)" : st === "o" ? "  (opaque)" : ""}</option>`;
-        }).join("");
+        const ci = list.findIndex(([b]) => b === cur);
+        if (ci >= 0) {
+          s.title = list[ci][1];
+          s.innerHTML = bname(list[ci]) + `<span class="cbb-l">${esc(lab(list[ci]))}</span>` + status(mark(ci) === "o" ? "o" : "d", list[ci][5]);
+        }
         const step = document.querySelector("[data-step]");
         if (!step || !has) return;
         const tb = list.filter((_, i) => mark(i) !== "-"), i = tb.findIndex(([b]) => b === cur);
-        const lab = (x) => x[2] ?? x[0];
         const link = (x, txt) => `<a href="#${esc(encodeURIComponent(x[0]))}" title="${esc(x[1])} ${esc(lab(x))}">${esc(txt)}</a>`;
         step.innerHTML = (i > 0 ? link(tb[i - 1], `← ${lab(tb[i - 1])}`) : `<span class="off">← first</span>`) +
           `<span class="n">${tb.length} build${tb.length === 1 ? "" : "s"}</span>` +
@@ -131,12 +142,86 @@
       })
       .catch(() => { builds = null; });  // keep what the page shipped; retry next time
   };
-  document.addEventListener("change", (e) => {
-    const s = e.target;
-    if (!s.matches?.(".cb-build")) return;
-    const absent = s.selectedOptions[0].dataset.n;
-    if (s.dataset.tsel && !absent) location.hash = encodeURIComponent(s.value);
-    else location.href = s.dataset.l.replace("@", s.value);
+  const bpRender = () => {
+    const root = pop();
+    if (!root || !bp.list) return;
+    const q = root.querySelector(".bp-input").value.toLowerCase().trim();
+    // grouped by product, groups in order of their newest build, newest first within;
+    // each row keeps its index into the list (= data-has position)
+    const groups = new Map();
+    bp.list.map((x, i) => [x, i]).reverse()
+      .filter(([x]) => !q || [x[0], x[1], lab(x)].some((t) => t.toLowerCase().includes(q)))
+      .forEach((r) => (groups.get(r[0][2]) || groups.set(r[0][2], []).get(r[0][2])).push(r));
+    bp.shown = [...groups.values()].flat();
+    bp.sel = Math.max(0, Math.min(bp.sel, bp.shown.length - 1));
+    let out = "", k = 0;
+    for (const [g, rows] of groups) {
+      out += `<div class="bp-g">${esc(g)}</div>`;
+      for (const [x, i] of rows) {
+        const st = bp.has ? bp.has[i] : "d";
+        out += `<div class="bp-opt${st === "-" ? " absent" : st === "o" ? " opq" : ""}${x[0] === bp.cur ? " cur" : ""}${k === bp.sel ? " sel" : ""}"` +
+          ` role="option" aria-selected="${x[0] === bp.cur}" data-k="${k}"><span class="cbb-r">${esc(x[3])}</span>` +
+          `<span class="cbb-l">${esc(lab(x))}</span>${status(st, x[5])}</div>`;
+        k++;
+      }
+    }
+    const list = root.querySelector(".bp-list");
+    list.innerHTML = out || `<div class="bp-empty">No builds match</div>`;
+    nearest(list, list.querySelector(".bp-opt.sel"));
+  };
+  const bpOpen = (open) => {
+    const s = btn();
+    if (!open || !s) {
+      const was = pop();
+      if (was) { was.remove(); s?.setAttribute("aria-expanded", "false"); s?.focus(); }
+      return;
+    }
+    builds?.then((all) => {
+      bp.list = all[s.dataset.am]; bp.has = s.dataset.has || ""; bp.cur = s.dataset.cur;
+      if (!bp.list) return;
+      s.insertAdjacentHTML("afterend", `<div id="vp-bp" class="bp"><input class="bp-input" placeholder="Filter builds…" aria-label="Filter builds">` +
+        `<div class="bp-list" role="listbox"></div></div>`);
+      s.setAttribute("aria-expanded", "true");
+      bp.sel = 0;
+      bpRender();
+      bp.sel = Math.max(0, bp.shown.findIndex(([x]) => x[0] === bp.cur));
+      bpRender();
+      pop().querySelector(".bp-input").focus();
+    });
+  };
+  const bpPick = (k) => {
+    const row = bp.shown[k];
+    const s = btn();
+    if (!row || !s) return;
+    const [x, i] = row, absent = bp.has && bp.has[i] === "-";
+    bpOpen(false);
+    if (s.dataset.tsel && !absent) location.hash = encodeURIComponent(x[0]);
+    else location.href = s.dataset.l.replace("@", x[0]);
+  };
+  document.addEventListener("click", (e) => {
+    const t = e.target;
+    if (t.closest?.(".cb-build[data-am]")) { bpOpen(!pop()); return; }
+    const o = t.closest?.("#vp-bp .bp-opt");
+    if (o) bpPick(+o.dataset.k);
+    else if (pop() && !t.closest?.("#vp-bp")) bpOpen(false);
+  });
+  document.addEventListener("input", (e) => {
+    if (e.target.matches(".bp-input")) { bp.sel = 0; bpRender(); }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (!pop() || !e.target.closest?.("#vp-bp")) return;
+    const n = bp.shown.length;
+    const move = { ArrowDown: bp.sel + 1, ArrowUp: bp.sel - 1, Home: 0, End: n - 1, PageDown: bp.sel + 10, PageUp: bp.sel - 10 }[e.key];
+    if (move !== undefined) { e.preventDefault(); bp.sel = Math.max(0, Math.min(n - 1, move)); bpRender(); }
+    else if (e.key === "Enter") { e.preventDefault(); bpPick(bp.sel); }
+    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); bpOpen(false); }
+  });
+  document.addEventListener("mouseover", (e) => {
+    const o = e.target.closest?.("#vp-bp .bp-opt");
+    if (o && +o.dataset.k !== bp.sel) {
+      pop().querySelector(".bp-opt.sel")?.classList.remove("sel");
+      o.classList.add("sel"); bp.sel = +o.dataset.k;
+    }
   });
   document.addEventListener("vp:build", () => { barSync(); sbSync(); });
 
@@ -158,7 +243,6 @@
     `<input class="ck-input" placeholder="Search every type in every build…">` +
     `<div class="ck-filters"></div><div class="ck-list"></div>` +
     `<div class="ck-foot">↑↓ move · ↵ open · click a square for that build · esc close · / or ⌘K to open</div></div></div>`;
-  const short = (fam) => fam.replace(/^Windows /, "");
   // once there is more than one architecture a build is named "<build> · <arch>"
   const arched = () => new Set(ck.ix.v.map((v) => v[0])).size > 1;
   // v = [arch, build, family, channel[, label, incomplete]]: the label is what to show
@@ -263,7 +347,7 @@
       }).join("");
       return `<a class="ck-item${i === ck.sel ? " sel" : ""}${t[4].length ? "" : " op"}" data-i="${i}" href="${esc(typeHref(t, ti, f))}">` +
         `${dot(t[1])}<span class="ck-name">${f ? `${esc(t[0])}<span class="ck-fld">.${mark(f)}</span>` : mark(t[0])}</span><span class="ck-mod">${esc(ix.m[t[3]])}</span>` +
-        `<span class="ck-strip">${strip}</span><span class="ck-ver ch-${tv[3]}">${esc(short(tv[2]))}${arched() ? " " + esc(tv[0]) : ""}</span></a>`;
+        `<span class="ck-strip">${strip}</span><span class="ck-ver ch-${tv[3]}">${esc(tv[2].replace(/^Windows /, ""))}${arched() ? " " + esc(tv[0]) : ""}</span></a>`;
     }).join("") : `<div class="ck-empty">No matches with these filters</div>`;
     nearest(list, list.querySelector(".ck-item.sel"));
   };

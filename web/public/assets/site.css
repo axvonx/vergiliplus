@@ -78,25 +78,59 @@ html.side-collapsed .docs-side { display: none; }
   color: var(--foot); font-size: 1.5rem; font-weight: 600; }
 
 /* ---- home: list of Windows versions, colour-coded by channel ---- */
+.vgroup + .vgroup { margin-top: 2.2rem; }
+.vg-name { margin: 0 0 0.8rem; color: var(--mute); font-size: 1.5rem; font-weight: 700; }
 .vlist { display: grid; gap: 0.6rem; }
 .vrow { display: flex; align-items: baseline; gap: 1.2rem; padding: 1rem 1.5rem; background: var(--panel);
   border-left: 4px solid var(--ch); border-radius: 0 0.5rem 0.5rem 0; }
 .vrow:hover { background: color-mix(in srgb, var(--ch) 10%, var(--panel)); }
-.vr-fam { color: var(--ch); font-weight: 600; font-size: 2.4rem; flex: 1 1 auto; }
+.vr-fam { color: var(--ch); font-weight: 600; font-size: 2.4rem; flex: 1 1 auto; min-width: 0; }
+/* an architecture, wherever one is named: neutral, so it adds no colour of its own */
+.arch { display: inline-block; padding: 0 0.6rem; border: 1px solid color-mix(in srgb, var(--mute) 55%, transparent);
+  border-radius: 0.3rem; color: var(--mute); font-family: var(--mono); font-size: 1.3rem; font-weight: 600;
+  line-height: 1.7; text-transform: lowercase; white-space: nowrap; }
+a.arch:hover { color: #fff; border-color: #fff; }
+.arch.on { color: #fff; border-color: #fff; }
 .vr-build { color: var(--mute); font-family: var(--mono); font-size: 1.6rem; }
 .ch-client { --ch: var(--ch-client); } .ch-server { --ch: var(--ch-server); } .ch-insider { --ch: var(--ch-insider); }
 
-/* ---- context bar (verg.css .breadcrumb): build ▾ / module | module / Type ---- */
-.cbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.2rem; margin: 0 0 1.5rem; padding: 0.6rem 1rem;
+/* ---- context bar (verg.css .breadcrumb): arch | arch  build ▾ / module | module, Type below ---- */
+.cbar { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.2rem; margin: 0 0 1.5rem; padding: 0.6rem 1rem;
   background: var(--panel); border-radius: 0.3rem; color: #fff; font-size: 1.6rem; font-weight: 600; }
-.cb-arch { color: #fff; }
-.cb-build { background: var(--input); color: var(--mint); border: 1px solid var(--input-line); padding: 3px 5px; font-size: 1.6rem; font-weight: 600; max-width: 100%; }
+.cb-archs { display: inline-flex; flex-wrap: wrap; gap: 0.5rem; }
+/* the build: a breadcrumb that opens a list (nav.js #vp-bp), not a boxed field */
+.cb-build { display: inline-flex; align-items: baseline; gap: 0.7rem; max-width: 100%; min-width: 0; padding: 2px 0;
+  background: none; border: 0; border-bottom: 3px solid transparent; color: var(--mint); font-size: 1.8rem;
+  font-weight: 700; cursor: pointer; text-align: left; }
+.cb-build::after { content: "▾"; color: var(--mute); font-size: 1.3rem; }
+.cb-build:hover, .cb-build[aria-expanded="true"] { border-bottom-color: var(--mint); }
+.cbb-p { color: color-mix(in srgb, var(--mint) 60%, var(--panel)); }
+.cbb-l { color: var(--mute); font-family: var(--mono); font-size: 1.4rem; font-weight: 400; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.cbb-o { color: var(--mute); font-size: 1.3rem; font-style: italic; font-weight: 400; }
+.bp { position: absolute; z-index: 40; top: calc(100% + 0.4rem); left: 0; width: min(46rem, 100%);
+  background: var(--bg); border: 1px solid #44475a; border-radius: 0.5rem; box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+  padding: 0.6rem; font-size: 1.6rem; }
+.bp-input { width: 100%; box-sizing: border-box; margin-bottom: 0.4rem; padding: 4px 8px; background: var(--input);
+  border: 1px solid var(--input-line); color: var(--mint); }
+.bp-list { max-height: 60vh; overflow-y: auto; }
+.bp-g { padding: 0.8rem 0.8rem 0.2rem; color: var(--mute); font-size: 1.2rem; font-weight: 700; }
+.bp-opt { display: flex; align-items: baseline; gap: 0.7rem; padding: 0.3rem 0.8rem; border-radius: 0.3rem;
+  color: var(--mint); cursor: pointer; }
+.bp-opt .cbb-l { margin-left: auto; }
+.bp-opt.sel { background: var(--panel); }
+.bp-opt.cur { box-shadow: inset 3px 0 0 var(--mint); }
+.bp-opt.opq { opacity: 0.75; }
+.bp-opt.absent { opacity: 0.45; }
+.bp-empty { padding: 0.8rem; color: var(--mute); }
 .cb-sep { color: #fff; }
 .cb-mods { display: inline-flex; gap: 1rem; }
 .cb-mod { color: var(--gold); font-weight: 700; font-size: 1.8rem; border-bottom: 3px solid transparent; }
 .cb-mod:hover { color: var(--gold); border-bottom-color: yellow; }
 .cb-mod.on { color: var(--gold); border-bottom-color: rgba(208, 208, 210, 0.5); }
-.cb-type { color: var(--cyan); font-weight: 800; font-size: 3.3rem; line-height: 1.2; }
+.cb-br { flex-basis: 100%; height: 0; }  /* the type starts its own row, steps beside it */
+.cb-type { flex: 1 1 auto; min-width: 0; margin: 0; color: var(--cyan); font-weight: 800;
+  font-size: clamp(2.2rem, 3.6vw, 3.3rem); line-height: 1.2; }
 .cb-step { display: inline-flex; gap: 1rem; align-items: center; margin-left: auto; font-size: 1.6rem; }
 .cb-step a { color: rgb(255, 245, 197); }
 .cb-step a:hover { color: yellow; }
@@ -254,7 +288,8 @@ html { font-size: 8px; }
   .logo { width: 3.6rem; height: 3.6rem; }
   .page, .docs-main { padding: 1.2rem; }
   .cb-step { margin-left: 0; flex-basis: 100%; }
-  .cb-type { font-size: 2.8rem; overflow-wrap: anywhere; }
+  .cb-type { font-size: 2.6rem; }
+  .bp { width: 100%; }
   .sc-ctrls { position: static; justify-content: flex-end; padding: 0 0.8rem 0.6rem; }
   .ck-ov { padding-top: 2vh; }
   .ck-vmenu { width: min(36rem, calc(100vw - 4rem)); }

@@ -1,27 +1,36 @@
 ---
-// Home: one row per Windows version, newest first, colour-coded by channel.
+// Home: one row per Windows version, newest first, colour-coded by channel, grouped
+// under its product (Windows 10, Windows Server, …) in order of each one's newest build.
 // A row links to the build's kernel listing; nav.js retargets it to the module
 // last viewed for that build.
 import Layout from "../layouts/Layout.astro";
-import { catalog, ctxPath, channel } from "../lib/catalog.mjs";
+import { catalog, ctxPath, channel, product } from "../lib/catalog.mjs";
 import { modInfo } from "../lib/modules.mjs";
 const cat = catalog();
 const versions = cat.versions().map((d) => {
     const mods = cat.modules(d.arch, d.build);
     const kernel = mods.includes("ntoskrnl") ? "ntoskrnl" : mods.find((m) => modInfo(m).ring === "kernel") || mods[0];
-    return { ...d, mods, kernel };
+    return { ...d, mods, kernel, ...product(d.family) };
   });
+const groups = new Map();
+for (const v of versions) (groups.get(v.product) || groups.set(v.product, []).get(v.product)).push(v);
 const multiArch = cat.archs().length > 1;
 ---
 <Layout>
-  <ul class="vlist">
-    {versions.map((v) => (
-      <li><a class={`vrow ch-${channel(v.family)}`} href={`${ctxPath(v.arch, v.build, v.kernel)}.html`}
-             data-ab={`${v.arch}/${v.build}`} data-mods={v.mods.join(",")} data-def={v.kernel}>
-        <span class="vr-fam">{v.family}</span>
-        <span class="vr-build">{v.label}{multiArch ? ` · ${v.arch}` : ""}</span>
-        {v.inc && <span class="inc" title={v.inc}>incomplete</span>}
-      </a></li>
-    ))}
-  </ul>
+  {[...groups].map(([name, vs]) => (
+    <section class="vgroup">
+      <h2 class="vg-name">{name}</h2>
+      <ul class="vlist">
+        {vs.map((v) => (
+          <li><a class={`vrow ch-${channel(v.family)}`} href={`${ctxPath(v.arch, v.build, v.kernel)}.html`}
+                 data-ab={`${v.arch}/${v.build}`} data-mods={v.mods.join(",")} data-def={v.kernel} title={v.family}>
+            <span class="vr-fam">{v.release}</span>
+            {multiArch && <span class="arch">{v.arch}</span>}
+            <span class="vr-build">{v.label}</span>
+            {v.inc && <span class="inc" title={v.inc}>incomplete</span>}
+          </a></li>
+        ))}
+      </ul>
+    </section>
+  ))}
 </Layout>

@@ -170,3 +170,22 @@ test("variants: build 404's two _PEB definitions", async () => {
   assert.match(html, /MIPS\/DISKPERF\.EXE \(100 bytes\)/);
   assert.match(html, /this definition: MIPS\/DISKPERF\.EXE/);
 });
+
+// every family in data/ splits into a product heading and a release without "Windows "
+test("product(): every family splits", async () => {
+  const { product } = await import("../web/src/lib/catalog.mjs");
+  const fams = new Set();
+  for (const f of fs.readdirSync(DATA).filter((f) => f.endsWith(".json"))) {
+    const d = JSON.parse(fs.readFileSync(path.join(DATA, f), "utf8"));
+    if (d && d.family) fams.add(d.family);
+  }
+  assert.ok(fams.size > 20);
+  for (const fam of fams) {
+    const p = product(fam);
+    assert.match(p.product, /^Windows (NT|Server|Vista|XP|\d)/, fam);
+    assert.ok(p.release && !/^Windows /.test(p.release), fam);
+  }
+  assert.deepEqual(product("Windows 10 1703"), { product: "Windows 10", release: "1703" });
+  assert.deepEqual(product("Windows NT pre-release, April 1991"), { product: "Windows NT", release: "pre-release, April 1991" });
+  assert.deepEqual(product("Windows 8"), { product: "Windows 8", release: "8" });
+});
