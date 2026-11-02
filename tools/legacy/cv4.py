@@ -183,11 +183,33 @@ class Merger:
         return self.intern(("o", n.get("lf")), {"kind": "other", "lf": n.get("lf")})
 
 
-def convert(paths, machine, module, arch, build, family="", note="", names=None):
+def doc_shape(doc, name):
+    """shape() of a doc's named type, or None."""
+    t, k = doc["types"], doc["named"].get(name)
+    return shape(t, k) if k else None
+
+
+def matching_tables(doc, tables, names):
+    """The tables (object name, records) whose definitions of every one of `names` agree
+    with the doc's member for member: how an object of a mixed-architecture library
+    (the SDK's CRASHLIB.LIB holds every CPU's crash-dump structures, compiled on i386)
+    is assigned to the doc's architecture."""
+    out = []
+    for obj, tbl in tables:
+        defs = {n["name"]: k for k, n in tbl.items()
+                if n["kind"] in ("struct", "union") and n.get("fieldlist")}
+        if all(n in defs and shape(tbl, defs[n]) == doc_shape(doc, n) for n in names):
+            out.append((obj, tbl))
+    return out
+
+
+def convert(paths, machine, module, arch, build, family="", note="", names=None, extra=()):
     """One or more COFF libraries/objects -> the vergiliplus doc for module x build x arch.
-    `names` (optional) limits the documented types; everything they reach comes along."""
+    `names` (optional) limits the documented types; everything they reach comes along.
+    `extra`: more (object, records) tables merged in (see matching_tables); the library's
+    own definitions outvote theirs."""
     mach = MACHINES[machine] if isinstance(machine, str) else machine
-    tables = [t for p in paths for t in type_tables(p, mach)]
+    tables = [t for p in paths for t in type_tables(p, mach)] + list(extra)
     if not tables:
         raise ValueError("no CodeView types for machine 0x%x in %s" % (mach, ", ".join(paths)))
     m = Merger(tables)

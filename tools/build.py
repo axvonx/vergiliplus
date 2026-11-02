@@ -57,6 +57,11 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # "kdext": names+offsets only, from a debugger
                                                # extension. "names" limits what a cv4 doc
                                                # documents (what they reach comes along).
+                                               # "supplement": {lib, sha256, [member], machine,
+                                               # match: [names], take: [names], note} adds
+                                               # "take" (+ what it reaches) from the one object
+                                               # whose "match" structs agree with the doc's
+                                               # (per-type provenance: its note)
                                                # "build" is required (a sort key; buildLabel
                                                # is what shows when there is no real number);
                                                # "note" becomes the layouts' provenance line;
@@ -357,6 +362,30 @@ def handle(entry, base, pdbdir):
         else:
             doc = cv4.convert([src], entry["machine"], entry["module"], arch, build, family,
                               entry["note"], set(entry["names"]) if entry.get("names") else None)
+        sup = entry.get("supplement")
+        if sup:  # more types from one object of another library, if one matches this arch
+            tables = cv4.type_tables(fetch_pkg(sup, pdbdir, "lib"), cv4.MACHINES[sup["machine"]])
+            hit = [(o, t) for o, t in cv4.matching_tables(doc, tables, sup["match"])
+                   if all(any(n.get("name") == r and n.get("fieldlist") for n in t.values())
+                          for r in sup["take"])]  # ...and defines what it is taken for
+            if len(hit) == 1:
+                before = set(doc["named"])
+                doc = cv4.convert([src], entry["machine"], entry["module"], arch, build, family,
+                                  entry["note"], extra=hit)
+                # document only what "take" names, and the new named types they reach
+                reach = pdb_to_json.reachable(doc["types"], [doc["named"][n] for n in sup["take"]
+                                                             if n in doc["named"]])
+                doc["named"] = {n: k for n, k in doc["named"].items()
+                                if n in before or (k in reach and n not in before)}
+                doc["types"] = pdb_to_json.reachable(doc["types"], doc["named"].values())
+                doc["opaque"] = {n: k for n, k in doc["opaque"].items() if n not in doc["named"]}
+                doc["provenanceTypes"] = {n: {"kind": "source", "note": sup["note"]}
+                                          for n in sorted(set(doc["named"]) - before)}
+                print("  supplement %s: %s" % (hit[0][0], ", ".join(doc["provenanceTypes"])),
+                      file=sys.stderr)
+            else:
+                print("  ~~ supplement: %d objects match %s here, none taken"
+                      % (len(hit), "/".join(sup["match"])), file=sys.stderr)
         if entry.get("kdext"):
             ext = fetch_pkg(dict(entry["kdext"], member=[]), pdbdir, "url")
             ok, n, _, bad = kdext.check(doc, ext)
