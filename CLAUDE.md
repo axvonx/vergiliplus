@@ -20,6 +20,8 @@ tools/build.py        manifest data/sources.json -> data/<module>-<build>-<arch>
   legacy/kdext.py     cross-check _EPROCESS/_ETHREAD vs a KDEXT*.DLL's !processfields
   legacy/cv3.py       1991 debuggers' CodeView 3 -> computed natural 32-bit layouts
   legacy/hsfs.py, pcjs.py   High Sierra CD / PCjs disk JSON readers (fetch chain steps)
+  legacy/inferred.py  data/inferred/*.json spec -> doc (reverse-engineered layouts)
+  legacy/re/          regen.sh + r2 scripts that write those specs from the 1992-94 KDs
   check_links.py, check_budget.py   post-build gates (CI runs both)
 web/src/lib/types.mjs    type graph + C declarators as segments ({t}, {t,kw}, {t,ref})
 web/src/lib/layout.mjs   pahole rows: anonymous union/struct reconstruction, enums, usedIn, layoutText
@@ -40,7 +42,8 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 ## Rules
 
 - **Portable, dependency-light.** The Python is stdlib only. External tools are
-  `llvm-pdbutil` (+ `llvm-undname` beside it), `wimlib-imagex` and `7z`, found via PATH
+  `llvm-pdbutil` (+ `llvm-undname` beside it), `wimlib-imagex` and `7z` (plus `r2`, only to
+  regenerate inferred specs), found via PATH
   (or `$LLVM_PDBUTIL`).
   No hardcoded paths, no mounts, nothing macOS-specific.
 - **No personal paths in the repo.** The manifest roots images at `$VP_IMAGES`. History
@@ -78,6 +81,16 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   Where a build's sources define a type differently (`"variants": true` on a multi-file
   `lib` entry), `doc.variants = {name: [{type, note}]}` keeps each definition (the chosen
   one is `named[name]`); the page shows one at a time under a select (struct.js).
+- **Inferred** (`/* inferred: … */`, a cyan `inferred` tag with a confidence and its basis):
+  layouts reverse-engineered from Microsoft's own code where no type record exists. The
+  NT 3.1-era kernel debuggers' built-in `!process`/`!thread` read the whole EPROCESS /
+  ETHREAD (size) and print fields: `tools/legacy/re/` recovers each printed or switched-on
+  field's offset (role from the string the code uses it with), validated against NT 3.51 /
+  4.0 where the truth is known (exact). Names are NT 3.51's by meaning; embedded structs
+  are flattened (`Pcb.DirectoryTableBase`, `Tcb.State`); gaps render "not recovered"
+  (shown even with Metadata off). Confidence: high = a second binary (the kernel) reads it
+  too; medium = the debugger's code alone. The spec (`data/inferred/*.json`, evidence =
+  instruction address) is the reviewed artifact; `regen.sh` (needs r2) rewrites it.
 - **Opaque types**: names a PDB declares or mentions but never defines (forward
   declarations, plus struct/union/enum names that `llvm-undname` finds in public
   symbols, kept fully qualified, e.g. `AutoBoost::_AB_PRIORITY`). They live in
@@ -165,7 +178,7 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 ## Open (undecided)
 
-**Scale:** 64 builds over 7 arches ≈ 101 MB in ~24k files; a build adds ~1 MB (its new
+**Scale:** 70 builds over 7 arches ≈ 101 MB in ~24k files; a build adds ~1 MB (its new
 types' pages and changed views); a new arch is another /t/ tree (x86 added ~23 MB).
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
 more ARM64 builds · more canary builds (UUP sets) · home

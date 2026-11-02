@@ -1,0 +1,263 @@
+{
+ "module": "ntoskrnl",
+ "arch": "x86",
+ "build": "0.1992.7.0",
+ "buildLabel": "no build number",
+ "family": "Windows NT pre-release, July 1992",
+ "incomplete": "only _EPROCESS and _ETHREAD, and of those only the members the kernel debugger's !process and !thread read",
+ "source": {
+  "lib": "https://archive.org/download/winnt_3.10.297-july_92_sdk/winnt_3.10.297-july_92_sdk.iso/MSTOOLS/BIN/I386/I386KD.EXE",
+  "sha256": "d0ee61d3fdec1a7b5dc22d4f520c08728d961f68ed8a1fc065cdefa7dd3e2f4d"
+ },
+ "note": "July 1992 pre-release Win32 SDK CD, MSTOOLS/BIN/I386/I386KD.EXE: the offsets its built-in !process and !thread commands read; names NT 3.51's, by meaning",
+ "structs": {
+  "_EPROCESS": {
+   "size": 644,
+   "confidence": "medium",
+   "basis": "offsets read from the debugger's !process code (which [EPROCESS + n] each labelled line prints); names carried back from NT 3.51 by meaning; types from access width; size from the debugger's read of the whole structure",
+   "members": [
+    {
+     "name": "Pcb.KernelTime",
+     "type": "union _LARGE_INTEGER",
+     "offset": 32,
+     "evidence": "0x34f1e"
+    },
+    {
+     "name": "Pcb.UserTime",
+     "type": "union _LARGE_INTEGER",
+     "offset": 40,
+     "evidence": "0x34edb"
+    },
+    {
+     "name": "Pcb.DirectoryTableBase",
+     "type": "unsigned long",
+     "offset": 68,
+     "evidence": "0x34d2d"
+    },
+    {
+     "name": "CreateTime",
+     "type": "union _LARGE_INTEGER",
+     "offset": 176,
+     "evidence": "0x34e73"
+    },
+    {
+     "name": "UniqueProcessId",
+     "type": "void*",
+     "offset": 192,
+     "evidence": "0x34d3c"
+    },
+    {
+     "name": "QuotaPeakPoolUsage",
+     "type": "unsigned long[2]",
+     "offset": 212,
+     "evidence": "0x34f70"
+    },
+    {
+     "name": "QuotaPoolUsage",
+     "type": "unsigned long[2]",
+     "offset": 240,
+     "evidence": "0x34f9c"
+    },
+    {
+     "name": "PeakVirtualSize",
+     "type": "unsigned long",
+     "offset": 352,
+     "evidence": "0x34ff4"
+    },
+    {
+     "name": "Vm.PageFaultCount",
+     "type": "unsigned long",
+     "offset": 360,
+     "evidence": "0x34fc8"
+    },
+    {
+     "name": "Vm.PeakWorkingSetSize",
+     "type": "unsigned long",
+     "offset": 364,
+     "evidence": "0x34fde"
+    },
+    {
+     "name": "Vm.WorkingSetSize",
+     "type": "unsigned long",
+     "offset": 368,
+     "evidence": "0x34fb2"
+    },
+    {
+     "name": "ObjectTable",
+     "type": "void*",
+     "offset": 412,
+     "evidence": "0x34d24"
+    },
+    {
+     "name": "VadRoot",
+     "type": "void*",
+     "offset": 500,
+     "evidence": "0x34e51"
+    },
+    {
+     "name": "CloneRoot",
+     "type": "void*",
+     "offset": 508,
+     "evidence": "0x34e48"
+    },
+    {
+     "name": "NumberOfPrivatePages",
+     "type": "unsigned long",
+     "offset": 512,
+     "evidence": "0x34e3f"
+    },
+    {
+     "name": "ImageFileName",
+     "type": "unsigned char[16]",
+     "offset": 560,
+     "evidence": "0x34d83"
+    },
+    {
+     "name": "InheritedFromUniqueProcessId",
+     "type": "void*",
+     "offset": 588,
+     "evidence": "0x34d33"
+    }
+   ]
+  },
+  "_ETHREAD": {
+   "size": 784,
+   "confidence": "medium",
+   "basis": "offsets read from the debugger's !thread code; each read's role from the string the code uses it with (the state switch, \"Alertable\", \"unable to get Wait object\", the labelled lines); names NT 3.51's; Tcb.* are the embedded KTHREAD's; types from access width; size from the debugger's read",
+   "members": [
+    {
+     "name": "Tcb.Header.Type",
+     "type": "short",
+     "offset": 0,
+     "evidence": "0x3503b"
+    },
+    {
+     "name": "Tcb.MutexListHead",
+     "type": "struct _LIST_ENTRY",
+     "offset": 24,
+     "evidence": "0x3554a"
+    },
+    {
+     "name": "Tcb.ApcState.Process",
+     "type": "struct _KPROCESS*",
+     "offset": 368,
+     "evidence": "0x3578d"
+    },
+    {
+     "name": "Tcb.KernelTime",
+     "type": "union _LARGE_INTEGER",
+     "offset": 408,
+     "evidence": "0x35820"
+    },
+    {
+     "name": "Tcb.UserTime",
+     "type": "union _LARGE_INTEGER",
+     "offset": 416,
+     "evidence": "0x357d8"
+    },
+    {
+     "name": "Tcb.InitialStack",
+     "type": "void*",
+     "offset": 424,
+     "evidence": "0x358a0"
+    },
+    {
+     "name": "Tcb.KernelStack",
+     "type": "void*",
+     "offset": 428,
+     "evidence": "0x35897"
+    },
+    {
+     "name": "Tcb.MutexLevel",
+     "type": "unsigned long",
+     "offset": 440,
+     "evidence": "0x35521"
+    },
+    {
+     "name": "Tcb.WaitTime",
+     "type": "unsigned long",
+     "offset": 476,
+     "evidence": "0x357b8"
+    },
+    {
+     "name": "Tcb.WaitBlockList",
+     "type": "struct _KWAIT_BLOCK*",
+     "offset": 484,
+     "evidence": "0x3522f"
+    },
+    {
+     "name": "Tcb.Alertable",
+     "type": "unsigned char",
+     "offset": 492,
+     "evidence": "0x351b3"
+    },
+    {
+     "name": "Tcb.Priority",
+     "type": "char",
+     "offset": 505,
+     "evidence": "0x358c4"
+    },
+    {
+     "name": "Tcb.State",
+     "type": "unsigned long",
+     "offset": 508,
+     "evidence": "0x35086"
+    },
+    {
+     "name": "Tcb.SuspendCount",
+     "type": "char",
+     "offset": 513,
+     "evidence": "0x35205"
+    },
+    {
+     "name": "Tcb.WaitMode",
+     "type": "char",
+     "offset": 515,
+     "evidence": "0x351d0"
+    },
+    {
+     "name": "Tcb.WaitReason",
+     "type": "unsigned long",
+     "offset": 516,
+     "evidence": "0x351e8"
+    },
+    {
+     "name": "Tcb.BasePriority",
+     "type": "char",
+     "offset": 521,
+     "evidence": "0x358b9"
+    },
+    {
+     "name": "Cid.UniqueProcess",
+     "type": "void*",
+     "offset": 572,
+     "evidence": "0x3506a"
+    },
+    {
+     "name": "Cid.UniqueThread",
+     "type": "void*",
+     "offset": 576,
+     "evidence": "0x35061"
+    },
+    {
+     "name": "LpcMessages",
+     "type": "void*",
+     "offset": 600,
+     "evidence": "0x35586"
+    },
+    {
+     "name": "IrpList",
+     "type": "struct _LIST_ENTRY",
+     "offset": 660,
+     "evidence": "0x3566e"
+    },
+    {
+     "name": "StartAddress",
+     "type": "void*",
+     "offset": 772,
+     "evidence": "0x35869"
+    }
+   ]
+  }
+ }
+}

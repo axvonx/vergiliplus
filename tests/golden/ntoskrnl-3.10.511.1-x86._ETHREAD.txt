@@ -1,0 +1,63 @@
+struct _ETHREAD {
+    short Tcb.Header.Type;                                  /* 0x0  2 */
+    /* 22 bytes not recovered */
+    struct _LIST_ENTRY Tcb.MutexListHead;                   /* 0x18  8 */
+    /* 24 bytes not recovered */
+    union _LARGE_INTEGER Tcb.KernelTime;                    /* 0x38  8 */
+
+    /* --- cacheline 1 boundary (64 bytes) --- */
+    union _LARGE_INTEGER Tcb.UserTime;                      /* 0x40  8 */
+    /* 264 bytes not recovered */
+
+    /* --- cacheline 5 boundary (320 bytes) --- */
+    struct _KPROCESS* Tcb.ApcState.Process;                 /* 0x150  4 */
+    /* 36 bytes not recovered */
+    void* Tcb.InitialStack;                                 /* 0x178  4 */
+    void* Tcb.KernelStack;                                  /* 0x17c  4 */
+    /* 8 bytes not recovered */
+
+    /* --- cacheline 6 boundary (384 bytes) --- */
+    unsigned long Tcb.MutexLevel;                           /* 0x188  4 */
+    /* 36 bytes not recovered */
+    unsigned long Tcb.WaitTime;                             /* 0x1b0  4 */
+    /* 4 bytes not recovered */
+    struct _KWAIT_BLOCK* Tcb.WaitBlockList;                 /* 0x1b8  4 */
+    /* 4 bytes not recovered */
+
+    /* --- cacheline 7 boundary (448 bytes) --- */
+    unsigned char Tcb.Alertable;                            /* 0x1c0  1 */
+    /* 7 bytes not recovered */
+    unsigned char Tcb.KernelStackResident;                  /* 0x1c8  1 */
+    /* 2 bytes not recovered */
+    unsigned char Tcb.DecrementCount;                       /* 0x1cb  1 */
+    /* 1 byte not recovered */
+    char Tcb.Priority;                                      /* 0x1cd  1 */
+    char Tcb.State;                                         /* 0x1ce  1 */
+    char Tcb.FreezeCount;                                   /* 0x1cf  1 */
+    char Tcb.SuspendCount;                                  /* 0x1d0  1 */
+    /* 1 byte not recovered */
+    char Tcb.WaitMode;                                      /* 0x1d2  1 */
+    unsigned char Tcb.WaitReason;                           /* 0x1d3  1 */
+    /* 1 byte not recovered */
+    char Tcb.BasePriority;                                  /* 0x1d5  1 */
+    char Tcb.PriorityDecrement;                             /* 0x1d6  1 */
+    /* 49 bytes not recovered */
+
+    /* --- cacheline 8 boundary (512 bytes) --- */
+    void* Cid.UniqueProcess;                                /* 0x208  4 */
+    void* Cid.UniqueThread;                                 /* 0x20c  4 */
+    /* 20 bytes not recovered */
+    void* LpcMessages;                                      /* 0x224  4 */
+    /* 48 bytes not recovered */
+
+    /* --- cacheline 9 boundary (576 bytes) --- */
+    struct _LIST_ENTRY IrpList;                             /* 0x258  8 */
+    /* 96 bytes not recovered */
+
+    /* --- cacheline 11 boundary (704 bytes) --- */
+    void* StartAddress;                                     /* 0x2c0  4 */
+    /* 8 bytes not recovered */
+    void* Win32StartAddress;                                /* 0x2cc  4 */
+    /* 24 bytes not recovered */
+};
+/* inferred: NT 3.1 Advanced Server CD (1994), SUPPORT/DEBUG/I386/I386KD.EXE (3.10.511.1): the offsets its built-in !process and !thread commands read; names NT 3.51's, by meaning */
