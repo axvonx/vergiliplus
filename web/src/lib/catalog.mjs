@@ -119,7 +119,7 @@ export const vrow = (x, row) =>
 
 // release channel from the family name, for colour-coding versions
 export const channel = (family) =>
-  /server/i.test(family) ? "server" : /canary|insider|dev|beta|preview/i.test(family) ? "insider" : "client";
+  /server/i.test(family) ? "server" : /canary|insider|dev|beta|preview|pre-release|\bRC\d/i.test(family) ? "insider" : "client";
 
 // The search palette's rows (/search-index.json; /member-index.json refers to t by
 // position): v = [[arch, build, family, channel[, label, incomplete]]] newest first (label

@@ -52,6 +52,8 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # type records of a COFF library's objects for
                                                # one machine, fetched like "pkg" (archive.org
                                                # serves single files inside disc images).
+                                               # "format": "cv3" instead computes 32-bit
+                                               # layouts from a 1991 debugger's CodeView 3.
                                                # "build" is required (a sort key; buildLabel
                                                # is what shows when there is no real number);
                                                # "note" becomes the layouts' provenance line;
@@ -83,7 +85,7 @@ import urllib.request
 
 import pdb_to_json
 import pe_pdbid
-from legacy import cv4, kdext
+from legacy import cv3, cv4, hsfs, kdext, pcjs
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -181,11 +183,15 @@ def fetch_sym(entry, outdir):
 def fetch_pkg(entry, outdir, url_key="pkg"):
     """A PDB out of a symbol package: GET the archive, verify sha256, then unpack each
     name of "member" from the previous archive with 7z. Cached as one file in outdir.
-    (Also any other pinned download: "lib" entries, their "kdext".)"""
+    (Also any other pinned download: "lib" entries, their "kdext".) A member may instead
+    be {"hsfs": path} (a file of a High Sierra CD image, which 7z can't read) or
+    {"pcjs": name} (a PCjs disk-image JSON -> its raw sector image)."""
     url, members = entry[url_key], entry.get("member", [])
-    key = hashlib.sha256((url + "|" + "|".join(members)).encode()).hexdigest()[:16]
-    out = os.path.join(outdir, "pkg-%s-%s" % (key, os.path.basename(
-        (members[-1] if members else url).replace("\\", "/"))))
+    label = lambda m: m if isinstance(m, str) else json.dumps(m, sort_keys=True)
+    key = hashlib.sha256((url + "|" + "|".join(map(label, members))).encode()).hexdigest()[:16]
+    last = members[-1] if members else url
+    last = last if isinstance(last, str) else next(iter(last.values()))
+    out = os.path.join(outdir, "pkg-%s-%s" % (key, os.path.basename(last.replace("\\", "/"))))
     if os.path.exists(out):
         return out
     sevenzip = tool("7z", "7zz", "7za")
@@ -197,15 +203,26 @@ def fetch_pkg(entry, outdir, url_key="pkg"):
                 h.update(chunk)
         if h.hexdigest() != entry["sha256"].lower():
             raise RuntimeError("sha256 mismatch for %s: %s" % (url, h.hexdigest()))
-        if members and not sevenzip:
+        if any(isinstance(m, str) for m in members) and not sevenzip:
             raise Skip("need 7-Zip (7z/7zz) to unpack " + url)
         for i, member in enumerate(members):
             step = os.path.join(work, "step%d" % i)
-            subprocess.run([sevenzip, "e", "-y", "-o" + step, cur, member], check=True,
-                           capture_output=True)
-            cur = os.path.join(step, os.path.basename(member.replace("\\", "/")))
-            if not os.path.exists(cur):
-                raise RuntimeError("%s not found in %s" % (member, url))
+            os.makedirs(step)
+            if isinstance(member, dict) and "hsfs" in member:
+                nxt = os.path.join(step, os.path.basename(member["hsfs"]))
+                with open(nxt, "wb") as f:
+                    f.write(hsfs.extract(cur, member["hsfs"]))
+            elif isinstance(member, dict) and "pcjs" in member:
+                nxt = os.path.join(step, member["pcjs"])
+                with open(cur) as f, open(nxt, "wb") as g:
+                    g.write(pcjs.image(json.load(f)))
+            else:
+                subprocess.run([sevenzip, "e", "-y", "-o" + step, cur, member], check=True,
+                               capture_output=True)
+                nxt = os.path.join(step, os.path.basename(member.replace("\\", "/")))
+            if not os.path.exists(nxt):
+                raise RuntimeError("%s not found in %s" % (label(member), url))
+            cur = nxt
         shutil.copyfile(cur, out + ".part")
         os.replace(out + ".part", out)
     return out
@@ -329,9 +346,12 @@ def handle(entry, base, pdbdir):
         return produced
 
     if "lib" in entry:
-        build = entry["build"]
-        doc = cv4.convert([fetch_pkg(entry, pdbdir, "lib")], entry["machine"], entry["module"],
-                          arch, build, family, entry["note"])
+        build, src = entry["build"], fetch_pkg(entry, pdbdir, "lib")
+        if entry.get("format") == "cv3":
+            doc = cv3.convert(src, entry["module"], arch, build, family, entry["note"])
+        else:
+            doc = cv4.convert([src], entry["machine"], entry["module"], arch, build, family,
+                              entry["note"])
         if entry.get("kdext"):
             ext = fetch_pkg(dict(entry["kdext"], member=[]), pdbdir, "url")
             ok, n, _, bad = kdext.check(doc, ext)

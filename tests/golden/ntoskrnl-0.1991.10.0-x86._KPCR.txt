@@ -1,0 +1,25 @@
+struct _KPCR {
+    struct _NT_TIB NtTib;                                   /* 0x0  28 */
+    struct _KPCR* SelfPcr;                                  /* 0x1c  4 */
+    struct _KPRCB* Prcb;                                    /* 0x20  4 */
+    char Irql;                                              /* 0x24  1 */
+    /* 3 bytes padding */
+    unsigned long IRR;                                      /* 0x28  4 */
+    unsigned long IDR;                                      /* 0x2c  4 */
+    unsigned long InterruptMode;                            /* 0x30  4 */
+    struct _LARGE_INTEGER PerformanceCounter;               /* 0x34  8 */
+    unsigned long RolloverCount;                            /* 0x3c  4 */
+
+    /* --- cacheline 1 boundary (64 bytes) --- */
+    unsigned long NextRolloverCount;                        /* 0x40  4 */
+    unsigned long ProfilingStopped;                         /* 0x44  4 */
+    struct _KIDTENTRY* IDT;                                 /* 0x48  4 */
+    struct _KGDTENTRY* GDT;                                 /* 0x4c  4 */
+    struct _KTSS* TSS;                                      /* 0x50  4 */
+    struct _KPRCB PrcbData;                                 /* 0x54  372 */
+
+    /* --- cacheline 7 boundary (448 bytes) --- */
+    unsigned long Version;                                  /* 0x1c8  4 */
+    char IsExecutingDpc;                                    /* 0x1cc  1 */
+};
+/* computed: October 1991 pre-release CD, SETUP/DBUGDISK/I386KD.EXE CodeView 3 types (compiled 1-byte packed for its 16-bit host), laid out with natural 32-bit alignment; _KPCR agrees with NT 3.1's offsets on every shared member */

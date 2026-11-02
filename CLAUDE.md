@@ -1,9 +1,9 @@
 # CLAUDE.md — vergiliplus
 
 Static browser of Windows struct/union/enum layouts from Microsoft's **public PDBs**:
-kernel (`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), 18 x86
-(NT 4.0, Windows 2000 SP3 → Windows 10 22H2), 3 IA-64 (2003 SP1 → 2008 SP2) and NT 4.0 on
-MIPS / Alpha / PowerPC, live at
+kernel (`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), 21 x86
+(Oct 1991 pre-release, NT 4.0, Windows 2000 RC2 → Windows 10 22H2), 3 IA-64 (2003 SP1 →
+2008 SP2), NT on MIPS (Apr 1991, 4.0), Alpha (4.0, 2000 RC2) and PowerPC (4.0), live at
 https://vergiliplus.com. Not a fork of Vergilius; it borrows only its look.
 
 ## Map
@@ -16,6 +16,8 @@ tools/build.py        manifest data/sources.json -> data/<module>-<build>-<arch>
                       cv_records() = the one CodeView leaf decoder (16-bit + _ST)
   legacy/cv4.py       COFF .lib/.obj .debug$T (CV4) tables merged into one doc
   legacy/kdext.py     cross-check _EPROCESS/_ETHREAD vs a KDEXT*.DLL's !processfields
+  legacy/cv3.py       1991 debuggers' CodeView 3 -> computed natural 32-bit layouts
+  legacy/hsfs.py, pcjs.py   High Sierra CD / PCjs disk JSON readers (fetch chain steps)
   check_links.py, check_budget.py   post-build gates (CI runs both)
 web/src/lib/types.mjs    type graph + C declarators as segments ({t}, {t,kw}, {t,ref})
 web/src/lib/layout.mjs   pahole rows: anonymous union/struct reconstruction, enums, usedIn, layoutText
@@ -148,7 +150,7 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 ## Open (undecided)
 
-**Scale:** 46 builds over 6 arches ≈ 75 MB in ~17k files; a build adds ~1 MB (its new
+**Scale:** 51 builds over 6 arches ≈ 77 MB in ~17.4k files; a build adds ~1 MB (its new
 types' pages and changed views); a new arch is another /t/ tree (x86 added ~23 MB).
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
 ARM64 / IA-64 · x86 Win10 1507/1709/1803/1903/1909 · more canary builds (UUP sets) · home
