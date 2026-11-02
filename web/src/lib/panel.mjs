@@ -15,7 +15,7 @@ export const typePath = (arch, module, name) => `/t/${arch}/${module}/${slug(nam
 
 function rowHtml(r, T) {
   if (r.hole != null)
-    return `<div class="sc-line sc-hole${r.unknown ? " sc-unk" : ""}"><span class="sc-code">${ind(r.depth)}/* ${r.hole} byte${r.hole === 1 ? "" : "s"} ${r.unknown ? "not recovered" : "padding"} */</span></div>`;
+    return `<div class="sc-line sc-hole"><span class="sc-code">${ind(r.depth)}/* ${r.hole} byte${r.hole === 1 ? "" : "s"} padding */</span></div>`;
   if (r.cacheline != null)
     return `<div class="sc-line sc-cache"><span class="sc-code">${ind(r.depth)}/* ── cacheline ${r.cacheline} boundary (${r.bytes} bytes) ── */</span></div>`;
   if (r.open)
@@ -31,8 +31,7 @@ function rowHtml(r, T) {
 // A type the sources define in more than one way (doc.variants) shows every definition,
 // one at a time, picked from a select under the notices (struct.js switches them).
 export function panelHtml(T, name, doc = null) {
-  const inf = T.get(T.named[name]).inferred;
-  const notes = (doc?.incomplete ? incompleteHtml(doc) : "") + (inf ? inferredHtml(inf) : "");
+  const notes = doc?.incomplete ? incompleteHtml(doc) : "";
   const vs = doc?.variants?.[name];
   if (!vs) return notes + layoutHtml(T, name);
   const base = T.provenance(name);
@@ -64,8 +63,6 @@ function layoutHtml(T, name) {
     head = `<span class="kw">${L.kind}</span> ${esc(L.name)} {`;
     body = L.rows.map((r) => rowHtml(r, T)).join("");
     stats = s.untyped ? [[plural(s.members, "member"), ""], ["size", "unknown"]]
-      : s.inferred ? [["size", `${s.size} (0x${s.size.toString(16)})`], [plural(s.members, "member"), "recovered"],
-                      ["not recovered", `${s.sumHoles + s.padding} bytes`]]
       : [["size", `${s.size} (0x${s.size.toString(16)})`], [plural(s.members, "member"), ""],
              [plural(s.holes, "hole"), s.holes ? `${s.sumHoles} bytes` : ""], ["padding", s.padding],
              [plural(s.cachelines, "cacheline"), ""]];
@@ -81,10 +78,6 @@ function layoutHtml(T, name) {
     `<div class="stats">${st}</div>`;
 }
 
-// a reverse-engineered struct: its tag, confidence and how it was inferred
-const inferredHtml = (inf) =>
-  `<p class="inf-note"><span class="inf">inferred</span> confidence: <b>${esc(inf.confidence)}</b>. ${esc(inf.basis)}</p>`;
-
 const incompleteHtml = (doc) =>
   `<p class="inc-note"><span class="inc">incomplete</span> ${esc(doc.incomplete)}</p>`;
 
@@ -97,9 +90,7 @@ export function opaqueHtml(doc, name, kind) {
       (x.module < y.module ? -1 : 1));
   return (doc.incomplete ? incompleteHtml(doc) : "") +
     `<pre class="sc-pre"><code><div class="sc-line"><span class="sc-code"><span class="kw">${esc(kind)}</span> ${esc(name)};</span><span class="sc-ann">/* opaque */</span></div></code></pre>` +
-    (doc.provenance?.kind === "inferred"
-      ? `<p class="opaque-note">Named by a layout inferred for <b>${esc(doc.module)}</b> in this build, but not itself recovered.</p>`
-      : doc.provenance
+    (doc.provenance
       ? `<p class="opaque-note">Named but not defined in the type records <b>${esc(doc.module)}</b>'s layouts for this build ` +
         `come from (a forward declaration or pointer target). The layout isn't known here.</p>`
       : `<p class="opaque-note">Declared but not defined in <b>${esc(doc.module)}</b>'s public PDB for this build: a forward ` +

@@ -63,11 +63,6 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # definition sources disagree on (labelled).
                                                # A "lib" may also be a PE image carrying its
                                                # CodeView 4 inline (MIPS 1992-93 binaries).
-
-  {"inferred": "inferred/ntoskrnl-3.10.511.1-x86.json"}
-                                               # reverse-engineered layouts: a spec under data/
-                                               # (members, evidence, size, confidence, basis;
-                                               # tools/legacy/inferred.py), no fetch
                                                # "supplement": {lib, sha256, [member], machine,
                                                # match: [names], take: [names], note} adds
                                                # "take" (+ what it reaches) from the one object
@@ -105,7 +100,7 @@ import urllib.request
 
 import pdb_to_json
 import pe_pdbid
-from legacy import cv3, cv4, hsfs, inferred, kdext, pcjs
+from legacy import cv3, cv4, hsfs, kdext, pcjs
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -348,7 +343,7 @@ def image_build(im, kernel_version):
 
 
 def handle(entry, base, pdbdir):
-    arch = entry.get("arch")  # inferred entries carry it in their spec
+    arch = entry["arch"]
     family = entry.get("family", "")
     produced = []
 
@@ -374,14 +369,6 @@ def handle(entry, base, pdbdir):
     if "pkg" in entry:
         fv = entry["version"]
         emit(fetch_pkg(entry, pdbdir), entry["module"], entry.get("build") or fv, fv)
-        return produced
-
-    if "inferred" in entry:
-        with open(os.path.join(DATA, entry["inferred"])) as f:
-            doc = inferred.convert(json.load(f))
-        out = json_name(doc["module"], doc["build"], doc["arch"])
-        pdb_to_json.write(doc, out)
-        produced.append(out)
         return produced
 
     if "lib" in entry:

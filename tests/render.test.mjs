@@ -28,7 +28,6 @@ const NT40 = "ntoskrnl-4.0.1381.1-x86.json";
 const OCT91 = "ntoskrnl-0.1991.10.0-x86.json";
 const NT351 = "ntoskrnl-3.51.1057.1-x86.json";
 const JUL92 = "ntdll-0.1992.7.0-mips.json";
-const NT31 = "ntoskrnl-3.10.511.1-x86.json";
 // fixture file: <module>.<type>.txt for the 24H2 docs, <doc>.<type>.txt for any other
 const fixture = (file, name) =>
   `${[NTDLL, NTOS].includes(file) ? file.split("-")[0] : file.replace(/\.json$/, "")}.${name}.txt`;
@@ -56,10 +55,6 @@ const CASES = [
   [NT351, "_EPROCESS"],
   // recorded, not computed: MIPS USERSRV.DLL's inline CodeView 4, July 1992
   [JUL92, "_PEB"],
-  // inferred (reverse-engineered) from NT 3.1's I386KD !process / !thread code:
-  // gaps are "not recovered", the tag line is /* inferred: ... */
-  [NT31, "_EPROCESS"],
-  [NT31, "_ETHREAD"],
 ];
 
 for (const [file, name] of CASES) {

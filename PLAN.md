@@ -32,19 +32,6 @@ inventories stay in `$VP_IMAGES/research/` (not in the repo).
 - MIPS NT 4.0 `_KPRCB`: CRASHLIB's MIPS object disagrees with the DDK (`_KTRAP_FRAME`
   512 vs 600), so none is shown; another source would be needed.
 
-## Reverse engineering (inferred layouts), next steps
-
-- More members per struct: kernel code alignment (NT 3.51 kernel, whose offsets kdext
-  gives, against 3.1's: same function, same instruction shapes, different displacements)
-  would fill "not recovered" gaps; confidence medium unless two binaries agree.
-- More structs: !irp / !devobj / !drvobj / !obja / !handle code in the same debuggers
-  (IRP, DEVICE_OBJECT, OBJECT_HEADER, HANDLE_TABLE), same method.
-- NT 3.5 (build 807): its DDK's debuggers have no built-in !process; the NT 3.5 CD's
-  KDEXT*.DLL would (not found locally; look for a 3.5 Workstation/Server ISO).
-- Geoff Chappell's 3.10 tables (geoffchappell.com) are an independent check, not a
-  source: they differ from 3.10.511.1's debugger and kernel code for UniqueProcessId
-  (0xB4 vs 0xB0), ObjectTable and NumberOfPrivatePages (likely another 3.10 build).
-
 ## Facts that cost time to find
 
 - NT 3.1 / 3.5 / 3.51 / 4.0 public `.dbg` symbols carry **zero** type records; kernel
