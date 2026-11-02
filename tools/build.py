@@ -28,6 +28,21 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # (indexed by TimeDateStamp+SizeOfImage, see
                                                # winbindex.m417z.com) — needs no local files
 
+  {"sym": "ntkrpamp.pdb", "guid": "37D328E3...", "age": 2, "version": "6.0.6001.18000",
+   "module":"ntoskrnl", "arch":"x86", "family":"..."}
+                                               # a public PDB straight from msdl by its RSDS
+                                               # identity, for binaries msdl doesn't serve
+                                               # (x86 Vista/7 kernels). "version" is the
+                                               # shipped binary's FileVersion (the label)
+
+  {"pkg": "https://.../w2k3_sp1_x86_symbols.zip", "sha256": "...",
+   "member": ["Windows2003_sp1.x86.fre.rtm.symbols.exe", "symbols.cab", "ntkrpamp.pdb.exe"],
+   "version": "5.2.3790.1830", "module":"ntoskrnl", "arch":"x86", "family":"..."}
+                                               # a PDB inside an official symbol package
+                                               # (msdl lacks it): download, check sha256,
+                                               # then 7z out each member of the chain in turn.
+                                               # PDB 2.0 (Windows 2000) is read by pdb_to_json
+
 Build labels come from the binaries, not the manifest (A1): images use the image's
 own Build.ServicePackBuild (e.g. 6.3.9600.17050), single PEs their FileVersion. An
 explicit "build" overrides. Paths may use $VARS / ~ and are relative to the manifest;
@@ -136,6 +151,46 @@ def fetch_pe(entry, outdir):
     return out
 
 
+def fetch_sym(entry, outdir):
+    """A PDB from msdl by identity (name + GUID + age), cached like fetch_pdb."""
+    name, guid, age = entry["sym"], entry["guid"].upper(), int(entry["age"])
+    out = os.path.join(outdir, guid + str(age) + "-" + name)
+    if not os.path.exists(out):
+        download("%s%s/%s%X/%s" % (MSDL, name, guid, age, name), out + ".part")
+        os.replace(out + ".part", out)
+    return out
+
+
+def fetch_pkg(entry, outdir):
+    """A PDB out of a symbol package: GET the archive, verify sha256, then unpack each
+    name of "member" from the previous archive with 7z. Cached as one file in outdir."""
+    key = hashlib.sha256((entry["pkg"] + "|" + "|".join(entry["member"])).encode()).hexdigest()[:16]
+    out = os.path.join(outdir, "pkg-%s-%s" % (key, os.path.basename(entry["member"][-1])))
+    if os.path.exists(out):
+        return out
+    sevenzip = tool("7z", "7zz", "7za")
+    if not sevenzip:
+        raise Skip("need 7-Zip (7z/7zz) to unpack symbol packages")
+    with tempfile.TemporaryDirectory() as work:
+        cur = download(entry["pkg"], os.path.join(work, "pkg"))
+        h = hashlib.sha256()
+        with open(cur, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+        if h.hexdigest() != entry["sha256"].lower():
+            raise RuntimeError("sha256 mismatch for %s: %s" % (entry["pkg"], h.hexdigest()))
+        for i, member in enumerate(entry["member"]):
+            step = os.path.join(work, "step%d" % i)
+            subprocess.run([sevenzip, "e", "-y", "-o" + step, cur, member], check=True,
+                           capture_output=True)
+            cur = os.path.join(step, os.path.basename(member.replace("\\", "/")))
+            if not os.path.exists(cur):
+                raise RuntimeError("%s not found in %s" % (member, entry["pkg"]))
+        shutil.copyfile(cur, out + ".part")
+        os.replace(out + ".part", out)
+    return out
+
+
 def json_name(module, build, arch):
     return os.path.join(DATA, "%s-%s-%s.json" % (module, build, arch))
 
@@ -241,6 +296,16 @@ def handle(entry, base, pdbdir):
             pe = fetch_pe(entry, work)
             fv = pe_pdbid.file_version(pe)
             emit(fetch_pdb(pe, pdbdir), entry["module"], entry.get("build") or fv, fv)
+        return produced
+
+    if "sym" in entry:
+        fv = entry["version"]
+        emit(fetch_sym(entry, pdbdir), entry["module"], entry.get("build") or fv, fv)
+        return produced
+
+    if "pkg" in entry:
+        fv = entry["version"]
+        emit(fetch_pkg(entry, pdbdir), entry["module"], entry.get("build") or fv, fv)
         return produced
 
     if "pdb" in entry or "pe" in entry:

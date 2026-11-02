@@ -9,7 +9,8 @@ https://vergiliplus.com. Not a fork of Vergilius; it borrows only its look.
 ```
 tools/build.py        manifest data/sources.json -> data/<module>-<build>-<arch>.json
   pe_pdbid.py         PE -> RSDS identity + FileVersion        (importable)
-  pdb_to_json.py      llvm-pdbutil dump -types -> doc          (importable: convert/write)
+  pdb_to_json.py      llvm-pdbutil dump -types -> doc          (importable: convert/write);
+                      parse20() reads PDB 2.0 (Windows 2000) itself, stdlib
   check_links.py, check_budget.py   post-build gates (CI runs both)
 web/src/lib/types.mjs    type graph + C declarators as segments ({t}, {t,kw}, {t,ref})
 web/src/lib/layout.mjs   pahole rows: anonymous union/struct reconstruction, enums, usedIn, layoutText
@@ -44,6 +45,14 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   entries carry `version`; a sha256 mismatch passes only if the FileVersion matches, and
   a mismatching revision gets re-pinned by probing older ones. Pin both modules of a
   build to the same revision.
+- **Manifest kinds beyond `msdl`**: `sym` = a PDB straight from msdl by name+GUID+age
+  (x86 Vista/7 `ntkrnlpa.exe` is not on msdl, its PDB is); `pkg` = a PDB inside an official
+  symbol package (archive.org URL + sha256 + `member` chain unpacked with 7z): XP SP1,
+  2003 SP1, Windows 2000 (msdl lacks them). `version` is the shipped binary's FileVersion.
+- **x86 kernel = the PAE multiprocessor one** (`ntkrpamp.exe`, PDB `ntkrpamp.pdb`; Vista/7
+  ship it as `ntkrnlpa.exe`; Windows 8+ x86 is PAE-only `ntoskrnl.exe`), module name stays
+  `ntoskrnl`. x86 Win8+ PEs are not in winbindex: pin them with `msdl` entries from a PE
+  extracted once from an ISO/ESD (msdl serves them).
 - **Opaque types**: names a PDB declares or mentions but never defines (forward
   declarations, plus struct/union/enum names that `llvm-undname` finds in public
   symbols, kept fully qualified, e.g. `AutoBoost::_AB_PRIORITY`). They live in
@@ -108,6 +117,12 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   palette opens with `/` or ⌘K.
 - PDBs cache in `$TMPDIR/vergiliplus-pdbs`, keyed by GUID+age.
 - Stale `astro preview` servers keep their port; a new one silently moves.
+
+- XP SP2 public PDBs (msdl) carry no types at all, so it is absent. Windows 2000 ntdll PDBs
+  are stripped (kernel only). XP SP1 ntdll is a PDB 2.0 (read by `parse20`). PDB 2.0 has
+  no hash/public streams: forward refs resolve by name, no mangled-name opaque types.
+- Same build string on two arches is normal (`ntoskrnl-6.1.7601.17514-{x64,x86}.json`);
+  the palette names the arch once there are two.
 
 ## Open (undecided)
 
