@@ -62,7 +62,13 @@ pre, code { font-family: var(--mono); }
 .docs-main { padding: 1.5rem; min-width: 0; }
 html.side-collapsed .docs { grid-template-columns: minmax(0, 1fr); }
 html.side-collapsed .docs-side { display: none; }
-@media (max-width: 760px) { .docs { grid-template-columns: minmax(0, 1fr); } .docs-side { display: none; } }
+/* phones: the sidebar is an off-canvas drawer; ☰ toggles html.side-open (nav.js) */
+@media (max-width: 760px) {
+  .docs, html.side-collapsed .docs { grid-template-columns: minmax(0, 1fr); }
+  .docs-side { position: fixed; z-index: 50; left: 0; top: 0; width: min(85vw, 340px); background: var(--bg);
+    transform: translateX(-100%); visibility: hidden; transition: transform 0.2s, visibility 0.2s; }
+  html.side-open .docs-side { transform: none; visibility: visible; box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.6); }
+}
 
 /* panels (verg.css .mainblock-content / .maincross) */
 .panel { background: var(--panel); border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
@@ -221,11 +227,41 @@ option.inc { color: var(--red); }
 @media (max-width: 760px) { .ck-strip { display: none; } }
 
 /* ---- responsive: scale every rem via html font-size (verg.css trick) ---- */
-@media (max-width: 543px) { html { font-size: 5px; } }
-@media (min-width: 544px) { html { font-size: 6px; } }
-@media (min-width: 768px) { html { font-size: 8px; } }
+/* phones floor at 8px: shrinking text with the screen made code ~9px on a phone */
+html { font-size: 8px; }
 @media (min-width: 992px) { html { font-size: 9px; } }
 @media (min-width: 1200px) { html { font-size: 10px; } }
 
 /* the member a palette member-search hit points at */
 .sc-member.hit { background: rgba(255, 245, 197, 0.12); outline: 1px solid rgba(255, 245, 197, 0.45); }
+
+/* ---- phones ---- */
+@media (max-width: 760px) {
+  .topnav { padding: 0 1rem; }
+  .brand { font-size: 3.4rem; }
+  .logo { width: 3.6rem; height: 3.6rem; }
+  .page, .docs-main { padding: 1.2rem; }
+  .cb-step { margin-left: 0; flex-basis: 100%; }
+  .cb-type { font-size: 2.8rem; overflow-wrap: anywhere; }
+  .sc-ctrls { position: static; justify-content: flex-end; padding: 0 0.8rem 0.6rem; }
+  .ck-ov { padding-top: 2vh; }
+  .ck-vmenu { width: min(36rem, calc(100vw - 4rem)); }
+  .ck-ver { flex-basis: auto; max-width: 12rem; }
+  /* the struct view scrolls sideways; edge shadows show there is more */
+  .sc-pre {
+    background:
+      linear-gradient(90deg, var(--code-bg) 30%, transparent) left / 4rem 100% no-repeat local,
+      linear-gradient(270deg, var(--code-bg) 30%, transparent) right / 4rem 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgba(139, 233, 253, 0.35), transparent) left / 1.4rem 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgba(139, 233, 253, 0.35), transparent) right / 1.4rem 100% no-repeat scroll,
+      var(--code-bg);
+  }
+}
+@media (max-width: 543px) {
+  .hz { white-space: normal; overflow-wrap: anywhere; }
+}
+@media (pointer: coarse) {
+  .btn { min-height: 36px; min-width: 36px; }
+  .sb-item { padding: 8px; }
+  .navlink, .side-toggle { min-height: 44px; }
+}

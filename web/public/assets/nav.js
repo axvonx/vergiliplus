@@ -360,13 +360,19 @@
 
   // ---- nav buttons ----------------------------------------------------------------
   document.addEventListener("click", (e) => {
+    const root = document.documentElement;
     if (e.target.closest?.("[data-side-toggle]")) {
-      const c = document.documentElement.classList.toggle("side-collapsed");
-      store("vp-side", c ? "0" : "1");
+      if (phone.matches) root.classList.toggle("side-open");
+      else store("vp-side", root.classList.toggle("side-collapsed") ? "0" : "1");
+    } else if (root.classList.contains("side-open") && !e.target.closest?.(".docs-side")) {
+      root.classList.remove("side-open");
     }
   });
 
+  const phone = matchMedia("(max-width: 760px)");
+
   const sync = () => {
+    document.documentElement.classList.remove("side-open");
     ck.open = false; ckRender(); sbSync(); homeLinks(); barSync();
     tl.q = ""; tl.kind = "all";
     document.documentElement.classList.toggle("side-collapsed", store("vp-side") === "0");

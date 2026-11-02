@@ -50,7 +50,7 @@ export function panelHtml(T, name, doc = null) {
     : `<span>${k} <b>${esc(v)}</b></span>`).join("");
   const p = T.provenance(name);
   return (doc?.incomplete ? incompleteHtml(doc) : "") +
-    `<div class="sc" data-sc><pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-tgl" data-sc-meta aria-pressed="true"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div>` +
+    `<div class="sc meta-off" data-sc><pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-tgl" data-sc-meta aria-pressed="false"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div>` +
     `<div class="sc-line sc-head"><span class="sc-code">${head}</span></div>${body}<div class="sc-line"><span class="sc-code">};</span></div>` +
     (p ? `<div class="sc-line sc-prov"><span class="sc-code">/* ${esc(p)} */</span></div>` : "") +
     `</code></pre></div>` +
