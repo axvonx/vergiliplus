@@ -68,6 +68,11 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # "take" (+ what it reaches) from the one object
                                                # whose "match" structs agree with the doc's
                                                # (per-type provenance: its note)
+                                               # "asserts": [{lib, sha256, [member]}] debug
+                                               # builds whose ASSERT text names types
+                                               # (tools/legacy/strnames.py): names without a
+                                               # layout here become opaque, with evidence
+                                               # (doc.attested)
                                                # "build" is required (a sort key; buildLabel
                                                # is what shows when there is no real number);
                                                # "note" becomes the layouts' provenance line;
@@ -100,7 +105,7 @@ import urllib.request
 
 import pdb_to_json
 import pe_pdbid
-from legacy import cv3, cv4, hsfs, kdext, pcjs
+from legacy import cv3, cv4, hsfs, kdext, pcjs, strnames
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -254,6 +259,42 @@ def source_label(entry):
     return "/".join(urllib.parse.unquote(entry["lib"]).split("/")[-2:])
 
 
+def known_types(skip):
+    """{name: kind} of every type some other committed doc (any build, arch, module, not
+    the file `skip`) defines or declares: what an attested typedef name is, where a
+    recorded build says."""
+    out = {}
+    for path in sorted(glob.glob(os.path.join(DATA, "*-*.json"))):
+        if os.path.abspath(path) == os.path.abspath(skip):
+            continue
+        with open(path) as f:
+            d = json.load(f)
+        for n, k in d.get("opaque", {}).items():
+            if n not in d.get("attested", {}):  # only what type records say, never ASSERT text
+                out.setdefault(n, k)
+        for n, i in d["named"].items():
+            out[n] = d["types"][i]["kind"]
+    return out
+
+
+def attest(doc, names):
+    """Add the names a debug build's ASSERT text attests (strnames.names) to doc.opaque,
+    each under its page name: _X where a recorded build has the struct tag _X (NT's
+    typedef struct _X {...} X convention), else X as written. Kind: the recorded build's,
+    else "type" (unknown). Names doc already lays out are skipped."""
+    known, att = known_types(json_name(doc["module"], doc["build"], doc["arch"])), {}
+    for x, ev in names.items():
+        page = "_" + x if "_" + x in known else x
+        if page in doc["named"] or page in doc["opaque"]:
+            continue
+        doc["opaque"][page] = known.get(page, "type")
+        att[page] = dict(ev, **{"as": x})
+    doc["opaque"] = dict(sorted(doc["opaque"].items()))
+    doc["attested"] = att
+    print("  asserts: %d names (%d with a later layout)"
+          % (len(att), sum(1 for n in att if n in known)), file=sys.stderr)
+
+
 def json_name(module, build, arch):
     return os.path.join(DATA, "%s-%s-%s.json" % (module, build, arch))
 
@@ -376,7 +417,8 @@ def handle(entry, base, pdbdir):
         more = [fetch_pkg(dict(x, member=x.get("member", [])), pdbdir, "lib")
                 for x in entry.get("also", [])]
         if entry.get("format") == "cv3":
-            doc = cv3.convert(src, entry["module"], arch, build, family, entry["note"])
+            doc = cv3.convert([src] + more, entry["module"], arch, build, family, entry["note"],
+                              labels=[source_label(x) for x in [entry] + entry.get("also", [])])
         elif entry.get("format") == "kdext":
             doc = kdext.convert(src, entry["module"], arch, build, family, entry["note"])
         else:
@@ -416,6 +458,10 @@ def handle(entry, base, pdbdir):
                 raise RuntimeError("%s disagrees with %s on %s" % (
                     entry["lib"], entry["kdext"]["url"], ", ".join(b[0] for b in bad) or "everything"))
             print("  kdext: %d/%d _EPROCESS/_ETHREAD offsets agree" % (ok, n), file=sys.stderr)
+        if entry.get("asserts"):
+            attest(doc, strnames.names([fetch_pkg(dict(x, member=x.get("member", [])), pdbdir, "lib")
+                                        for x in entry["asserts"]],
+                                       [source_label(x) for x in entry["asserts"]]))
         for k in ("buildLabel", "incomplete"):
             if entry.get(k):
                 doc[k] = entry[k]

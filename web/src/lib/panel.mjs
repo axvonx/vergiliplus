@@ -81,6 +81,15 @@ function layoutHtml(T, name) {
 const incompleteHtml = (doc) =>
   `<p class="inc-note"><span class="inc">incomplete</span> ${esc(doc.incomplete)}</p>`;
 
+// a name only a debug build's ASSERT text gives (doc.attested): the expression, verbatim
+const HOW = { sizeof: "a <code>sizeof</code>", cast: "a pointer cast", FIELD_OFFSET: "<code>FIELD_OFFSET</code>" };
+const attestedHtml = (a, name, known) =>
+  `<p class="opaque-note">Named, without a layout, by ${HOW[a.how] || "an expression"} in <b>${esc(a.file)}</b>'s ASSERT text ` +
+  `for this build (a debug build keeps each assertion's source text): <code class="att">${esc(a.text)}</code>` +
+  (a.as !== name ? ` It says <b>${esc(a.as)}</b>; recorded builds name the struct <b>${esc(name)}</b> (NT's <code>typedef struct _X {…} X</code> convention).` : "") +
+  (a.members ? ` Members it names: ${a.members.map((m) => `<b>${esc(m)}</b>`).join(", ")}.` : "") +
+  (known ? "" : " Its kind (struct, union or scalar) isn't known.") + `</p>`;
+
 // an opaque name's view in one build: its declaration, and where it does have a layout
 // (other modules of this build first, then other builds, newest first)
 export function opaqueHtml(doc, name, kind) {
@@ -88,9 +97,12 @@ export function opaqueHtml(doc, name, kind) {
     .filter((d) => d.arch === doc.arch && name in d.named)
     .sort((x, y) => ((y.build === doc.build) - (x.build === doc.build)) || cmpBuild(y.build, x.build) ||
       (x.module < y.module ? -1 : 1));
+  const att = doc.attested?.[name], known = kind !== "type";
   return (doc.incomplete ? incompleteHtml(doc) : "") +
-    `<pre class="sc-pre"><code><div class="sc-line"><span class="sc-code"><span class="kw">${esc(kind)}</span> ${esc(name)};</span><span class="sc-ann">/* opaque */</span></div></code></pre>` +
-    (doc.provenance
+    `<pre class="sc-pre"><code><div class="sc-line"><span class="sc-code">${known ? `<span class="kw">${esc(kind)}</span> ` : ""}${esc(name)};</span>` +
+    `<span class="sc-ann">/* ${att ? "named only" : "opaque"} */</span></div></code></pre>` +
+    (att ? attestedHtml(att, name, known)
+    : doc.provenance
       ? `<p class="opaque-note">Named but not defined in the type records <b>${esc(doc.module)}</b>'s layouts for this build ` +
         `come from (a forward declaration or pointer target). The layout isn't known here.</p>`
       : `<p class="opaque-note">Declared but not defined in <b>${esc(doc.module)}</b>'s public PDB for this build: a forward ` +

@@ -135,6 +135,7 @@ class Graph:
         self.lay, self.pending = {}, []
         self.defs = {}  # struct name -> (module, ti): first definition wins
         self.disagree = set()
+        self.shapes = {}  # struct name -> {(bits, member names): [(module, ti)]}, first seen first
         for m, recs in enumerate(tables):
             for ti, d in recs.items():
                 if d[:1] != b"\x79":
@@ -145,6 +146,8 @@ class Graph:
                     continue
                 if name in ANON:
                     continue
+                shape = (bits, tuple(n for _, n, _ in host_members(recs, *struct_head(d)[2:4])))
+                self.shapes.setdefault(name, {}).setdefault(shape, []).append((m, ti))
                 if name not in self.defs:
                     self.defs[name] = (m, ti)
                 elif struct_head(tables[self.defs[name][0]][self.defs[name][1]])[0] != bits:
@@ -252,6 +255,15 @@ class Graph:
             self.fill(node, m, ti)
         return i
 
+    def variant(self, name, m, ti):
+        """A node for another definition of a named struct (module m's record ti)."""
+        key = ("V", m, ti)
+        if key not in self.ids:
+            node = {"kind": "struct", "name": name, "size": 0, "fieldlist": None, "forward": None}
+            self.intern(key, node)
+            self.fill(node, m, ti)
+        return self.ids[key]
+
     def fill(self, node, m, ti):
         L = self.layout(m, ti)
         node.update(kind=L["kind"], size=L["size"], fieldlist=self.fieldlist(L["members"]))
@@ -324,16 +336,43 @@ class Graph:
         return x
 
 
-def convert(exe, module, arch, build, family="", note=""):
-    """A 1991 debugger executable -> the vergiliplus doc (computed layouts)."""
-    g = Graph(type_tables(exe))
+def convert(exes, module, arch, build, family="", note="", labels=None):
+    """1991 debugger executable(s) -> the vergiliplus doc (computed layouts). With more
+    than one, the first's definitions win; a documented name another defines differently
+    keeps each definition (doc.variants, noted with `labels`, one per executable)."""
+    exes = [exes] if isinstance(exes, str) else exes
+    labels = labels or [os.path.basename(e) for e in exes]
+    tables, owner = [], []
+    for i, exe in enumerate(exes):
+        t = type_tables(exe)
+        tables += t
+        owner += [i] * len(t)
+    g = Graph(tables)
     roots = {n: g.named(n) for n in sorted(g.defs) if NT_NAME.match(n) and n not in HOST_ONLY}
     g.settle()
-    types = P.reachable(g.types, roots.values())
+    var = {}
+    for n in sorted(roots):  # each executable's first definition; differing ones are variants
+        first = {}
+        for shape, locs in g.shapes[n].items():
+            for m, ti in locs:
+                if owner[m] not in first or (m, ti) < first[owner[m]][1]:
+                    first[owner[m]] = (shape, (m, ti))
+        shapes = {}
+        for i in sorted(first):
+            shapes.setdefault(first[i][0], []).append((i, first[i][1]))
+        if len(shapes) > 1:
+            var[n] = [{"type": roots[n] if j == 0 else g.variant(n, *locs[0][1]),
+                       "note": ", ".join(labels[i] for i, _ in locs)}
+                      for j, locs in enumerate(shapes.values())]
+    g.settle()
+    types = P.reachable(g.types, list(roots.values()) + [v["type"] for vs in var.values() for v in vs])
     # named structs the documented ones reach are kernel types too
     named = {n: g.ids[("N", n)] for n in sorted(g.defs)
              if ("N", n) in g.ids and g.ids[("N", n)] in types}
-    if g.disagree:
+    # a name only a later executable defines says which
+    only = {n: {"kind": "computed", "note": "%s; this type: %s" % (note, labels[owner[g.defs[n][0]]])}
+            for n in named if owner[g.defs[n][0]]}
+    if g.disagree and not var:
         print("  ~~ %s: %d names defined differently across modules (first kept): %s"
               % (arch, len(g.disagree), ", ".join(sorted(g.disagree))), file=sys.stderr)
     return {
@@ -341,6 +380,8 @@ def convert(exe, module, arch, build, family="", note=""):
         "fileVersion": None, "pdb": None,
         "provenance": {"kind": "computed", "note": note},
         "named": named, "opaque": {}, "types": types,
+        **({"variants": var} if var else {}),
+        **({"provenanceTypes": only} if only else {}),
     }
 
 

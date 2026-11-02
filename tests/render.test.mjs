@@ -165,3 +165,22 @@ test("variants: build 404's two _PEB definitions", async () => {
   assert.match(html, /MIPS\/DISKPERF\.EXE \(100 bytes\)/);
   assert.match(html, /this definition: MIPS\/DISKPERF\.EXE/);
 });
+
+// April 1991: the debug kernel's ASSERT text names types it has no layout for; the page
+// quotes the expression, maps the typedef to a recorded build's tag, says what isn't known
+test("attested names: April 1991 ASSERT text", async () => {
+  const { opaqueHtml } = await import("../web/src/lib/panel.mjs");
+  const doc = loadDoc(path.join(DATA, "ntoskrnl-0.1991.4.0-mips.json"));
+  const sem = opaqueHtml(doc, "_KSEMAPHORE", "struct");
+  assert.match(sem, /<span class="kw">struct<\/span> _KSEMAPHORE;.*named only/);
+  assert.match(sem, /sizeof\(KSEMAPHORE\)/);
+  assert.match(sem, /It says <b>KSEMAPHORE<\/b>/);
+  const fcb = opaqueHtml(doc, "FCB", "type");
+  assert.match(fcb, /<span class="sc-code">FCB;/);
+  assert.match(fcb, /\(\(PFCB\)Fcb\)/);
+  assert.match(fcb, /kind \(struct, union or scalar\) isn't known/);
+  const io = opaqueHtml(doc, "_IO_STACK_LOCATION", "struct");
+  assert.match(io, /Members it names: <b>Parameters\.Read\.ByteOffset<\/b>/);
+  // KD.EXE (March 1991) defines the wait-state packet smaller than MIPSKD.EXE
+  assert.deepEqual(doc.variants._DBGKD_WAIT_STATE_CHANGE.map((v) => v.note), ["MIPSKD.EXE", "KD.EXE"]);
+});

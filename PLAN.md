@@ -32,6 +32,15 @@ inventories stay in `$VP_IMAGES/research/` (not in the repo).
 - MIPS NT 4.0 `_KPRCB`: CRASHLIB's MIPS object disagrees with the DDK (`_KTRAP_FRAME`
   512 vs 600), so none is shown; another source would be needed.
 
+## Names without layouts (attested), next steps
+
+- More checked builds with `"asserts"`: Oct 1991 CD, NT 3.1 / 3.5 / 3.51 checked
+  kernels (archive.org). Expect tens of names each; a kernel's drivers' names belong to
+  their own modules (not ntoskrnl), which the site doesn't have yet.
+- Higher-yield name source, still unused: SDK/DDK C headers (Dec 1991 `MSTOOLS/H`, the
+  1992-93 DDKs) name and *define* hundreds of types; they'd need a C declaration reader.
+  April 1991 has no headers on its disks.
+
 ## Facts that cost time to find
 
 - NT 3.1 / 3.5 / 3.51 / 4.0 public `.dbg` symbols carry **zero** type records; kernel

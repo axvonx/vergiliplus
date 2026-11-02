@@ -20,6 +20,7 @@ tools/build.py        manifest data/sources.json -> data/<module>-<build>-<arch>
   legacy/kdext.py     cross-check _EPROCESS/_ETHREAD vs a KDEXT*.DLL's !processfields
   legacy/cv3.py       1991 debuggers' CodeView 3 -> computed natural 32-bit layouts
   legacy/hsfs.py, pcjs.py   High Sierra CD / PCjs disk JSON readers (fetch chain steps)
+  legacy/strnames.py  type names a debug build's ASSERT text names (sizeof/cast/FIELD_OFFSET)
   check_links.py, check_budget.py   post-build gates (CI runs both)
 web/src/lib/types.mjs    type graph + C declarators as segments ({t}, {t,kw}, {t,ref})
 web/src/lib/layout.mjs   pahole rows: anonymous union/struct reconstruction, enums, usedIn, layoutText
@@ -83,6 +84,14 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   symbols, kept fully qualified, e.g. `AutoBoost::_AB_PRIORITY`). They live in
   `doc.opaque` ({name: kind}); in a build where a type is opaque its view is the
   declaration, "defined in" and used in. Dimmed in lists.
+- **Attested names** (`"asserts"` on a `lib` entry): a debug build keeps each ASSERT's
+  source text, and `sizeof(X)`, `FIELD_OFFSET(X, …)` and a pointer cast `(PX)` name a
+  type for certain. Names the build has no layout for join `doc.opaque`, evidence in
+  `doc.attested` ({page: {as, how, text, file[, members]}}), shown verbatim on the page
+  (`/* named only */`). Page name: `_X` where a recorded doc has the tag `_X`, else `X`;
+  kind from that doc, else `"type"` (unknown, no keyword). Never attribute members via
+  variables (`Process->Pcb`): that's inference. Yield is tens per build, not hundreds
+  (April 1991 kernel 18, all 95 December 1991 checked binaries 40).
 - **`data/*.json` is the committed artifact**: compact, and pruned to types reachable
   from the documented ones. Never commit PDBs, PEs or `web/dist/`.
 - **Text first, HTML at the edge.** layout/types produce segments; only
