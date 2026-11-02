@@ -158,6 +158,9 @@
     `<div class="ck-filters"></div><div class="ck-list"></div>` +
     `<div class="ck-foot">↑↓ move · ↵ open · click a square for that build · esc close · / or ⌘K to open</div></div></div>`;
   const short = (fam) => fam.replace(/^Windows /, "");
+  // once there is more than one architecture a build is named "<build> · <arch>"
+  const arched = () => new Set(ck.ix.v.map((v) => v[0])).size > 1;
+  const vname = (v) => (arched() ? `${v[1]} · ${v[0]}` : v[1]);
   // per-version on/off, recomputed only when F.vOff is replaced (it is never mutated)
   let onFor = null, on = [];
   const vOn = (i) => {
@@ -192,7 +195,7 @@
       `<span class="ck-vers"><button class="btn${nOn < ix.v.length ? " on" : ""}" data-ck-vers>Versions ${nOn}/${ix.v.length} ▾</button>` +
       `<span class="ck-vmenu" hidden><span class="ck-vall"><button class="btn" data-ck-vall="1">all</button><button class="btn" data-ck-vall="0">none</button></span>` +
       ix.v.map((v, i) => `<label class="ch-${v[3]}"><input type="checkbox" data-ck-v="${i}"${vOn(i) ? " checked" : ""}>` +
-        `<span class="vf">${esc(v[2])}</span><span class="vb">${esc(v[1])}</span></label>`).join("") + `</span></span>`;
+        `<span class="vf">${esc(v[2])}</span><span class="vb">${esc(vname(v))}</span></label>`).join("") + `</span></span>`;
   };
 
   const ckRender = () => {
@@ -254,11 +257,11 @@
       const strip = order.map((vi) => {
         const st = t[4].includes(vi) ? "d" : t[5].includes(vi) ? "o" : "";
         const v = ix.v[vi];
-        return `<i class="ch-${v[3]}${st ? " " + st : ""}"${st ? ` data-go="${esc(typeHref(t, vi, f))}"` : ""} title="${esc(v[2])} ${esc(v[1])}${st === "o" ? " (opaque)" : st ? "" : " (absent)"}"></i>`;
+        return `<i class="ch-${v[3]}${st ? " " + st : ""}"${st ? ` data-go="${esc(typeHref(t, vi, f))}"` : ""} title="${esc(v[2])} ${esc(vname(v))}${st === "o" ? " (opaque)" : st ? "" : " (absent)"}"></i>`;
       }).join("");
       return `<a class="ck-item${i === ck.sel ? " sel" : ""}${t[4].length ? "" : " op"}" data-i="${i}" href="${esc(typeHref(t, ti, f))}">` +
         `${dot(t[1])}<span class="ck-name">${f ? `${esc(t[0])}<span class="ck-fld">.${mark(f)}</span>` : mark(t[0])}</span><span class="ck-mod">${esc(ix.m[t[3]])}</span>` +
-        `<span class="ck-strip">${strip}</span><span class="ck-ver ch-${tv[3]}">${esc(short(tv[2]))}</span></a>`;
+        `<span class="ck-strip">${strip}</span><span class="ck-ver ch-${tv[3]}">${esc(short(tv[2]))}${arched() ? " " + esc(tv[0]) : ""}</span></a>`;
     }).join("") : `<div class="ck-empty">No matches with these filters</div>`;
     nearest(list, list.querySelector(".ck-item.sel"));
   };
