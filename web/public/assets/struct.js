@@ -5,7 +5,7 @@
   if (window.__vpStruct) return;
   window.__vpStruct = true;
   const KEY = "vp-meta";
-  const metaOn = () => { try { return localStorage.getItem(KEY) !== "0"; } catch (e) { return true; } };
+  const metaOn = () => { try { return localStorage.getItem(KEY) === "1"; } catch (e) { return false; } };
   const apply = () => document.querySelectorAll("[data-sc]").forEach((sc) => {
     const on = metaOn();
     sc.classList.toggle("meta-off", !on);

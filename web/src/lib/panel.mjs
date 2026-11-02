@@ -46,7 +46,7 @@ export function panelHtml(T, name) {
   const st = stats.map(([k, v]) => /^\d/.test(k)
     ? `<span><b>${k.split(" ")[0]}</b> ${k.split(" ").slice(1).join(" ")}${v !== "" ? ` (${esc(v)})` : ""}</span>`
     : `<span>${k} <b>${esc(v)}</b></span>`).join("");
-  return `<div class="sc" data-sc><pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-tgl" data-sc-meta aria-pressed="true"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div>` +
+  return `<div class="sc meta-off" data-sc><pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-tgl" data-sc-meta aria-pressed="false"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div>` +
     `<div class="sc-line sc-head"><span class="sc-code">${head}</span></div>${body}<div class="sc-line"><span class="sc-code">};</span></div></code></pre></div>` +
     `<div class="stats">${st}</div>`;
 }
