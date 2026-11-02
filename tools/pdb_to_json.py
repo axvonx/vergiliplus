@@ -12,6 +12,9 @@ Usage:
       [--family F] [--file-version V] [--pdbutil /path/to/llvm-pdbutil] [-o out.json]
 Also importable: convert(...) -> doc, write(doc, path).
 
+PDB 2.0 files (Windows 2000 symbols), which llvm-pdbutil cannot open, are read by
+parse20() below instead, producing the same nodes.
+
 Only the record kinds needed to render C declarations are modeled; anything else
 is kept as a best-effort {kind:"other"} node so rendering degrades instead of
 crashing.
@@ -176,6 +179,8 @@ def mangled_type_names(pdb, pdbutil):
 
 def pdb_identity(pdb, pdbutil):
     """{guid, age} of the PDB itself, so a doc can be re-fetched from msdl later."""
+    if is_pdb20(pdb):
+        return pdb20_identity(pdb)
     out = subprocess.run([find_pdbutil(pdbutil), "dump", "-summary", pdb],
                          capture_output=True, text=True).stdout
     guid = grab(r"GUID: \{([0-9A-Fa-f-]+)\}", out)
@@ -301,8 +306,14 @@ def parse(lines):
     for bk, bn in bases.items():
         types.setdefault(bk, {"kind": "base", "name": bn})
 
-    # llvm-pdbutil prints a forward ref's target ("-> 0x..") only via the TPI hash
-    # stream, which readable() drops for VC 7.x PDBs; resolve those by name instead
+    resolve_forwards(types)
+    return types
+
+
+def resolve_forwards(types):
+    """llvm-pdbutil prints a forward ref's target ("-> 0x..") only via the TPI hash
+    stream, which readable() drops for VC 7.x PDBs (and PDB 2.0 has none): resolve those
+    by name instead."""
     defs = {(t["kind"], t["name"]): k for k, t in types.items()
             if t.get("fieldlist") and t.get("name")}
     for t in types.values():
@@ -310,6 +321,198 @@ def parse(lines):
                 and not t.get("forward"):
             t["forward"] = defs.get((t["kind"], t.get("name")))
 
+
+# ---------------------------------------------------------------------------
+# PDB 2.0 ("Microsoft C/C++ program database 2.00", VC 4-6; Windows 2000 symbols).
+# llvm-pdbutil cannot open these (16-bit page numbers, a different directory), so the
+# TPI stream is read here directly. The output is the same node shape parse() makes.
+
+PDB20_MAGIC = b"Microsoft C/C++ program database 2.00\r\n\x1aJG\0\0"
+
+
+def is_pdb20(path):
+    with open(path, "rb") as f:
+        return f.read(len(PDB20_MAGIC)) == PDB20_MAGIC
+
+
+def pdb20_streams(path):
+    """The MSF 2.0 streams of a PDB as a list of bytes (None for a deleted stream)."""
+    with open(path, "rb") as f:
+        b = f.read()
+    page, _, _, root_size = struct.unpack_from("<IHHI", b, 44)
+    npg = -(-root_size // page)
+    root_pages = struct.unpack_from("<%dH" % npg, b, 56 + 4)
+
+    def read(pages, size):
+        return b"".join(b[p * page:(p + 1) * page] for p in pages)[:size]
+
+    root = read(root_pages, root_size)
+    n = struct.unpack_from("<H", root, 0)[0]
+    sizes = [struct.unpack_from("<I", root, 4 + 8 * i)[0] for i in range(n)]
+    pos, out = 4 + 8 * n, []
+    for z in sizes:
+        k = -(-z // page) if z != 0xFFFFFFFF else 0
+        pages = struct.unpack_from("<%dH" % k, root, pos)
+        pos += 2 * k
+        out.append(read(pages, z) if z != 0xFFFFFFFF else None)
+    return out
+
+
+def pdb20_identity(path):
+    """{signature, age} of a PDB 2.0 (it has a timestamp signature, not a GUID)."""
+    pdbs = pdb20_streams(path)[1]
+    _, sig, age = struct.unpack_from("<III", pdbs, 0)
+    return {"guid": None, "signature": sig, "age": age}
+
+
+# CodeView simple types -> the names llvm-pdbutil prints for them
+CV_SIMPLE = {
+    0x03: "void", 0x07: "<not translated>", 0x08: "HRESULT",
+    0x10: "signed char", 0x20: "unsigned char", 0x68: "__int8", 0x69: "unsigned __int8",
+    0x70: "char", 0x71: "wchar_t", 0x72: "__int16", 0x73: "unsigned __int16",
+    0x74: "int", 0x75: "unsigned", 0x76: "__int64", 0x77: "unsigned __int64",
+    0x78: "__int128", 0x79: "unsigned __int128",
+    0x11: "short", 0x21: "unsigned short", 0x12: "long", 0x22: "unsigned long",
+    0x13: "__int64", 0x23: "unsigned __int64",
+    0x40: "float", 0x41: "double", 0x42: "long double", 0x30: "bool",
+    0x31: "__bool16", 0x32: "__bool32", 0x33: "__bool64",
+}
+CV_PTR_MODES = (0x100, 0x200, 0x300, 0x400, 0x500, 0x600)  # near16 .. near64
+
+
+def cv_simple_name(ti):
+    """Name of a primitive type index (< 0x1000), pointer variants included; None if
+    unknown."""
+    mode = ti & 0x700
+    base = CV_SIMPLE.get(ti & 0xFF)
+    if base is None or (mode and mode not in CV_PTR_MODES):
+        return None
+    return base + "*" if mode else base
+
+
+def cv_numeric(d, o):
+    """A CodeView numeric leaf (inline < 0x8000, else a typed little-endian value)."""
+    v = struct.unpack_from("<H", d, o)[0]
+    if v < 0x8000:
+        return v, o + 2
+    size, signed = {0x8000: (1, True), 0x8001: (2, True), 0x8002: (2, False),
+                    0x8003: (4, True), 0x8004: (4, False),
+                    0x8009: (8, True), 0x800a: (8, False)}.get(v, (None, False))
+    if size is None:
+        raise ValueError("unsupported numeric leaf 0x%x" % v)
+    return int.from_bytes(d[o + 2:o + 2 + size], "little", signed=signed), o + 2 + size
+
+
+def cv_pstr(d, o):
+    n = d[o]
+    return d[o + 1:o + 1 + n].decode("latin1"), o + 1 + n
+
+
+def parse20_fieldlist(d):
+    """Members and enumerators of an LF_FIELDLIST body (32-bit type indices, _ST names)."""
+    members, enums, o = [], [], 0
+    while o < len(d):
+        sub = struct.unpack_from("<H", d, o)[0]
+        if sub == 0x1405:      # LF_MEMBER_ST: attr, type, offset, name
+            ti = struct.unpack_from("<I", d, o + 4)[0]
+            off, p = cv_numeric(d, o + 8)
+            name, o = cv_pstr(d, p)
+            members.append({"name": name, "type": hexi(ti), "offset": off})
+        elif sub == 0x0403:    # LF_ENUMERATE: attr, value, name
+            val, p = cv_numeric(d, o + 4)
+            name, o = cv_pstr(d, p)
+            enums.append({"name": name, "value": val})
+        elif sub == 0x1400:    # LF_BCLASS: attr, type, offset
+            _, o = cv_numeric(d, o + 8)
+        elif sub in (0x1401, 0x1402):  # LF_VBCLASS/IVBCLASS: attr, type, vbptr, 2 numerics
+            _, p = cv_numeric(d, o + 12)
+            _, o = cv_numeric(d, p)
+        elif sub == 0x1404:    # LF_INDEX: pad, continuation type (lists are not split here)
+            o += 8
+        elif sub == 0x1406:    # LF_STMEMBER_ST: attr, type, name
+            _, o = cv_pstr(d, o + 8)
+        elif sub == 0x1407:    # LF_METHOD_ST: count, method list, name
+            _, o = cv_pstr(d, o + 8)
+        elif sub == 0x1408:    # LF_NESTTYPE_ST: pad, type, name
+            _, o = cv_pstr(d, o + 8)
+        elif sub in (0x1409, 0x140a):  # LF_VFUNCTAB / LF_FRIENDCLS: pad, type
+            o += 8
+        elif sub == 0x140b:    # LF_ONEMETHOD_ST: attr, type, [vbase offset], name
+            attr = struct.unpack_from("<H", d, o + 2)[0]
+            _, o = cv_pstr(d, o + 8 + (4 if ((attr >> 2) & 7) in (4, 6) else 0))
+        else:
+            raise ValueError("unknown field list sub-leaf 0x%04x" % sub)
+        while o < len(d) and d[o] >= 0xF0:  # LF_PADn
+            o += d[o] & 0x0F
+    return members, enums
+
+
+def parse20(path):
+    """TPI of a PDB 2.0 -> {hex index: node}, as parse() does for llvm-pdbutil text."""
+    tpi = pdb20_streams(path)[2]
+    ver, hdr, tmin, tmax, cb = struct.unpack_from("<IIIII", tpi, 0)
+    if ver != 19961031:
+        raise ValueError("unexpected TPI version %d in %s" % (ver, path))
+    types, o, ti = {}, hdr, tmin
+    while o < hdr + cb and ti < tmax:
+        ln, leaf = struct.unpack_from("<HH", tpi, o)
+        d = tpi[o + 4:o + 2 + ln]
+        o, key = o + 2 + ln, hexi(ti)
+        ti += 1
+        if leaf in (0x1004, 0x1005, 0x1006):   # LF_CLASS_ST / LF_STRUCTURE_ST / LF_UNION_ST
+            _, prop, fl = struct.unpack_from("<HHI", d, 0)
+            p = 8 if leaf == 0x1006 else 16  # structs also carry derived + vshape
+            size, p = cv_numeric(d, p)
+            name, _ = cv_pstr(d, p)
+            fwd = bool(prop & 0x80)
+            types[key] = {"kind": "union" if leaf == 0x1006 else "struct", "name": name,
+                          "size": 0 if fwd else size,
+                          "fieldlist": hexi(fl) if fl and not fwd else None, "forward": None}
+        elif leaf == 0x1007:                   # LF_ENUM_ST: count, property, type, field, name
+            _, prop, _, fl = struct.unpack_from("<HHII", d, 0)
+            name, _ = cv_pstr(d, 12)
+            types[key] = {"kind": "enum", "name": name,
+                          "fieldlist": hexi(fl) if fl and not prop & 0x80 else None,
+                          "forward": None}
+        elif leaf == 0x1203:                   # LF_FIELDLIST
+            members, enums = parse20_fieldlist(d)
+            types[key] = {"kind": "fieldlist", "members": members, "enums": enums}
+        elif leaf == 0x1002:                   # LF_POINTER: referent, attributes
+            types[key] = {"kind": "pointer", "referent": hexi(struct.unpack_from("<I", d, 0)[0])}
+        elif leaf == 0x1003:                   # LF_ARRAY_ST: element, index, size, name
+            el = struct.unpack_from("<I", d, 0)[0]
+            size, _ = cv_numeric(d, 8)
+            types[key] = {"kind": "array", "element": hexi(el), "bytes": size}
+        elif leaf == 0x1001:                   # LF_MODIFIER: type, attributes
+            ref, attr = struct.unpack_from("<IH", d, 0)
+            types[key] = {"kind": "modifier", "referent": hexi(ref),
+                          "const": bool(attr & 1), "volatile": bool(attr & 2)}
+        elif leaf == 0x1205:                   # LF_BITFIELD: type, length, position
+            ty, bits, pos = struct.unpack_from("<IBB", d, 0)
+            types[key] = {"kind": "bitfield", "type": hexi(ty), "bits": bits, "pos": pos}
+        elif leaf == 0x1008:                   # LF_PROCEDURE: return, conv, res, count, args
+            ret, _, _, _, args = struct.unpack_from("<IBBHI", d, 0)
+            types[key] = {"kind": "proc", "return": hexi(ret), "args": hexi(args)}
+        elif leaf == 0x1201:                   # LF_ARGLIST: count, types
+            n = struct.unpack_from("<I", d, 0)[0]
+            types[key] = {"kind": "arglist",
+                          "args": [hexi(a) for a in struct.unpack_from("<%dI" % n, d, 4)]}
+        else:
+            types[key] = {"kind": "other", "lf": "LF_0x%04X" % leaf}
+
+    # primitive types are implicit: add the ones the records refer to
+    seen = set()
+    for t in types.values():
+        for f in ("referent", "element", "type", "return"):
+            seen.add(t.get(f))
+        seen.update(t.get("args") if isinstance(t.get("args"), list) else [])
+        seen.update(m["type"] for m in t.get("members", []))
+    for s in seen:
+        if s and int(s, 16) < 0x1000 and s not in types:
+            name = cv_simple_name(int(s, 16))
+            if name:
+                types[s] = {"kind": "base", "name": name}
+    resolve_forwards(types)
     return types
 
 
@@ -334,7 +537,8 @@ def reachable(types, roots):
 
 def convert(pdb, module, arch, build, family="", file_version=None, pdbutil=None):
     """PDB -> the vergiliplus doc for one module x build x arch."""
-    types = parse(run_pdbutil(pdb, pdbutil))
+    pdb20 = is_pdb20(pdb)
+    types = parse20(pdb) if pdb20 else parse(run_pdbutil(pdb, pdbutil))
     # index of renderable top-level named types (definitions, not forward refs)
     named, declared = {}, {}
     for key, t in types.items():
@@ -348,7 +552,8 @@ def convert(pdb, module, arch, build, family="", file_version=None, pdbutil=None
     # opaque: names this PDB knows but never defines, as {name: kind}, from forward
     # declarations and from mangled public symbols (whose tag gives the kind)
     opaque = {n: k for n, k in declared.items() if n not in named}
-    for n, k in mangled_type_names(pdb, pdbutil).items():
+    # (a PDB 2.0 has no public symbol table we read: forward declarations only)
+    for n, k in ({} if pdb20 else mangled_type_names(pdb, pdbutil)).items():
         if n not in named:
             opaque.setdefault(n, k)
     return {
