@@ -1,7 +1,8 @@
 # CLAUDE.md — vergiliplus
 
 Static browser of Windows struct/union/enum layouts from Microsoft's **public PDBs**:
-kernel (`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), live at
+kernel (`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary) and 16 x86
+builds (Windows 2000 SP3 → Windows 10 22H2), live at
 https://vergiliplus.com. Not a fork of Vergilius; it borrows only its look.
 
 ## Map
@@ -52,7 +53,9 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 - **x86 kernel = the PAE multiprocessor one** (`ntkrpamp.exe`, PDB `ntkrpamp.pdb`; Vista/7
   ship it as `ntkrnlpa.exe`; Windows 8+ x86 is PAE-only `ntoskrnl.exe`), module name stays
   `ntoskrnl`. x86 Win8+ PEs are not in winbindex: pin them with `msdl` entries from a PE
-  extracted once from an ISO/ESD (msdl serves them).
+  extracted once from an ISO/ESD (msdl serves them). When the image's ntdll is a different
+  revision than its kernel, the ntdll entry carries `"build"` = the kernel's label, as an
+  image entry would (Win10 1703, 22H2).
 - **Opaque types**: names a PDB declares or mentions but never defines (forward
   declarations, plus struct/union/enum names that `llvm-undname` finds in public
   symbols, kept fully qualified, e.g. `AutoBoost::_AB_PRIORITY`). They live in
@@ -126,10 +129,10 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 ## Open (undecided)
 
-**Scale:** 22 builds ≈ 39 MB in ~7.8k files; a build adds ~1 MB (its new types' pages and
-changed views). x86/ARM64 or per-update builds now fit; a new arch is a second /t/ tree.
+**Scale:** 38 builds (22 x64 + 16 x86) ≈ 62 MB in ~13.5k files; a build adds ~1 MB (its
+new types' pages and changed views); a new arch is another /t/ tree (x86 added ~23 MB).
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
-x86/ARM64 (winbindex has them; budget first) · more canary builds (UUP sets) · home
+ARM64 / IA-64 · x86 Win10 1507/1709/1803/1903/1909 · more canary builds (UUP sets) · home
 grouping (client/server/insider).
 
 ## Attribution
