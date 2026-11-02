@@ -6,7 +6,7 @@
 // so the same rendering feeds plain text (copy, golden tests) and HTML (the site).
 
 // pointer width per arch; everything else in BASE_SIZES is LLP64 on every arch
-const PTR_SIZE = { x86: 4, x64: 8, arm64: 8, arm: 4 };
+const PTR_SIZE = { x86: 4, x64: 8, arm64: 8, arm: 4, ia64: 8, mips: 4, alpha: 4, ppc: 4 };
 const BASE_SIZES = {
   "char": 1, "signed char": 1, "unsigned char": 1, "bool": 1,
   "short": 2, "unsigned short": 2, "wchar_t": 2, "__wchar_t": 2,
