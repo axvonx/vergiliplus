@@ -1,0 +1,29 @@
+---
+// One page per arch x module x type, covering every build. It inlines the default
+// build's view (lib/panel.mjs: newest defining build, else newest declaring it) so it
+// reads without a fetch; #<build> selects another, which struct.js renders from the
+// type's pack (/p/...json.gz).
+import Layout from "../../../../layouts/Layout.astro";
+import ContextBar from "../../../../components/ContextBar.astro";
+import { slug } from "../../../../lib/types.mjs";
+import { typePages, viewOf } from "../../../../lib/panel.mjs";
+
+export function getStaticPaths() {
+  return typePages().flatMap((page) => [page.slug, ...page.aliases]
+    .map((type) => ({ params: { arch: page.arch, module: page.module, type }, props: { page } })));
+}
+
+const { page } = Astro.props;
+const { view, used } = viewOf(page, page.def);
+---
+<Layout title={`${page.name} · ${page.module}`} side>
+  <ContextBar arch={page.arch} build={page.def} module={page.module} type={page.name} page={page} />
+  <div data-tp data-def={page.def} data-cur={page.def} data-has={page.has}
+       data-pack={`/p/${page.arch}/${page.module}/${page.slug}.json.gz`}>
+    <div class="panel" data-view set:html={view} />
+    <section class="panel" data-used hidden={!used.length}>
+      <div class="used-h">Used in (<span data-used-n>{used.length}</span>)</div>
+      <div class="used-list">{used.map((x) => (<a href={`${slug(x)}.html`}>{x}</a>))}</div>
+    </section>
+  </div>
+</Layout>

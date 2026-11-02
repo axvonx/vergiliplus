@@ -3,7 +3,8 @@
 // over an auto-fit, colour-coded column list. Filtering is in nav.js.
 import Layout from "../../../../layouts/Layout.astro";
 import ContextBar from "../../../../components/ContextBar.astro";
-import { catalog, typeList, ctxPath } from "../../../../lib/catalog.mjs";
+import { catalog, typeList } from "../../../../lib/catalog.mjs";
+import { typePath } from "../../../../lib/panel.mjs";
 
 export function getStaticPaths() {
   return catalog().docs.map((d) => ({
@@ -21,7 +22,6 @@ for (const it of items) it.o ? counts.opaque++ : counts[it.k]++;
 // the tooltip) so wide screens get many columns instead of a few sized to the longest
 const lens = names.map((n) => n.length).sort((a, b) => a - b);
 const colCh = Math.max(20, lens[Math.floor(lens.length * 0.9)] || 20) + 3;
-const base = ctxPath(arch, build, module);
 ---
 <Layout title={`${module} ${build}`} wide>
   <ContextBar arch={arch} build={build} module={module} />
@@ -33,7 +33,7 @@ const base = ctxPath(arch, build, module);
   </div>
   <div class="hz-list" data-tl style={`column-width:${Math.round(colCh * 1.2)}ch`}>
     {items.map((it) => (
-      <a class={`hz k-${it.k}${it.o ? " op" : ""}`} href={`${base}/${it.s}.html`} title={it.n.length + 3 > colCh ? it.n : undefined}><span class="dot"></span>{it.n}</a>
+      <a class={`hz k-${it.k}${it.o ? " op" : ""}`} href={`${typePath(arch, module, it.n)}#${build}`} title={it.n.length + 3 > colCh ? it.n : undefined}><span class="dot"></span>{it.n}</a>
     ))}
   </div>
 </Layout>

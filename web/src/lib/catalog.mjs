@@ -50,18 +50,12 @@ export function catalog() {
   const byKey = new Map();
   const builds = new Map();   // arch|module -> [build asc]
   const modules = new Map();  // arch|build  -> [module]
-  const wizard = new Map();   // arch|module|name -> [build asc] (defined or opaque)
   for (const d of docs) {
     byKey.set(key(d.arch, d.build, d.module), d);
     (builds.get(key(d.arch, d.module)) || builds.set(key(d.arch, d.module), []).get(key(d.arch, d.module))).push(d.build);
     (modules.get(key(d.arch, d.build)) || modules.set(key(d.arch, d.build), []).get(key(d.arch, d.build))).push(d.module);
-    for (const n of [...Object.keys(d.named), ...Object.keys(d.opaque)]) {
-      const k = key(d.arch, d.module, n);
-      (wizard.get(k) || wizard.set(k, []).get(k)).push(d.build);
-    }
   }
   for (const v of builds.values()) v.sort(cmpBuild);
-  for (const v of wizard.values()) v.sort(cmpBuild);
   _cat = {
     docs,
     get: (a, b, m) => byKey.get(key(a, b, m)),
@@ -71,7 +65,6 @@ export function catalog() {
     // one entry per arch × build, newest first: {arch, build, family}
     versions: () => [...new Map(docs.slice().sort((x, y) => cmpBuild(y.build, x.build))
       .map((d) => [d.arch + "/" + d.build, { arch: d.arch, build: d.build, family: d.family }])).values()],
-    typeBuilds: (a, m, n) => wizard.get(key(a, m, n)) || [],
   };
   return _cat;
 }
@@ -118,3 +111,31 @@ export const ctxPath = (a, b, m) => `/v/${a}/${b}/${m}`;
 // release channel from the family name, for colour-coding versions
 export const channel = (family) =>
   /server/i.test(family) ? "server" : /canary|insider|dev|beta|preview/i.test(family) ? "insider" : "client";
+
+// The search palette's rows (/search-index.json; /member-index.json refers to t by
+// position): v = [[arch, build, family, channel]] newest first, m = [module],
+// t = [[name, kind, slug, module#, [v# defining it], [v# where opaque]]] by name.
+let _rows = null;
+export function searchRows() {
+  if (_rows) return _rows;
+  const cat = catalog();
+  const v = cat.versions();
+  const vi = new Map(v.map((x, i) => [x.arch + "/" + x.build, i]));
+  const m = [...new Set(cat.docs.map((d) => d.module))].sort();
+  const t = new Map();
+  for (const d of cat.docs) {
+    const mi = m.indexOf(d.module), i = vi.get(d.arch + "/" + d.build);
+    for (const it of typeList(d)) {
+      const k = it.n + "|" + mi;
+      const e = t.get(k) || t.set(k, [it.n, it.k, it.s, mi, [], []]).get(k);
+      if (!it.o) e[1] = it.k;  // a definition's kind wins over a forward declaration's
+      e[it.o ? 5 : 4].push(i);
+    }
+  }
+  for (const e of t.values()) { e[4].sort((a, b) => a - b); e[5].sort((a, b) => a - b); }
+  return (_rows = {
+    v: v.map((x) => [x.arch, x.build, x.family, channel(x.family)]),
+    m,
+    t: [...t.values()].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[3] - b[3])),
+  });
+}

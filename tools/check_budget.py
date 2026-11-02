@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Fail the build if web/dist outgrows its budget (GitHub Pages caps a site at ~1 GB).
 
-Each build (two modules) adds ~9 MB / ~2.4k files: one shell per type plus only the
-panels whose layout changed. Pages documents no file-count limit; --max-files is a
+Each build (two modules) adds ~1 MB / ~100 files: pages for its new types plus the
+views that changed (one page per type covers every build). Pages documents no file-count limit; --max-files is a
 guard against runaway generation, not a hosting limit. Raise either deliberately.
 Usage: check_budget.py [web/dist] [--max-mb 600] [--max-files 150000]
 """

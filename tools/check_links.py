@@ -4,19 +4,25 @@
 Scans href/src attributes in all .html files, resolves them against the page
 (relative) or the site root (absolute), and reports targets that don't exist.
 Also checks that each type listing has the /ti/ sidebar index nav.js fetches, and
-that each type page's shared panel (data-frag, /f/<hash>.html) exists and its links
-resolve against that page, since struct.js injects it there.
+that each type page's pack (data-pack, /p/...json.gz) exists and every build's view in
+it links to existing pages, resolved against the type page (struct.js renders it there).
 Stdlib only. Exit 1 on any broken link.
 
 Usage: check_links.py [web/dist]
 """
+import gzip
+import json
 import os
 import re
 import sys
 from urllib.parse import unquote, urlsplit
 
-ATTR = re.compile(r'(?:href|src|data-frag)="([^"#?]*)')
-FRAG = re.compile(r'data-frag="([^"]*)"')
+ATTR = re.compile(r'(?:href|src|data-pack)="([^"#?]*)')
+PACK = re.compile(r'data-pack="([^"]*)"')
+
+
+def slug(s):
+    return re.sub(r"[^A-Za-z0-9_.-]", "_", s)  # = web/src/lib/types.mjs slug
 
 
 def main():
@@ -27,22 +33,29 @@ def main():
         for f in fs:
             files.add(os.path.relpath(os.path.join(d, f), root))
 
+    # On a case-insensitive disk (macOS) files differing only by case (a type page and
+    # its alias, lib/panel.mjs typePages) share one entry; there, match case-insensitively.
+    # CI (Linux) stays exact.
+    folded = {f.lower() for f in files} if os.path.exists(os.path.join(root, "INDEX.HTML")) else None
+    exists = lambda t: t in files or (folded is not None and t.lower() in folded)
+
     def read(rel):
         with open(os.path.join(root, rel), encoding="utf-8") as fh:
             return fh.read()
 
-    frags = {}  # fragment -> its link set, read once
     checked, broken = 0, []
-    for rel in sorted(f for f in files if f.endswith(".html") and not f.startswith("f/")):
+    for rel in sorted(f for f in files if f.endswith(".html")):
         base = os.path.dirname(rel)
         html = read(rel)
         urls = set(ATTR.findall(html))
-        for fr in FRAG.findall(html):
-            fr = fr.lstrip("/")
-            if fr in files:
-                if fr not in frags:
-                    frags[fr] = set(ATTR.findall(read(fr)))
-                urls |= frags[fr]
+        for pk in PACK.findall(html):
+            pk = pk.lstrip("/")
+            if pk in files:  # its views' links and used-in names, as rendered on this page
+                with gzip.open(os.path.join(root, pk), "rt", encoding="utf-8") as fh:
+                    p = json.load(fh)
+                for v in p["v"]:
+                    urls |= set(ATTR.findall(v))
+                urls |= {slug(n) + ".html" for u in p["u"] for n in u}
         for url in urls:
             if not url or urlsplit(url).scheme or url.startswith("//"):
                 continue  # external, mailto:, or a pure fragment
@@ -54,7 +67,7 @@ def main():
             if os.path.isdir(os.path.join(root, target)):
                 target = os.path.join(target, "index.html")
             checked += 1
-            if target not in files:
+            if not exists(target):
                 broken.append((rel, url))
 
     # nav.js fetches /ti/<arch>/<build>/<module>.json for every listing context

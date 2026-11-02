@@ -195,6 +195,8 @@ a.str-link:hover { color: yellow; }
 .ck-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.4rem 0.8rem; border-radius: 0.3rem; color: inherit; }
 .ck-item:hover { color: inherit; }
 .ck-item.sel { background: var(--bg); }
+.ck-fld { color: var(--mute); }
+.ck-fld b { color: inherit; }
 .ck-item .dot { margin-right: 0; }
 .ck-name { color: var(--mint); font-size: 1.8rem; font-weight: 700; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ck-name b { color: var(--brand); }
@@ -216,3 +218,6 @@ a.str-link:hover { color: yellow; }
 @media (min-width: 768px) { html { font-size: 8px; } }
 @media (min-width: 992px) { html { font-size: 9px; } }
 @media (min-width: 1200px) { html { font-size: 10px; } }
+
+/* the member a palette member-search hit points at */
+.sc-member.hit { background: rgba(255, 245, 197, 0.12); outline: 1px solid rgba(255, 245, 197, 0.45); }

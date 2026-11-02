@@ -2,55 +2,57 @@
 // Where am I + where can I go, in one row (replaces breadcrumbs, the type heading,
 // the old version bar and the sidebar header):
 //   [arch]  build ▾  /  module | module  /  Type        ← prev · n builds · next →
-// The build select keeps you on the same type when the target build defines it.
+// On a listing the build is the page's. On a type page (`page` from lib/panel.mjs) it
+// is the URL's #<build>: this renders the default build and nav.js re-syncs the select,
+// steps and module links when struct.js switches builds (vp:build).
 import { catalog, ctxPath } from "../lib/catalog.mjs";
-import { slug } from "../lib/types.mjs";
 import { modInfo } from "../lib/modules.mjs";
-const { arch, build, module, type } = Astro.props;
+import { typePath } from "../lib/panel.mjs";
+const { arch, build, module, type, page } = Astro.props;
 const cat = catalog();
 const fam = (b) => cat.get(arch, b, module)?.family || "";
-const typeHref = (b, m = module) => `${ctxPath(arch, b, m)}/${slug(type)}.html`;
 const listHref = (b, m = module) => `${ctxPath(arch, b, m)}.html`;
 const multiArch = cat.archs().length > 1;
 
 const mods = cat.modules(arch, build);
 const builds = cat.builds(arch, module);
-const tb = type ? cat.typeBuilds(arch, module, type) : [];
-const has = new Set(tb);
+// a type page's steps: the builds it appears in (defined or opaque)
+const tb = page ? builds.filter((_, i) => page.has[i] !== "-") : [];
 const i = tb.indexOf(build);
 const prev = i > 0 ? tb[i - 1] : null;
 const next = i >= 0 && i < tb.length - 1 ? tb[i + 1] : null;
+// other modules: their page for this type where they have one (any build)
+const inMod = (m) => page && catalog().docs.some((d) => d.arch === arch && d.module === m && (type in d.named || type in d.opaque));
 ---
 <div class="cbar">
   {multiArch && <span class="cb-arch">{arch}</span>}
   {/* Only the current build is rendered; nav.js fills the rest from /builds.json
       (one copy, not ~2 KB in every page). data-has has one char per build of
-      cat.builds(arch, module): d defined, o opaque, - absent. option value = build;
-      nav.js rebuilds the target URL (@ = build), falling back to the listing where
-      the type isn't defined */}
+      cat.builds(arch, module): d defined, o opaque, - absent. On a listing, picking a
+      build loads its listing (data-l, @ = build); on a type page it sets #<build>,
+      or loads that build's listing where the type is absent. */}
   <select class="cb-build" aria-label="Build" data-am={`${arch}/${module}`}
-    data-has={type ? builds.map((b) => !has.has(b) ? "-" : cat.get(arch, b, module).opaque[type] ? "o" : "d").join("") : undefined}
-    data-t={type ? `/v/${arch}/@/${module}/${slug(type)}.html` : undefined} data-l={`/v/${arch}/@/${module}.html`}>
-    <option value={build} selected>{fam(build)} — {build}{type && cat.get(arch, build, module).opaque[type] ? "  (opaque)" : ""}</option>
+    data-has={page ? page.has : undefined} data-tsel={page ? "1" : undefined} data-l={`/v/${arch}/@/${module}.html`}>
+    <option value={build} selected>{fam(build)} — {build}{page && page.has[builds.indexOf(build)] === "o" ? "  (opaque)" : ""}</option>
   </select>
   <span class="cb-sep">/</span>
   <span class="cb-mods">
     {mods.map((m) => {
       const label = modInfo(m).label;
       if (m === module) return <span class="cb-mod on">{label}</span>;
-      const od = cat.get(arch, build, m);
-      const inOther = type && od && (type in od.named || type in od.opaque);
-      return <a class="cb-mod" href={inOther ? typeHref(build, m) : listHref(build, m)}
-                title={inOther ? `${type} in ${label}` : label}>{label}</a>;
+      const other = inMod(m);
+      return <a class="cb-mod" href={other ? `${typePath(arch, m, type)}#${build}` : listHref(build, m)}
+                data-mod={m} data-tpage={other ? "1" : undefined}
+                title={other ? `${type} in ${label}` : label}>{label}</a>;
     })}
   </span>
   {type && <span class="cb-sep">/</span>}
   {type && <h1 class="cb-type">{type}</h1>}
-  {type && (
-    <span class="cb-step">
-      {prev ? <a href={typeHref(prev)} title={`${fam(prev)} ${prev}`}>← {prev}</a> : <span class="off">← first</span>}
+  {page && (
+    <span class="cb-step" data-step>
+      {prev ? <a href={`#${prev}`} title={`${fam(prev)} ${prev}`}>← {prev}</a> : <span class="off">← first</span>}
       <span class="n">{tb.length} build{tb.length === 1 ? "" : "s"}</span>
-      {next ? <a href={typeHref(next)} title={`${fam(next)} ${next}`}>{next} →</a> : <span class="off">latest →</span>}
+      {next ? <a href={`#${next}`} title={`${fam(next)} ${next}`}>{next} →</a> : <span class="off">latest →</span>}
     </span>
   )}
 </div>
