@@ -37,9 +37,10 @@ inventories stay in `$VP_IMAGES/research/` (not in the repo).
 - More checked builds with `"asserts"`: Oct 1991 CD, NT 3.1 / 3.5 / 3.51 checked
   kernels (archive.org). Expect tens of names each; a kernel's drivers' names belong to
   their own modules (not ntoskrnl), which the site doesn't have yet.
-- Higher-yield name source, still unused: SDK/DDK C headers (Dec 1991 `MSTOOLS/H`, the
-  1992-93 DDKs) name and *define* hundreds of types; they'd need a C declaration reader.
-  April 1991 has no headers on its disks.
+- Headers (`headers` entries) cover the October 1992, February 1993, 3.5, 3.51 and 4.0
+  DDKs. Not yet: the March 1993 DDK (CDAC-038600, bin/cue only), the NT 3.1 Win32 SDK
+  and April 1993 Alpha SDK (user-mode WINNT.H family: ntdll-side types), the Dec 1991 /
+  July 1992 SDK headers, the NT 4.0 Beta 2 DDK, and SDK headers for the ntdll module.
 
 ## Facts that cost time to find
 

@@ -28,6 +28,7 @@ const NT40 = "ntoskrnl-4.0.1381.1-x86.json";
 const OCT91 = "ntoskrnl-0.1991.10.0-x86.json";
 const NT351 = "ntoskrnl-3.51.1057.1-x86.json";
 const JUL92 = "ntdll-0.1992.7.0-mips.json";
+const FEB93 = "ntoskrnl-3.10.404.1-x86.json";
 // fixture file: <module>.<type>.txt for the 24H2 docs, <doc>.<type>.txt for any other
 const fixture = (file, name) =>
   `${[NTDLL, NTOS].includes(file) ? file.split("-")[0] : file.replace(/\.json$/, "")}.${name}.txt`;
@@ -55,6 +56,9 @@ const CASES = [
   [NT351, "_EPROCESS"],
   // recorded, not computed: MIPS USERSRV.DLL's inline CodeView 4, July 1992
   [JUL92, "_PEB"],
+  // computed from headers: build 404.1's DDK NTDDK.H compiled by clang (tools/legacy/headers.py)
+  [FEB93, "_IRP"],
+  [FEB93, "_DEVICE_OBJECT"],
 ];
 
 for (const [file, name] of CASES) {
@@ -183,4 +187,15 @@ test("attested names: April 1991 ASSERT text", async () => {
   assert.match(io, /Members it names: <b>Parameters\.Read\.ByteOffset<\/b>/);
   // KD.EXE (March 1991) defines the wait-state packet smaller than MIPSKD.EXE
   assert.deepEqual(doc.variants._DBGKD_WAIT_STATE_CHANGE.map((v) => v.note), ["MIPSKD.EXE", "KD.EXE"]);
+});
+
+// a lib doc enriched from its DDK's headers: recorded types keep their provenance, the
+// added ones say they're computed from the headers; header-opaque names are opaque
+test("headers merged into NT 4.0's recorded doc", () => {
+  const T = renderer(NT40);
+  assert.ok(!T.provTypes._EPROCESS);  // recorded (LIBCNTPR.LIB): the doc's own provenance
+  assert.match(T.provTypes._ZONE_HEADER?.note || "", /DDK headers .*clang/);
+  assert.equal(T.provTypes._ZONE_HEADER.kind, "computed");
+  const doc = loadDoc(path.join(DATA, FEB93));
+  for (const n of ["_EPROCESS", "_KTHREAD", "_PEB"]) assert.ok(n in doc.opaque, n);
 });

@@ -21,6 +21,8 @@ tools/build.py        manifest data/sources.json -> data/<module>-<build>-<arch>
   legacy/cv3.py       1991 debuggers' CodeView 3 -> computed natural 32-bit layouts
   legacy/hsfs.py, pcjs.py   High Sierra CD / PCjs disk JSON readers (fetch chain steps)
   legacy/strnames.py  type names a debug build's ASSERT text names (sizeof/cast/FIELD_OFFSET)
+  legacy/headers.py   a DDK's C headers -> computed layouts (clang + lld-link -> PDB); merge/check
+  legacy/hstub/       one-line stand-ins for the C runtime headers DDKs include but don't ship
   check_links.py, check_budget.py   post-build gates (CI runs both)
 web/src/lib/types.mjs    type graph + C declarators as segments ({t}, {t,kw}, {t,ref})
 web/src/lib/layout.mjs   pahole rows: anonymous union/struct reconstruction, enums, usedIn, layoutText
@@ -41,7 +43,8 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 ## Rules
 
 - **Portable, dependency-light.** The Python is stdlib only. External tools are
-  `llvm-pdbutil` (+ `llvm-undname` beside it), `wimlib-imagex` and `7z`, found via PATH
+  `llvm-pdbutil` (+ `llvm-undname` beside it), `wimlib-imagex` and `7z` (plus `clang` and
+  `lld-link`, for `headers` entries), found via PATH
   (or `$LLVM_PDBUTIL`).
   No hardcoded paths, no mounts, nothing macOS-specific.
 - **No personal paths in the repo.** The manifest roots images at `$VP_IMAGES`. History
@@ -84,6 +87,19 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   symbols, kept fully qualified, e.g. `AutoBoost::_AB_PRIORITY`). They live in
   `doc.opaque` ({name: kind}); in a build where a type is opaque its view is the
   declaration, "defined in" and used in. Dimmed in lists.
+- **Header layouts** (`"headers"`: a pinned set of a DDK's C headers, files fetched one by
+  one from the archive.org image, `sha256` over "<sha256>  <path>\n" per sorted file):
+  `tools/legacy/headers.py` preprocesses `ntddk.h` with the arch's macros, drops function
+  bodies (and any top-level declaration clang rejects, warning if a type definition goes
+  with it), compiles the rest as MSVC x86 with CodeView for every type, links a PDB and
+  converts it: provenance `computed`. MSVC x86 rules give MIPS/Alpha/PPC's layouts too
+  (checked: NT 4.0 libraries on all four arches, 404.1's MIPS binaries; every offset
+  exact). A header is the *public* view: private members can be missing, a private struct
+  may be declared only up to its public prefix (Alpha `_KPRCB`). So on a `lib` entry the
+  records win: headers only add the types they lack (`provenanceTypes`), and the build
+  fails if any header member sits elsewhere in the records. Alone, they are a build's doc
+  (3.10.340.1, 3.10.404.1, 3.50.807), marked incomplete. Clang predefines `i386`; non-x86
+  arches undefine it (1992 headers test it).
 - **Attested names** (`"asserts"` on a `lib` entry): a debug build keeps each ASSERT's
   source text, and `sizeof(X)`, `FIELD_OFFSET(X, …)` and a pointer cast `(PX)` name a
   type for certain. Names the build has no layout for join `doc.opaque`, evidence in
@@ -174,7 +190,7 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 ## Open (undecided)
 
-**Scale:** 64 builds over 7 arches ≈ 101 MB in ~24k files; a build adds ~1 MB (its new
+**Scale:** 69 builds over 7 arches ≈ 105 MB in ~25k files; a build adds ~1 MB (its new
 types' pages and changed views); a new arch is another /t/ tree (x86 added ~23 MB).
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
 more ARM64 builds · more canary builds (UUP sets) · home

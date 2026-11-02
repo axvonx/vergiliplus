@@ -1,0 +1,34 @@
+struct _DEVICE_OBJECT {
+    short Type;                                             /* 0x0  2 */
+    unsigned short Size;                                    /* 0x2  2 */
+    long ReferenceCount;                                    /* 0x4  4 */
+    struct _DRIVER_OBJECT* DriverObject;                    /* 0x8  4 */
+    struct _DEVICE_OBJECT* NextDevice;                      /* 0xc  4 */
+    struct _DEVICE_OBJECT* AttachedDevice;                  /* 0x10  4 */
+    struct _IRP* CurrentIrp;                                /* 0x14  4 */
+    struct _IO_TIMER* Timer;                                /* 0x18  4 */
+    unsigned long Flags;                                    /* 0x1c  4 */
+    unsigned long Characteristics;                          /* 0x20  4 */
+    struct _VPB* Vpb;                                       /* 0x24  4 */
+    void* DeviceExtension;                                  /* 0x28  4 */
+    unsigned long DeviceType;                               /* 0x2c  4 */
+    char StackSize;                                         /* 0x30  1 */
+    /* 3 bytes padding */
+    union {
+        struct _LIST_ENTRY ListEntry;                       /* 0x34  8 */
+        struct _WAIT_CONTEXT_BLOCK Wcb;                     /* 0x34  40 */
+    } Queue;                                                /* 0x34  40 */
+
+    /* --- cacheline 1 boundary (64 bytes) --- */
+    unsigned long AlignmentRequirement;                     /* 0x5c  4 */
+    struct _KDEVICE_QUEUE DeviceQueue;                      /* 0x60  20 */
+    struct _KDPC Dpc;                                       /* 0x74  32 */
+
+    /* --- cacheline 2 boundary (128 bytes) --- */
+    unsigned long ActiveThreadCount;                        /* 0x94  4 */
+    void* SecurityDescriptor;                               /* 0x98  4 */
+    struct _KEVENT DeviceLock;                              /* 0x9c  16 */
+    unsigned long Spare1;                                   /* 0xac  4 */
+    union _LARGE_INTEGER Spare2;                            /* 0xb0  8 */
+};
+/* computed: Windows NT 3.1 beta DDK headers (DDK/INC/NTDDK.H, NTDEF.H, ...) compiled with MSVC 32-bit layout rules (clang); build 404.1 per the DDK's version.h */

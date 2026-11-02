@@ -73,6 +73,16 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # (tools/legacy/strnames.py): names without a
                                                # layout here become opaque, with evidence
                                                # (doc.attested)
+                                               # "headers": {url, dirs, files, sha256, [top]}
+                                               # a DDK's C headers (archive.org serves each
+                                               # file of the image; sha256 pins the set:
+                                               # sha256 of "<sha256>  <path>\n" per sorted
+                                               # file), compiled by tools/legacy/headers.py.
+                                               # On a lib entry: types the records lack are
+                                               # added (provenanceTypes) after every header
+                                               # member is found where the records have it.
+                                               # Alone ({"headers", build, note, module,
+                                               # arch, family, ...}): the build's doc.
                                                # "build" is required (a sort key; buildLabel
                                                # is what shows when there is no real number);
                                                # "note" becomes the layouts' provenance line;
@@ -105,7 +115,7 @@ import urllib.request
 
 import pdb_to_json
 import pe_pdbid
-from legacy import cv3, cv4, hsfs, kdext, pcjs, strnames
+from legacy import cv3, cv4, headers, hsfs, kdext, pcjs, strnames
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -246,6 +256,43 @@ def fetch_pkg(entry, outdir, url_key="pkg"):
         shutil.copyfile(cur, out + ".part")
         os.replace(out + ".part", out)
     return out
+
+
+def fetch_headers(spec, outdir):
+    """A pinned header set -> its include dirs (local, file names lower-cased: the
+    sources #include them so), in spec order. Cached under outdir by the set's sha256."""
+    root = os.path.join(outdir, "hdr-" + spec["sha256"][:16])
+    dirs = [os.path.join(root, "%d" % i) for i in range(len(spec["dirs"]))]
+    if os.path.exists(root + ".ok"):
+        return dirs
+    shutil.rmtree(root, ignore_errors=True)
+    for d in dirs:
+        os.makedirs(d)
+    h = hashlib.sha256()
+    for path in sorted(spec["files"]):
+        local = os.path.join(dirs[spec["dirs"].index(os.path.dirname(path))],
+                             os.path.basename(path).lower())
+        download(spec["url"] + "/" + urllib.parse.quote(path), local)
+        with open(local, "rb") as f:
+            h.update(("%s  %s\n" % (hashlib.sha256(f.read()).hexdigest(), path)).encode())
+    if h.hexdigest() != spec["sha256"]:
+        raise RuntimeError("sha256 mismatch for the header set at %s: %s" % (spec["url"], h.hexdigest()))
+    open(root + ".ok", "w").close()
+    return dirs
+
+
+def merge_headers(doc, spec, pdbdir):
+    """Add the types a lib doc's records lack from its DDK's headers (see headers.merge),
+    failing if any member the headers give sits elsewhere in the records."""
+    hdr = headers.convert(fetch_headers(spec, pdbdir), doc["arch"], doc["module"], doc["build"],
+                          top=spec.get("top", "ntddk.h"))
+    bad = headers.check(doc, hdr)
+    if bad:
+        raise RuntimeError("headers disagree with the records on %s" % ", ".join(
+            "%s.%s" % (n, x[0]) for n, x in bad))
+    shared = len(set(doc["named"]) & set(hdr["named"]))
+    added = headers.merge(doc, hdr, spec["note"])
+    print("  headers: %d shared types agree; %d added" % (shared, len(added)), file=sys.stderr)
 
 
 def source_label(entry):
@@ -412,6 +459,18 @@ def handle(entry, base, pdbdir):
         emit(fetch_pkg(entry, pdbdir), entry["module"], entry.get("build") or fv, fv)
         return produced
 
+    if "headers" in entry and "lib" not in entry:
+        spec = entry["headers"]
+        doc = headers.convert(fetch_headers(spec, pdbdir), arch, entry["module"], entry["build"],
+                              family, entry["note"], top=spec.get("top", "ntddk.h"))
+        for k in ("buildLabel", "incomplete"):
+            if entry.get(k):
+                doc[k] = entry[k]
+        out = json_name(entry["module"], entry["build"], arch)
+        pdb_to_json.write(doc, out)
+        produced.append(out)
+        return produced
+
     if "lib" in entry:
         build, src = entry["build"], fetch_pkg(entry, pdbdir, "lib")
         more = [fetch_pkg(dict(x, member=x.get("member", [])), pdbdir, "lib")
@@ -458,6 +517,8 @@ def handle(entry, base, pdbdir):
                 raise RuntimeError("%s disagrees with %s on %s" % (
                     entry["lib"], entry["kdext"]["url"], ", ".join(b[0] for b in bad) or "everything"))
             print("  kdext: %d/%d _EPROCESS/_ETHREAD offsets agree" % (ok, n), file=sys.stderr)
+        if entry.get("headers"):
+            merge_headers(doc, entry["headers"], pdbdir)
         if entry.get("asserts"):
             attest(doc, strnames.names([fetch_pkg(dict(x, member=x.get("member", [])), pdbdir, "lib")
                                         for x in entry["asserts"]],
