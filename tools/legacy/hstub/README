@@ -1,0 +1,6 @@
+C runtime / SDK headers the NT DDKs include but don't ship, reduced to what their
+#includes need for types to compile (tools/legacy/headers.py). Not Microsoft's text.
+  ctype.h, string.h: wchar_t / size_t       stddef.h, stdarg.h: empty
+  excpt.h: EXCEPTION_DISPOSITION as int (an enum of int size in the real header)
+  pshpackN.h / poppack.h: #pragma pack(push,N) / (pop), their whole effect
+  alphaops.h: empty (Alpha instruction encodings; no kernel type uses it)

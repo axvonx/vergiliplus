@@ -213,6 +213,7 @@ a.str-link:hover { color: yellow; }
 .kind-btn[data-k="opaque"] { color: var(--mute); }
 .opaque-note { color: var(--mute); font-size: 1.6rem; margin: 1.2rem 0 0.4rem; }
 .opaque-note b { color: var(--mint); }
+.opaque-note code.att { display: block; margin: 0.6rem 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--fg); }
 .defined-in { font-size: 1.6rem; color: var(--mute); }
 .defined-in a { display: inline-block; margin: 0 1rem 0 0.4rem; color: var(--gold); font-family: var(--mono); }
 
@@ -223,13 +224,6 @@ a.str-link:hover { color: yellow; }
   font-family: var(--mono); text-transform: lowercase; white-space: nowrap; }
 .inc-note { color: var(--mute); font-size: 1.6rem; margin: 0 0 1rem; }
 option.inc { color: var(--red); }
-/* ---- reverse-engineered layouts ---- */
-.inf { color: var(--kw); border: 1px solid var(--kw); border-radius: 3px; padding: 0 0.5rem; font-size: 1.3rem;
-  font-family: var(--mono); white-space: nowrap; }
-.inf-note { color: var(--mute); font-size: 1.6rem; margin: 0 0 1rem; }
-.inf-note b { color: var(--fg); }
-.sc-unk .sc-code { color: var(--orange); }
-.sc.meta-off .sc-unk { display: flex; }  /* an inferred struct's gaps show either way */
 /* ---- several definitions of one type in a build's sources ---- */
 .var { color: var(--orange); border: 1px solid var(--orange); border-radius: 3px; padding: 0 0.5rem; font-size: 1.3rem;
   font-family: var(--mono); white-space: nowrap; }

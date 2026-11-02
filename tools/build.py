@@ -63,16 +63,26 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # definition sources disagree on (labelled).
                                                # A "lib" may also be a PE image carrying its
                                                # CodeView 4 inline (MIPS 1992-93 binaries).
-
-  {"inferred": "inferred/ntoskrnl-3.10.511.1-x86.json"}
-                                               # reverse-engineered layouts: a spec under data/
-                                               # (members, evidence, size, confidence, basis;
-                                               # tools/legacy/inferred.py), no fetch
                                                # "supplement": {lib, sha256, [member], machine,
                                                # match: [names], take: [names], note} adds
                                                # "take" (+ what it reaches) from the one object
                                                # whose "match" structs agree with the doc's
                                                # (per-type provenance: its note)
+                                               # "asserts": [{lib, sha256, [member]}] debug
+                                               # builds whose ASSERT text names types
+                                               # (tools/legacy/strnames.py): names without a
+                                               # layout here become opaque, with evidence
+                                               # (doc.attested)
+                                               # "headers": {url, dirs, files, sha256, [top]}
+                                               # a DDK's C headers (archive.org serves each
+                                               # file of the image; sha256 pins the set:
+                                               # sha256 of "<sha256>  <path>\n" per sorted
+                                               # file), compiled by tools/legacy/headers.py.
+                                               # On a lib entry: types the records lack are
+                                               # added (provenanceTypes) after every header
+                                               # member is found where the records have it.
+                                               # Alone ({"headers", build, note, module,
+                                               # arch, family, ...}): the build's doc.
                                                # "build" is required (a sort key; buildLabel
                                                # is what shows when there is no real number);
                                                # "note" becomes the layouts' provenance line;
@@ -105,7 +115,7 @@ import urllib.request
 
 import pdb_to_json
 import pe_pdbid
-from legacy import cv3, cv4, hsfs, inferred, kdext, pcjs
+from legacy import cv3, cv4, headers, hsfs, kdext, pcjs, strnames
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -248,6 +258,43 @@ def fetch_pkg(entry, outdir, url_key="pkg"):
     return out
 
 
+def fetch_headers(spec, outdir):
+    """A pinned header set -> its include dirs (local, file names lower-cased: the
+    sources #include them so), in spec order. Cached under outdir by the set's sha256."""
+    root = os.path.join(outdir, "hdr-" + spec["sha256"][:16])
+    dirs = [os.path.join(root, "%d" % i) for i in range(len(spec["dirs"]))]
+    if os.path.exists(root + ".ok"):
+        return dirs
+    shutil.rmtree(root, ignore_errors=True)
+    for d in dirs:
+        os.makedirs(d)
+    h = hashlib.sha256()
+    for path in sorted(spec["files"]):
+        local = os.path.join(dirs[spec["dirs"].index(os.path.dirname(path))],
+                             os.path.basename(path).lower())
+        download(spec["url"] + "/" + urllib.parse.quote(path), local)
+        with open(local, "rb") as f:
+            h.update(("%s  %s\n" % (hashlib.sha256(f.read()).hexdigest(), path)).encode())
+    if h.hexdigest() != spec["sha256"]:
+        raise RuntimeError("sha256 mismatch for the header set at %s: %s" % (spec["url"], h.hexdigest()))
+    open(root + ".ok", "w").close()
+    return dirs
+
+
+def merge_headers(doc, spec, pdbdir):
+    """Add the types a lib doc's records lack from its DDK's headers (see headers.merge),
+    failing if any member the headers give sits elsewhere in the records."""
+    hdr = headers.convert(fetch_headers(spec, pdbdir), doc["arch"], doc["module"], doc["build"],
+                          top=spec.get("top", "ntddk.h"))
+    bad = headers.check(doc, hdr)
+    if bad:
+        raise RuntimeError("headers disagree with the records on %s" % ", ".join(
+            "%s.%s" % (n, x[0]) for n, x in bad))
+    shared = len(set(doc["named"]) & set(hdr["named"]))
+    added = headers.merge(doc, hdr, spec["note"])
+    print("  headers: %d shared types agree; %d added" % (shared, len(added)), file=sys.stderr)
+
+
 def source_label(entry):
     """A short name for a "lib" source: its last member, else the URL path's last two
     parts ("MIPS/CDPLAYER.EXE")."""
@@ -257,6 +304,42 @@ def source_label(entry):
     if m:
         return next(iter(m[-1].values()))
     return "/".join(urllib.parse.unquote(entry["lib"]).split("/")[-2:])
+
+
+def known_types(skip):
+    """{name: kind} of every type some other committed doc (any build, arch, module, not
+    the file `skip`) defines or declares: what an attested typedef name is, where a
+    recorded build says."""
+    out = {}
+    for path in sorted(glob.glob(os.path.join(DATA, "*-*.json"))):
+        if os.path.abspath(path) == os.path.abspath(skip):
+            continue
+        with open(path) as f:
+            d = json.load(f)
+        for n, k in d.get("opaque", {}).items():
+            if n not in d.get("attested", {}):  # only what type records say, never ASSERT text
+                out.setdefault(n, k)
+        for n, i in d["named"].items():
+            out[n] = d["types"][i]["kind"]
+    return out
+
+
+def attest(doc, names):
+    """Add the names a debug build's ASSERT text attests (strnames.names) to doc.opaque,
+    each under its page name: _X where a recorded build has the struct tag _X (NT's
+    typedef struct _X {...} X convention), else X as written. Kind: the recorded build's,
+    else "type" (unknown). Names doc already lays out are skipped."""
+    known, att = known_types(json_name(doc["module"], doc["build"], doc["arch"])), {}
+    for x, ev in names.items():
+        page = "_" + x if "_" + x in known else x
+        if page in doc["named"] or page in doc["opaque"]:
+            continue
+        doc["opaque"][page] = known.get(page, "type")
+        att[page] = dict(ev, **{"as": x})
+    doc["opaque"] = dict(sorted(doc["opaque"].items()))
+    doc["attested"] = att
+    print("  asserts: %d names (%d with a later layout)"
+          % (len(att), sum(1 for n in att if n in known)), file=sys.stderr)
 
 
 def json_name(module, build, arch):
@@ -348,7 +431,7 @@ def image_build(im, kernel_version):
 
 
 def handle(entry, base, pdbdir):
-    arch = entry.get("arch")  # inferred entries carry it in their spec
+    arch = entry["arch"]
     family = entry.get("family", "")
     produced = []
 
@@ -376,10 +459,14 @@ def handle(entry, base, pdbdir):
         emit(fetch_pkg(entry, pdbdir), entry["module"], entry.get("build") or fv, fv)
         return produced
 
-    if "inferred" in entry:
-        with open(os.path.join(DATA, entry["inferred"])) as f:
-            doc = inferred.convert(json.load(f))
-        out = json_name(doc["module"], doc["build"], doc["arch"])
+    if "headers" in entry and "lib" not in entry:
+        spec = entry["headers"]
+        doc = headers.convert(fetch_headers(spec, pdbdir), arch, entry["module"], entry["build"],
+                              family, entry["note"], top=spec.get("top", "ntddk.h"))
+        for k in ("buildLabel", "incomplete"):
+            if entry.get(k):
+                doc[k] = entry[k]
+        out = json_name(entry["module"], entry["build"], arch)
         pdb_to_json.write(doc, out)
         produced.append(out)
         return produced
@@ -389,7 +476,8 @@ def handle(entry, base, pdbdir):
         more = [fetch_pkg(dict(x, member=x.get("member", [])), pdbdir, "lib")
                 for x in entry.get("also", [])]
         if entry.get("format") == "cv3":
-            doc = cv3.convert(src, entry["module"], arch, build, family, entry["note"])
+            doc = cv3.convert([src] + more, entry["module"], arch, build, family, entry["note"],
+                              labels=[source_label(x) for x in [entry] + entry.get("also", [])])
         elif entry.get("format") == "kdext":
             doc = kdext.convert(src, entry["module"], arch, build, family, entry["note"])
         else:
@@ -429,6 +517,12 @@ def handle(entry, base, pdbdir):
                 raise RuntimeError("%s disagrees with %s on %s" % (
                     entry["lib"], entry["kdext"]["url"], ", ".join(b[0] for b in bad) or "everything"))
             print("  kdext: %d/%d _EPROCESS/_ETHREAD offsets agree" % (ok, n), file=sys.stderr)
+        if entry.get("headers"):
+            merge_headers(doc, entry["headers"], pdbdir)
+        if entry.get("asserts"):
+            attest(doc, strnames.names([fetch_pkg(dict(x, member=x.get("member", [])), pdbdir, "lib")
+                                        for x in entry["asserts"]],
+                                       [source_label(x) for x in entry["asserts"]]))
         for k in ("buildLabel", "incomplete"):
             if entry.get(k):
                 doc[k] = entry[k]

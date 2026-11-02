@@ -1,0 +1,46 @@
+struct _IRP {
+    short Type;                                             /* 0x0  2 */
+    unsigned short Size;                                    /* 0x2  2 */
+    struct _MDL* MdlAddress;                                /* 0x4  4 */
+    unsigned long Flags;                                    /* 0x8  4 */
+    union {
+        struct _IRP* MasterIrp;                             /* 0xc  4 */
+        long IrpCount;                                      /* 0xc  4 */
+        void* SystemBuffer;                                 /* 0xc  4 */
+    } AssociatedIrp;                                        /* 0xc  4 */
+    struct _LIST_ENTRY ThreadListEntry;                     /* 0x10  8 */
+    struct _IO_STATUS_BLOCK IoStatus;                       /* 0x18  8 */
+    char RequestorMode;                                     /* 0x20  1 */
+    char PendingReturned;                                   /* 0x21  1 */
+    char StackCount;                                        /* 0x22  1 */
+    char CurrentLocation;                                   /* 0x23  1 */
+    char Cancel;                                            /* 0x24  1 */
+    char CancelIrql;                                        /* 0x25  1 */
+    char ApcEnvironment;                                    /* 0x26  1 */
+    char Zoned;                                             /* 0x27  1 */
+    struct _IO_STATUS_BLOCK* UserIosb;                      /* 0x28  4 */
+    struct _KEVENT* UserEvent;                              /* 0x2c  4 */
+    union {
+        struct {
+            void (*UserApcRoutine)(void*, struct _IO_STATUS_BLOCK*, unsigned long);  /* 0x30  4 */
+            void* UserApcContext;                           /* 0x34  4 */
+        } AsynchronousParameters;                           /* 0x30  8 */
+        union _LARGE_INTEGER AllocationSize;                /* 0x30  8 */
+    } Overlay;                                              /* 0x30  8 */
+    void (*CancelRoutine)(struct _DEVICE_OBJECT*, struct _IRP*);  /* 0x38  4 */
+    void* UserBuffer;                                       /* 0x3c  4 */
+
+    /* --- cacheline 1 boundary (64 bytes) --- */
+    union {
+        struct {
+            struct _KDEVICE_QUEUE_ENTRY DeviceQueueEntry;   /* 0x40  16 */
+            struct _ETHREAD* Thread;                        /* 0x50  4 */
+            char* AuxiliaryBuffer;                          /* 0x54  4 */
+            struct _LIST_ENTRY ListEntry;                   /* 0x58  8 */
+            struct _IO_STACK_LOCATION* CurrentStackLocation;  /* 0x60  4 */
+            struct _FILE_OBJECT* OriginalFileObject;        /* 0x64  4 */
+        } Overlay;                                          /* 0x40  40 */
+        struct _KAPC Apc;                                   /* 0x40  48 */
+    } Tail;                                                 /* 0x40  48 */
+};
+/* computed: Windows NT 3.1 beta DDK headers (DDK/INC/NTDDK.H, NTDEF.H, ...) compiled with MSVC 32-bit layout rules (clang); build 404.1 per the DDK's version.h */

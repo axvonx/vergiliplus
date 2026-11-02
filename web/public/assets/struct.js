@@ -17,7 +17,7 @@
     const meta = !sc.classList.contains("meta-off");
     const out = [];
     for (const l of sc.querySelectorAll(".sc-line, .sc-member")) {
-      if (!meta && l.matches(".sc-hole:not(.sc-unk), .sc-cache")) continue;
+      if (!meta && l.matches(".sc-hole, .sc-cache")) continue;
       const code = l.querySelector(".sc-code")?.textContent ?? "";
       const ann = meta && l.querySelector(".sc-ann")?.textContent;
       if (l.matches(".sc-cache")) out.push("");
