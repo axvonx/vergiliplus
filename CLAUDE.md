@@ -29,7 +29,8 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 ## Rules
 
 - **Portable, dependency-light.** The Python is stdlib only. External tools are
-  `llvm-pdbutil`, `wimlib-imagex` and `7z`, found via PATH (or `$LLVM_PDBUTIL`).
+  `llvm-pdbutil` (+ `llvm-undname` beside it), `wimlib-imagex` and `7z`, found via PATH
+  (or `$LLVM_PDBUTIL`).
   No hardcoded paths, no mounts, nothing macOS-specific.
 - **No personal paths in the repo.** The manifest roots images at `$VP_IMAGES`. History
   was scrubbed once before the first push; keep it that way.
@@ -43,9 +44,10 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   a mismatching revision gets re-pinned by probing older ones. Pin both modules of a
   build to the same revision.
 - **Opaque types**: names a PDB declares or mentions but never defines (forward
-  declarations, plus struct/union/enum names demangled from public symbols, e.g. the
-  canary `_AB_*` family). They live in `doc.opaque` ({name: kind}) and get a small page
-  (declaration, "defined in", used in), dimmed in lists.
+  declarations, plus struct/union/enum names that `llvm-undname` finds in public
+  symbols, kept fully qualified, e.g. `AutoBoost::_AB_PRIORITY`). They live in
+  `doc.opaque` ({name: kind}) and get a small page (declaration, "defined in", used
+  in), dimmed in lists.
 - **`data/*.json` is the committed artifact**: compact, and pruned to types reachable
   from the documented ones. Never commit PDBs, PEs or `web/dist/`.
 - **Text first, HTML at the edge.** layout/types produce segments; only

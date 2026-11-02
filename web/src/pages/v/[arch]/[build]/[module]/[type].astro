@@ -2,7 +2,7 @@
 import Layout from "../../../../../layouts/Layout.astro";
 import StructCode from "../../../../../components/StructCode.astro";
 import ContextBar from "../../../../../components/ContextBar.astro";
-import { catalog, typesFor, usedInFor, typeList, ctxPath } from "../../../../../lib/catalog.mjs";
+import { catalog, cmpBuild, typesFor, usedInFor, typeList, ctxPath } from "../../../../../lib/catalog.mjs";
 import { slug } from "../../../../../lib/types.mjs";
 import { structLayout, enumLayout as enumOf } from "../../../../../lib/layout.mjs";
 
@@ -33,7 +33,7 @@ if (opaque) {
   definedIn = cat.docs
     .filter((d) => d.arch === arch && name in d.named)
     .map((d) => ({ d, here: d.build === build }))
-    .sort((x, y) => (y.here - x.here) || (x.d.build < y.d.build ? 1 : -1));
+    .sort((x, y) => (y.here - x.here) || cmpBuild(y.d.build, x.d.build) || (x.d.module < y.d.module ? -1 : 1));
 } else {
   layout = structLayout(T, name);
   enumLayout = layout ? null : enumOf(T, name);

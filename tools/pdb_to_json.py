@@ -48,32 +48,78 @@ def find_pdbutil(pdbutil):
              "`apt install llvm`, or https://releases.llvm.org) or set $LLVM_PDBUTIL.")
 
 
+def run_tool(argv, stdin=None, check=True):
+    out = subprocess.run(argv, input=stdin, capture_output=True, text=True)
+    if (out.returncode != 0 if check else not out.stdout):
+        sys.exit(os.path.basename(argv[0]) + " failed:\n" + out.stderr)
+    return out.stdout
+
+
 def run_pdbutil(pdb, pdbutil):
+    return run_tool([find_pdbutil(pdbutil), "dump", "-types", pdb]).splitlines()
+
+
+def find_undname(pdbutil):
+    """llvm-undname ships with llvm-pdbutil: look beside it first, then PATH."""
     exe = find_pdbutil(pdbutil)
-    out = subprocess.run([exe, "dump", "-types", pdb],
-                         capture_output=True, text=True)
-    if out.returncode != 0:
-        sys.exit("llvm-pdbutil failed:\n" + out.stderr)
-    return out.stdout.splitlines()
+    beside = os.path.join(os.path.dirname(shutil.which(exe) or exe), "llvm-undname")
+    found = shutil.which(beside) or shutil.which("llvm-undname")
+    if not found:
+        sys.exit("llvm-undname not found (it ships with LLVM, next to llvm-pdbutil).")
+    return found
 
 
-# A type named inside an MSVC-mangled public symbol: [P|Q|R|S][E][A|B]? then
-# T(union) U(struct) V(class) W4(enum), the name, then its scope up to "@@"
-MANGLED_TYPE = re.compile(r"(?<![A-Za-z0-9_])(?:[PQRS]E?[AB])?([TUV]|W4)([A-Za-z_][A-Za-z0-9_]*)@((?:[0-9]|[A-Za-z_][A-Za-z0-9_]*@)*)@")
-MANGLED_KIND = {"T": "union", "U": "struct", "V": "struct", "W4": "enum"}
+# A type named in a demangled signature: its tag keyword, then a qualified name
+# whose template arguments may nest (`struct ST_STORE<struct SM_TRAITS>::_ST_DATA_MGR`)
+DEMANGLED_TAG = re.compile(r"\b(struct|union|enum|class) (?=[A-Za-z_])")
+TAG_KIND = {"union": "union", "struct": "struct", "class": "struct", "enum": "enum"}
+IDENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+
+
+def qualified_name(s, i):
+    """The qualified name starting at s[i], as the PDB spells it (no tag keywords
+    inside template arguments), or None if it involves an unnamed scope."""
+    out = []
+    while True:
+        m = IDENT.match(s, i)
+        if not m:
+            return None
+        out.append(m.group())
+        i = m.end()
+        if s.startswith("<", i):
+            depth, j = 0, i
+            while j < len(s):
+                depth += {"<": 1, ">": -1}.get(s[j], 0)
+                j += 1
+                if depth == 0:
+                    break
+            if depth:
+                return None
+            out.append(DEMANGLED_TAG.sub("", s[i:j]))
+            i = j
+        if not s.startswith("::", i):
+            return "".join(out)
+        out.append("::")
+        i += 2
 
 
 def mangled_type_names(pdb, pdbutil):
     """Aggregate names that appear only inside mangled C++ public symbols. Newer
     internals (e.g. the canary AutoBoost _AB_* family) have no type records in the
     public PDB at all, so their signatures are the only place the names exist."""
-    out = subprocess.run([find_pdbutil(pdbutil), "dump", "-publics", pdb],
-                         capture_output=True, text=True).stdout
+    out = run_tool([find_pdbutil(pdbutil), "dump", "-publics", pdb])
+    syms = re.findall(r"`(\?[^`]+)`", out)
+    if not syms:
+        return {}
+    # exits 1 if any one symbol fails to demangle, but still demangles the rest
+    demangled = run_tool([find_undname(pdbutil)], stdin="\n".join(syms) + "\n", check=False)
     names = {}
-    for sym in re.findall(r"`(\?[^`]+)`", out):
-        for tag, name, _scope in MANGLED_TYPE.findall(sym):
-            if name.startswith("_") or name[:1].isupper():
-                names.setdefault(name, MANGLED_KIND[tag])
+    for line in demangled.splitlines():
+        for m in DEMANGLED_TAG.finditer(line):
+            name = qualified_name(line, m.end())
+            last = name and re.sub(r"<.*>", "", name).rsplit("::", 1)[-1]
+            if last and (last.startswith("_") or last[:1].isupper()):
+                names.setdefault(name, TAG_KIND[m.group(1)])
     return names
 
 

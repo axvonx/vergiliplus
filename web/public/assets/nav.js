@@ -102,14 +102,19 @@
   // Index (/search-index.json): v = [[arch, build, family, channel]] newest first,
   // m = [module], t = [[name, kind, slug, module#, [defined in v#], [opaque in v#]]].
   // One row per type x module; a presence strip shows every selected version.
-  const ck = { open: false, ix: null, hits: [], sel: 0, here: null };
+  const ck = { open: false, ix: null, loading: null, err: false, hits: [], sel: 0, here: null };
   // filters, remembered: kind, modules switched off, versions switched off, opaque shown
   const F = (() => { try { return JSON.parse(store("vp-ck")) || {}; } catch (e) { return {}; } })();
   F.kind ||= "all"; F.mOff ||= []; F.vOff ||= []; F.op ??= true;
   const saveF = () => store("vp-ck", JSON.stringify(F));
   const el = () => document.getElementById("vp-ck");
   const short = (fam) => fam.replace(/^Windows /, "");
-  const vOn = (i) => !F.vOff.includes(ck.ix.v[i][0] + "/" + ck.ix.v[i][1]);
+  // per-version on/off, recomputed only when F.vOff is replaced (it is never mutated)
+  let onFor = null, on = [];
+  const vOn = (i) => {
+    if (onFor !== F.vOff) { onFor = F.vOff; const off = new Set(F.vOff); on = ck.ix.v.map((v) => !off.has(v[0] + "/" + v[1])); }
+    return on[i];
+  };
   const typeHref = (t, vi) => { const v = ck.ix.v[vi]; return `/v/${v[0]}/${v[1]}/${ck.ix.m[t[3]]}/${t[2]}.html`; };
 
   // where a row goes: this page's build if the type is there, else the newest selected
@@ -141,7 +146,7 @@
     root.hidden = !ck.open;
     if (!ck.open) return;
     const ix = ck.ix, list = root.querySelector(".ck-list");
-    if (!ix) { list.innerHTML = `<div class="ck-empty">Loading index…</div>`; return; }
+    if (!ix) { list.innerHTML = `<div class="ck-empty">${ck.err ? "Couldn't load the search index" : "Loading index…"}</div>`; return; }
     const raw = root.querySelector(".ck-input").value.toLowerCase().trim();
     const terms = raw.split(/\s+/).filter(Boolean);
     if (!terms.length) {
@@ -199,16 +204,22 @@
       ck.here = m && { a: m[1], b: m[2], m: m[3] };
       ck.sel = 0;
       root.querySelector(".ck-input").value = "";
-      if (!ck.ix) fetch("/search-index.json").then((r) => r.json())
-        .then((x) => { ck.ix = x; renderFilters(); ckRender(); }).catch(() => {});
-      else renderFilters();
+      if (!ck.ix && !ck.loading) {
+        ck.err = false;
+        ck.loading = fetch("/search-index.json").then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then((x) => { ck.ix = x; renderFilters(); })
+          .catch(() => { ck.err = true; })
+          .finally(() => { ck.loading = null; ckRender(); });
+      } else if (ck.ix) renderFilters();
       setTimeout(() => root.querySelector(".ck-input").focus(), 0);
     }
     ckRender();
   };
   document.addEventListener("keydown", (e) => {
-    const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName);
-    if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") || (e.key === "/" && !typing && !ck.open)) {
+    const a = document.activeElement;
+    const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(a?.tagName) || a?.isContentEditable;
+    const slash = e.key === "/" && !typing && !ck.open && !e.metaKey && !e.ctrlKey && !e.altKey;
+    if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") || slash) {
       e.preventDefault(); ckOpen(!ck.open); return;
     }
     if (!ck.open) return;
@@ -237,7 +248,12 @@
       return;
     }
     const go = t.closest("[data-go]");
-    if (go) { e.preventDefault(); location.href = go.dataset.go; return; }
+    if (go) {
+      e.preventDefault();
+      if (e.metaKey || e.ctrlKey || e.shiftKey) window.open(go.dataset.go, "_blank");
+      else location.href = go.dataset.go;
+      return;
+    }
     const menu = el().querySelector(".ck-vmenu");
     if (t.closest("[data-ck-vers]")) { menu.hidden = !menu.hidden; return; }
     if (menu && !menu.hidden && !t.closest(".ck-vmenu")) menu.hidden = true;
