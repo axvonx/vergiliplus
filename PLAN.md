@@ -34,7 +34,7 @@ inventories stay in `$VP_IMAGES/research/` (not in the repo).
 
 ## Names without layouts (attested), next steps
 
-- Done: checked kernels' ASSERT names for 3.1 (511), 3.5, 3.51, 4.0 on every arch; SDK
+- Done: checked kernels' ASSERT names for Oct 1991, 3.1 (511), 3.5, 3.51, 4.0 on every arch; SDK
   WINNT.H for ntdll Dec 1991 → 4.0; NT 3.1 kernel from the July 1994 MSDN DDK headers.
 - Not yet: NT 3.1 Alpha (July 1994 disc 2 `ALPHA/NTOSKRNL.EXE`, checked, FileVersion
   3.10.520.1: no Alpha 3.1 doc to attach to); 3.5 build 800 (April 1995 disc 5's MIPS
