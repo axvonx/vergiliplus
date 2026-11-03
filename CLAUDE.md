@@ -120,8 +120,11 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   `_KPRCB`). So on a `lib` entry the records win: headers only add the types they lack
   (`provenanceTypes`), and the build fails if a header member the records also have sits
   elsewhere in them (by name: 1993 CodeView drops anonymous aggregates, so 404.1's
-  `_LARGE_INTEGER` records only `QuadPart`). Alone, they are a build's doc
-  (3.10.340.1, 3.10.404.1, 3.50.807.1), marked `partial`. Clang predefines `i386`; non-x86
+  `_LARGE_INTEGER` records only `QuadPart`). With `"names"`, a type the records give only
+  because a listed one reaches it yields to the headers where they have members it lacks
+  (404.1 MIPS ntoskrnl takes `_KPCR`, `_PEB`, the ACEs from CDPLAYER/DISKPERF; `_PEB`
+  reaches `_LARGE_INTEGER`, which stays the header's). Alone, they are a build's doc
+  (3.10.340.1, 3.10.404.1 x86, 3.50.807.1), marked `partial`. Clang predefines `i386`; non-x86
   arches undefine it (1992 headers test it).
 - **Attested names** (`"asserts"` on a `lib` entry): a debug build keeps each ASSERT's
   source text, and `sizeof(X)`, `FIELD_OFFSET(X, …)` and a pointer cast `(PX)` name a
@@ -191,7 +194,11 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   [t#]]]}`, ~730 KB, enum values too) loads only when the palette's "members" filter is on.
   Filters (kind, PDB, opaque, members, versions) persist in localStorage `vp-ck`; the
   palette opens with `/` or ⌘K.
-- PDBs cache in `$TMPDIR/vergiliplus-pdbs`, keyed by GUID+age.
+- PDBs cache in `$TMPDIR/vergiliplus-pdbs`, keyed by GUID+age. A doc's `pdb.age` is the
+  DBI stream's (= the PE's RSDS age, msdl's key); pdbutil's summary prints the PDB
+  stream's, which can run several ahead.
+- Every primitive the data uses needs an entry in types.mjs `BASE_SIZES` (`unsigned` is
+  T_UINT4): an unknown one throws rather than sizing 0 and mis-laying its struct.
 - Changes/History (diff.js) read the view HTML itself: a member's key is its `.sc-field`
   path through named groups (an enum value's name), so the views carry no extra markup.
   Keep `.sc-field`, `.sc-ann` (`/* 0x18:3  4 */`) and the stats' `size <b>N` parseable;
@@ -207,7 +214,10 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 - CodeView 4 objects each restart type indices at 0x1000: `cv4.py` merges by name (the
   definition most objects agree on; the C runtime's own `_EXCEPTION_RECORD` disagrees and
   is reported, not mixed in) and hash-conses the rest. `__unnamed` → `<unnamed-tag>`.
-  16-bit `LF_INDEX` is 0x0405 (0x0404 is `LF_FRIENDFCN`).
+  16-bit `LF_INDEX` is 0x0405 (0x0404 is `LF_FRIENDFCN`). 1992-93 MIPS NB08 gives a
+  bitfield's byte, not its unit (`_HARDWARE_PTE.Write` at 3:6): `Merger.member` moves it
+  to the unit's offset (0:30). Enumerators are read as the enum's underlying type (clang
+  and old CodeView store `-1` in an `int` enum as 4294967295; `signed_enumerators`).
 - Before NT 4.0 no Microsoft-published file found defines `_KTHREAD`/`_EPROCESS`
   (scanned: 1991-93 pre-release CDs and SDK/DDKs, NT 3.1 retail .dbg/kernels, 3.5/3.51
   DDKs). 1991 debuggers carry only what they decode; MIPS 1992-93 binaries carry NB08
