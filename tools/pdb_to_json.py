@@ -178,14 +178,38 @@ def mangled_type_names(pdb, pdbutil):
 
 
 def pdb_identity(pdb, pdbutil):
-    """{guid, age} of the PDB itself, so a doc can be re-fetched from msdl later."""
+    """{guid, age} of the PDB itself, so a doc can be re-fetched from msdl later: the
+    age is the DBI stream's, the one the PE's RSDS record and msdl's path carry (the PDB
+    stream's age, which pdbutil's summary prints, runs ahead of it once a PDB is
+    rewritten, e.g. stripped to public)."""
     if is_pdb20(pdb):
         return pdb20_identity(pdb)
     out = subprocess.run([find_pdbutil(pdbutil), "dump", "-summary", pdb],
                          capture_output=True, text=True).stdout
     guid = grab(r"GUID: \{([0-9A-Fa-f-]+)\}", out)
-    age = grab(r"Age: (\d+)", out, cast=int)
-    return {"guid": guid.replace("-", "").upper(), "age": age} if guid else None
+    return {"guid": guid.replace("-", "").upper(), "age": msf_dbi_age(pdb)} if guid else None
+
+
+def msf_dbi_age(path):
+    """Age in the DBI stream (stream 3) header of an MSF 7.0 PDB."""
+    with open(path, "rb") as f:
+        b = f.read()
+    if not b.startswith(b"Microsoft C/C++ MSF 7.00\r\n\x1aDS\0\0\0"):
+        raise ValueError("not an MSF 7.0 PDB: " + path)
+    bs, _, _, dir_size, _, map_block = struct.unpack_from("<6I", b, 32)
+    nblk = -(-dir_size // bs)
+    dir_blocks = struct.unpack_from("<%dI" % nblk, b, map_block * bs)
+    root = b"".join(b[k * bs:(k + 1) * bs] for k in dir_blocks)[:dir_size]
+    n = struct.unpack_from("<I", root, 0)[0]
+    sizes = struct.unpack_from("<%dI" % n, root, 4)
+    pos = 4 + 4 * n
+    for z in sizes[:3]:
+        pos += 4 * (-(-z // bs) if z != 0xFFFFFFFF else 0)
+    first = struct.unpack_from("<I", root, pos)[0]   # DBI's first block holds its header
+    sig, _, age = struct.unpack_from("<iII", b, first * bs)
+    if sig != -1:
+        raise ValueError("DBI stream of %s has no versioned header" % path)
+    return age
 
 
 def split_records(lines):
@@ -247,11 +271,13 @@ def parse(lines):
             nm = NAME.search(text)
             fl = grab(r"field list: (?:0x([0-9A-Fa-f]+)|<no type>)", text)
             fwd = grab(r"forward ref \(-> 0x([0-9A-Fa-f]+)\)", text)
+            ut = grab(r"underlying type: 0x([0-9A-Fa-f]+)", text)
             types[key] = {
                 "kind": "enum",
                 "name": nm.group(1) if nm else None,
                 "fieldlist": hexi(int(fl, 16)) if fl else None,
                 "forward": hexi(int(fwd, 16)) if fwd else None,
+                "underlying": int(ut, 16) if ut else None,
             }
         elif kind == "LF_FIELDLIST":
             members = []
@@ -306,8 +332,32 @@ def parse(lines):
     for bk, bn in bases.items():
         types.setdefault(bk, {"kind": "base", "name": bn})
 
+    signed_enumerators(types)
     resolve_forwards(types)
     return types
+
+
+# signed primitive types an enum can sit on -> their width in bits
+SIGNED_BITS = {0x10: 8, 0x68: 8, 0x11: 16, 0x72: 16, 0x12: 32, 0x74: 32, 0x13: 64, 0x76: 64}
+
+
+def signed_enumerators(types):
+    """Enumerator values as their enum's underlying type reads them. clang (the headers
+    path) and some CodeView 4 compilers store -1 in an int enum as LF_ULONG 4294967295;
+    MSVC's PDBs store -1. Drops the transient "underlying" key either way."""
+    for t in types.values():
+        if t.get("kind") != "enum":
+            continue
+        bits = SIGNED_BITS.get(t.pop("underlying", None))
+        fl = types.get(t.get("fieldlist"))
+        if not bits or not fl:
+            continue
+        for e in fl.get("enums", []):
+            v = e["value"]
+            if not -(1 << (bits - 1)) <= v < (1 << bits):
+                raise ValueError("enumerator %s = %d does not fit %d bits" % (e["name"], v, bits))
+            if v >= 1 << (bits - 1):
+                e["value"] = v - (1 << bits)
 
 
 def resolve_forwards(types):
@@ -359,9 +409,13 @@ def pdb20_streams(path):
 
 
 def pdb20_identity(path):
-    """{signature, age} of a PDB 2.0 (it has a timestamp signature, not a GUID)."""
-    pdbs = pdb20_streams(path)[1]
-    _, sig, age = struct.unpack_from("<III", pdbs, 0)
+    """{signature, age} of a PDB 2.0 (it has a timestamp signature, not a GUID); the age
+    is the DBI stream's, as in pdb_identity."""
+    streams = pdb20_streams(path)
+    sig = struct.unpack_from("<III", streams[1], 0)[1]
+    dsig, _, age = struct.unpack_from("<iII", streams[3], 0)
+    if dsig != -1:
+        raise ValueError("DBI stream of %s has no versioned header" % path)
     return {"guid": None, "signature": sig, "age": age}
 
 
@@ -500,14 +554,14 @@ def cv_records(blob, tmin=0x1000, tmax=None):
                           "fieldlist": hexi(fl) if fl and not fwd else None, "forward": None}
         elif leaf in (0x1007, 0x0007):
             if leaf == 0x1007:     # LF_ENUM_ST: count, property, type, field, name
-                _, prop, _, fl = struct.unpack_from("<HHII", d, 0)
+                _, prop, ut, fl = struct.unpack_from("<HHII", d, 0)
                 name, _ = cv_pstr(d, 12)
             else:                  # LF_ENUM (16-bit): count, type, field, property, name
-                _, _, fl, prop = struct.unpack_from("<HHHH", d, 0)
+                _, ut, fl, prop = struct.unpack_from("<HHHH", d, 0)
                 name, _ = cv_pstr(d, 8)
             types[key] = {"kind": "enum", "name": name,
                           "fieldlist": hexi(fl) if fl and not prop & 0x80 else None,
-                          "forward": None}
+                          "forward": None, "underlying": ut}
         elif leaf in (0x1203, 0x0204):         # LF_FIELDLIST
             members, enums, nxt = cv_fieldlist(d)
             types[key] = {"kind": "fieldlist", "members": members, "enums": enums}
@@ -565,6 +619,7 @@ def cv_records(blob, tmin=0x1000, tmax=None):
             if more.get("next"):
                 t["next"] = more["next"]
         t.pop("next", None)
+    signed_enumerators(types)
 
     # primitive types are implicit: add the ones the records refer to
     seen = set()

@@ -314,11 +314,22 @@ def fetch_headers(spec, outdir):
     return dirs
 
 
-def merge_headers(doc, spec, pdbdir):
+def merge_headers(doc, spec, pdbdir, listed=None):
     """Add the types a lib doc's records lack from its DDK's headers (see headers.merge),
-    failing if any member the headers give sits elsewhere in the records."""
+    failing if any member the headers give sits elsewhere in the records. `listed`: the
+    entry's "names", when it takes only those from the records; a type the records
+    document only because a listed one reaches it yields to the headers' definition
+    where that has members the record lacks (404.1's _PEB reaches _LARGE_INTEGER, whose
+    1993 record drops the anonymous LowPart/HighPart struct)."""
     hdr = headers.convert(fetch_headers(spec, pdbdir), doc["arch"], doc["module"], doc["build"],
                           top=spec.get("top", "ntddk.h"), only=spec.get("only"))
+    if listed is not None:
+        leaves = lambda d, n: {(x[0].split(".")[-1],) + x[1:] for x in headers.flat(d, d["named"][n])}
+        for n in [n for n in doc["named"] if n not in listed and n in hdr["named"]
+                  and hdr["types"][hdr["named"][n]]["kind"] != "enum"
+                  and leaves(hdr, n) - leaves(doc, n)]:
+            del doc["named"][n]
+            doc.get("variants", {}).pop(n, None)
     bad = headers.check(doc, hdr)
     if bad:
         raise RuntimeError("headers disagree with the records on %s" % ", ".join(
@@ -604,7 +615,8 @@ def handle(entry, base, pdbdir):
             checks["records"] = "all %d _EPROCESS/_ETHREAD offsets agree with %s" % (
                 n, source_label(dict(entry["kdext"], lib=entry["kdext"]["url"])))
         if entry.get("headers"):
-            checks["headers"] = merge_headers(doc, entry["headers"], pdbdir)
+            checks["headers"] = merge_headers(doc, entry["headers"], pdbdir,
+                                              set(entry["names"]) if entry.get("names") else None)
         if entry.get("asserts"):
             attest(doc, assert_names(entry["asserts"], pdbdir))
         cite_sources(doc, entry, checks)

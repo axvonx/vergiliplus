@@ -35,6 +35,13 @@ MACHINES = {"i386": 0x14C, "mips": 0x166, "alpha": 0x184, "ppc": 0x1F0}
 ANON = ("__unnamed", "<unnamed-tag>", "(untagged)", "")
 
 
+# bytes of the primitive types a bitfield can sit on (names as P.cv_simple_name gives them)
+SIMPLE_SIZES = {"char": 1, "signed char": 1, "unsigned char": 1, "__int8": 1,
+                "unsigned __int8": 1, "bool": 1, "short": 2, "unsigned short": 2,
+                "wchar_t": 2, "__int16": 2, "unsigned __int16": 2, "int": 4, "unsigned": 4,
+                "long": 4, "unsigned long": 4, "__int64": 8, "unsigned __int64": 8}
+
+
 def ar_members(b):
     """(name, bytes) of each member of a COFF archive ("!<arch>\\n")."""
     o = 8
@@ -182,11 +189,35 @@ class Merger:
 
     def fieldlist(self, i, key):
         fl = self.tables[i][1].get(key) or {"members": [], "enums": []}
-        members = [{"name": m["name"], "type": self.ref(i, m["type"]), "offset": m["offset"]}
-                   for m in fl.get("members", [])]
+        members = [self.member(i, m) for m in fl.get("members", [])]
         enums = [dict(e) for e in fl.get("enums", [])]
         skey = ("F", json.dumps(members), json.dumps(enums))
         return self.intern(skey, {"kind": "fieldlist", "members": members, "enums": enums})
+
+    def member(self, i, m):
+        """A member, a bitfield's offset made its storage unit's. The 1992-93 MIPS
+        compilers' NB08 records give the byte holding a bitfield's first bit, with the
+        position counted from that byte (_HARDWARE_PTE.Write: offset 3, bit 6, of a
+        ULONG); MSVC gives the unit's offset, bit 30. NT's MIPS is little-endian, so
+        the bit moves into the unit by 8 per byte."""
+        n = self.tables[i][1].get(m["type"]) if m["type"] else None
+        off = m["offset"]
+        if n and n["kind"] == "bitfield":
+            w = SIMPLE_SIZES.get(P.cv_simple_name(int(n["type"], 16)) or "") \
+                if int(n["type"], 16) < 0x1000 else None
+            if w is None:
+                raise ValueError("bitfield %s on a non-primitive type %s" % (m["name"], n["type"]))
+            if off % w:
+                unit = off - off % w
+                pos = n["pos"] + (off - unit) * 8
+                if pos + n["bits"] > w * 8:
+                    raise ValueError("bitfield %s at byte %d bit %d does not fit its %d-byte unit"
+                                     % (m["name"], off, n["pos"], w))
+                t = self.ref(i, n["type"])
+                bf = self.intern(("b", t, n["bits"], pos),
+                                 {"kind": "bitfield", "type": t, "bits": n["bits"], "pos": pos})
+                return {"name": m["name"], "type": bf, "offset": unit}
+        return {"name": m["name"], "type": self.ref(i, m["type"]), "offset": off}
 
     def ref(self, i, key):
         """Global index of table i's type `key`."""
