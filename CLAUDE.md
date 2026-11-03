@@ -2,10 +2,10 @@
 
 Static browser of Windows struct/union/enum layouts from Microsoft's **public PDBs** (and,
 before those carried types, the type records in its DDKs, SDKs and debuggers): kernel
-(`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), 27 x86 (Oct/Dec 1991
-pre-releases, NT 3.5 → Windows 10 22H2), 3 IA-64 (2003 SP1 → 2008 SP2), NT on MIPS (Apr/Dec
-1991, Jul 1992, 3.1 beta 404, 3.51, 4.0), Alpha (3.51, 4.0, 2000 RC2), PowerPC (3.51, 4.0)
-and ARM64 (24H2), live at
+(`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), 32 x86 (1991-92
+pre-releases, NT 3.1 → Windows 10 22H2), 3 IA-64 (2003 SP1 → 2008 SP2), NT on MIPS (Apr/Dec
+1991, Jul 1992, 3.1 betas 340/404, 3.1, 3.5, 3.51, 4.0), Alpha (3.1 beta 438, 3.5, 3.51, 4.0,
+2000 RC2), PowerPC (3.51, 4.0) and ARM64 (24H2), live at
 https://vergiliplus.com. Not a fork of Vergilius; it borrows only its look.
 
 ## Map
@@ -19,9 +19,10 @@ tools/build.py        manifest data/sources.json -> data/<module>-<build>-<arch>
   legacy/cv4.py       COFF .lib/.obj .debug$T (CV4) tables merged into one doc
   legacy/kdext.py     cross-check _EPROCESS/_ETHREAD vs a KDEXT*.DLL's !processfields
   legacy/cv3.py       1991 debuggers' CodeView 3 -> computed natural 32-bit layouts
-  legacy/hsfs.py, pcjs.py   High Sierra CD / PCjs disk JSON readers (fetch chain steps)
+  legacy/hsfs.py, pcjs.py, szdd.py   High Sierra CD / PCjs disk JSON / COMPRESS.EXE
+                      (NTOSKRNL.EX_) readers (fetch chain steps)
   legacy/strnames.py  type names a debug build's ASSERT text names (sizeof/cast/FIELD_OFFSET)
-  legacy/headers.py   a DDK's C headers -> computed layouts (clang + lld-link -> PDB); merge/check
+  legacy/headers.py   a DDK's/SDK's C headers -> computed layouts (clang + lld-link -> PDB); merge/check
   legacy/hstub/       one-line stand-ins for the C runtime headers DDKs include but don't ship
   check_links.py, check_budget.py   post-build gates (CI runs both)
 web/src/lib/types.mjs    type graph + C declarators as segments ({t}, {t,kw}, {t,ref})
@@ -94,8 +95,11 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   with it), compiles the rest as MSVC x86 with CodeView for every type, links a PDB and
   converts it: provenance `computed`. MSVC x86 rules give MIPS/Alpha/PPC's layouts too
   (checked: NT 4.0 libraries on all four arches, 404.1's MIPS binaries; every offset
-  exact). A header is the *public* view: private members can be missing, a private struct
-  may be declared only up to its public prefix (Alpha `_KPRCB`). So on a `lib` entry the
+  exact). `DEVL` is defined, as Microsoft's own builds had it (July 1992's WINNT.H keeps
+  `_RTL_CRITICAL_SECTION`'s debug members under it; that build's binaries agree). The SDK's
+  WINNT.H (`"top": "windef.h", "only": ["winnt.h"]`: just the types it defines) gives each
+  release's ntdll doc, Dec 1991 → 4.0. A header is the *public* view: private members can
+  be missing, a private struct may be declared only up to its public prefix (Alpha `_KPRCB`). So on a `lib` entry the
   records win: headers only add the types they lack (`provenanceTypes`), and the build
   fails if any header member sits elsewhere in the records. Alone, they are a build's doc
   (3.10.340.1, 3.10.404.1, 3.50.807), marked incomplete. Clang predefines `i386`; non-x86
@@ -107,7 +111,10 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   (`/* named only */`). Page name: `_X` where a recorded doc has the tag `_X`, else `X`;
   kind from that doc, else `"type"` (unknown, no keyword). Never attribute members via
   variables (`Process->Pcb`): that's inference. Yield is tens per build, not hundreds
-  (April 1991 kernel 18, all 95 December 1991 checked binaries 40).
+  (April 1991 kernel 18, all 95 December 1991 checked binaries 40, the 3.1-4.0 checked
+  kernels 14-28). MSDN shipped checked kernels for 3.1 (July 1994 disc 2: the UP
+  NTOSKRNL is checked, NTKRNLMP free), 3.5, 3.51 and 4.0; x86's compiler folds constant
+  ASSERTs (`FIELD_OFFSET(A, x) == FIELD_OFFSET(B, x)`) away, so x86 names fewer than RISC.
 - **`data/*.json` is the committed artifact**: compact, and pruned to types reachable
   from the documented ones. Never commit PDBs, PEs or `web/dist/`.
 - **Text first, HTML at the edge.** layout/types produce segments; only
@@ -190,7 +197,7 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 ## Open (undecided)
 
-**Scale:** 69 builds over 7 arches ≈ 110 MB in ~25k files; a build adds ~1 MB (its new
+**Scale:** 74 builds over 7 arches ≈ 114 MB in ~26k files; a build adds ~1 MB (its new
 types' pages and changed views); a new arch is another /t/ tree (x86 added ~23 MB).
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
 more ARM64 builds · more canary builds (UUP sets) · home

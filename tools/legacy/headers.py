@@ -21,7 +21,7 @@ So `merge` lets recorded layouts win and only adds what they lack, after checkin
 every member the header gives sits where the recorded layout has it.
 
   headers.py deps INCDIR... --arch A [--top ntddk.h]   headers the compile reads (pinning)
-  headers.py INCDIR... --arch A --build B -o out.json
+  headers.py INCDIR... --arch A --build B [--top windef.h --only winnt.h] -o out.json
 """
 import argparse
 import json
@@ -47,8 +47,10 @@ BUILTINS = ["__emul", "__emulu", "__ll_lshift", "__ll_rshift", "__ull_rshift",
             "_InterlockedIncrement", "_InterlockedDecrement", "_InterlockedExchange",
             "_InterlockedExchangeAdd", "_InterlockedCompareExchange", "_enable", "_disable",
             "_ReturnAddress"]
+# DEVL: Microsoft's own NT builds defined it (July 1992's WINNT.H gives
+# _RTL_CRITICAL_SECTION its debug members under it; that build's binaries have them)
 CLANG = ["-target", "i386-pc-windows-msvc", "-fms-extensions", "-fms-compatibility",
-         "-nostdinc", "-Wno-everything"]
+         "-nostdinc", "-Wno-everything", "-DDEVL=1"]
 REFS = ("fieldlist", "forward", "referent", "element", "type", "return")
 
 
@@ -135,16 +137,49 @@ def statements(src):
     return out
 
 
-def convert(dirs, arch, module, build, family="", note="", top="ntddk.h"):
-    """Include dirs (searched in order) -> the doc of every type compiling `top` defines."""
+def unmark(pre):
+    """Preprocessed text with line markers -> (text without them, {line: header base name})
+    (1-based lines of the text returned)."""
+    out, where, cur = [], {}, ""
+    for ln in pre.split("\n"):
+        m = re.match(r'#\s*(?:line\s+)?\d+\s+"([^"]*)"', ln)
+        if m:
+            cur = os.path.basename(m.group(1)).lower()
+            continue
+        out.append(ln)
+        where[len(out)] = cur
+    return "\n".join(out), where
+
+
+def defined_in(stmts, where, files):
+    """Names the declarations from `files` (header base names) define: struct/union/enum
+    tags with a body, and typedef names declared alongside a body."""
+    names, line = set(), 1
+    for st in stmts:
+        src = where.get(line + len(st) - len(st.lstrip("\n")), "")
+        line += st.count("\n")
+        if src not in files or "{" not in st:
+            continue
+        names.update(re.findall(r"\b(?:struct|union|enum)\s+(\w+)\s*\{", st))
+        if re.match(r"\s*typedef\b", st):
+            tail = st[st.rfind("}") + 1:]
+            names.update(re.findall(r"\b([A-Za-z_]\w*)\s*(?=[,;\[])", tail))
+    return names
+
+
+def convert(dirs, arch, module, build, family="", note="", top="ntddk.h", only=None):
+    """Include dirs (searched in order) -> the doc of every type compiling `top` defines
+    (`only`: header base names; then only the types those headers define)."""
     with tempfile.TemporaryDirectory() as w:
         tu = os.path.join(w, "tu.c")
         open(tu, "w").write("#include <%s>\n" % top)
-        pre = subprocess.run([tool("clang")] + CLANG + ARCH[arch] + incs(dirs) + ["-E", "-P", tu],
+        pre = subprocess.run([tool("clang")] + CLANG + ARCH[arch] + incs(dirs) + ["-E", tu],
                              capture_output=True, text=True)
         if pre.returncode:
             raise RuntimeError("preprocessing %s: %s" % (top, pre.stderr[-2000:]))
-        src = strip_bodies(pre.stdout)
+        src, where = unmark(pre.stdout)
+        keep = defined_in(statements(src), where, {f.lower() for f in only}) if only else None
+        src = strip_bodies(src)
         for b in BUILTINS:
             src = re.sub(r"\b%s\b" % b, "vp" + b, src)
         stmts = statements(src)
@@ -186,7 +221,8 @@ def convert(dirs, arch, module, build, family="", note="", top="ntddk.h"):
     for t in doc["types"].values():
         if "<unnamed-tag>" in (t.get("name") or ""):
             t["name"] = "<unnamed-tag>"
-    doc["named"] = {n: k for n, k in doc["named"].items() if "<unnamed-tag>" not in n}
+    doc["named"] = {n: k for n, k in doc["named"].items() if "<unnamed-tag>" not in n
+                    and (keep is None or n in keep)}
     doc["types"] = P.reachable(doc["types"], doc["named"].values())
     doc["opaque"] = {n: k for n, k in doc["opaque"].items() if n not in doc["named"]}
     doc["provenance"] = {"kind": "computed", "note": note}
@@ -283,12 +319,13 @@ def main():
     ap.add_argument("--arch", required=True)
     ap.add_argument("--build")
     ap.add_argument("--top", default="ntddk.h")
+    ap.add_argument("--only", action="append")
     ap.add_argument("-o", "--out")
     a = ap.parse_args()
     if a.cmd_or_dir == "deps":
         print("\n".join(deps(a.dirs, a.arch, a.top)))
         return
-    doc = convert([a.cmd_or_dir] + a.dirs, a.arch, "ntoskrnl", a.build, top=a.top)
+    doc = convert([a.cmd_or_dir] + a.dirs, a.arch, "ntoskrnl", a.build, top=a.top, only=a.only)
     if a.out:
         P.write(doc, a.out)
     else:

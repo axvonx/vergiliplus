@@ -73,16 +73,21 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # (tools/legacy/strnames.py): names without a
                                                # layout here become opaque, with evidence
                                                # (doc.attested)
-                                               # "headers": {url, dirs, files, sha256, [top]}
+                                               # "headers": {url, dirs, files, sha256, [top],
+                                               # [only]}
                                                # a DDK's C headers (archive.org serves each
                                                # file of the image; sha256 pins the set:
                                                # sha256 of "<sha256>  <path>\n" per sorted
-                                               # file), compiled by tools/legacy/headers.py.
+                                               # file), compiled by tools/legacy/headers.py
+                                               # ("top" is #included; "only": [header] keeps
+                                               # just the types those headers define, e.g. an
+                                               # SDK's winnt.h out of windef.h).
                                                # On a lib entry: types the records lack are
                                                # added (provenanceTypes) after every header
                                                # member is found where the records have it.
                                                # Alone ({"headers", build, note, module,
-                                               # arch, family, ...}): the build's doc.
+                                               # arch, family, ...}): the build's doc (which
+                                               # may carry "asserts" too).
                                                # "build" is required (a sort key; buildLabel
                                                # is what shows when there is no real number);
                                                # "note" becomes the layouts' provenance line;
@@ -115,7 +120,7 @@ import urllib.request
 
 import pdb_to_json
 import pe_pdbid
-from legacy import cv3, cv4, headers, hsfs, kdext, pcjs, strnames
+from legacy import cv3, cv4, headers, hsfs, kdext, pcjs, strnames, szdd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -214,8 +219,9 @@ def fetch_pkg(entry, outdir, url_key="pkg"):
     """A PDB out of a symbol package: GET the archive, verify sha256, then unpack each
     name of "member" from the previous archive with 7z. Cached as one file in outdir.
     (Also any other pinned download: "lib" entries, their "kdext".) A member may instead
-    be {"hsfs": path} (a file of a High Sierra CD image, which 7z can't read) or
-    {"pcjs": name} (a PCjs disk-image JSON -> its raw sector image)."""
+    be {"hsfs": path} (a file of a High Sierra CD image, which 7z can't read),
+    {"pcjs": name} (a PCjs disk-image JSON -> its raw sector image) or {"szdd": name}
+    (the previous file expanded from COMPRESS.EXE's SZDD format, e.g. NTOSKRNL.EX_)."""
     url, members = entry[url_key], entry.get("member", [])
     label = lambda m: m if isinstance(m, str) else json.dumps(m, sort_keys=True)
     key = hashlib.sha256((url + "|" + "|".join(map(label, members))).encode()).hexdigest()[:16]
@@ -242,6 +248,10 @@ def fetch_pkg(entry, outdir, url_key="pkg"):
                 nxt = os.path.join(step, os.path.basename(member["hsfs"]))
                 with open(nxt, "wb") as f:
                     f.write(hsfs.extract(cur, member["hsfs"]))
+            elif isinstance(member, dict) and "szdd" in member:
+                nxt = os.path.join(step, member["szdd"])
+                with open(cur, "rb") as f, open(nxt, "wb") as g:
+                    g.write(szdd.expand(f.read()))
             elif isinstance(member, dict) and "pcjs" in member:
                 nxt = os.path.join(step, member["pcjs"])
                 with open(cur) as f, open(nxt, "wb") as g:
@@ -285,7 +295,7 @@ def merge_headers(doc, spec, pdbdir):
     """Add the types a lib doc's records lack from its DDK's headers (see headers.merge),
     failing if any member the headers give sits elsewhere in the records."""
     hdr = headers.convert(fetch_headers(spec, pdbdir), doc["arch"], doc["module"], doc["build"],
-                          top=spec.get("top", "ntddk.h"))
+                          top=spec.get("top", "ntddk.h"), only=spec.get("only"))
     bad = headers.check(doc, hdr)
     if bad:
         raise RuntimeError("headers disagree with the records on %s" % ", ".join(
@@ -304,6 +314,12 @@ def source_label(entry):
     if m:
         return next(iter(m[-1].values()))
     return "/".join(urllib.parse.unquote(entry["lib"]).split("/")[-2:])
+
+
+def assert_names(sources, pdbdir):
+    """strnames.names over an "asserts" list's (fetched) files."""
+    return strnames.names([fetch_pkg(dict(x, member=x.get("member", [])), pdbdir, "lib")
+                           for x in sources], [source_label(x) for x in sources])
 
 
 def known_types(skip):
@@ -462,7 +478,10 @@ def handle(entry, base, pdbdir):
     if "headers" in entry and "lib" not in entry:
         spec = entry["headers"]
         doc = headers.convert(fetch_headers(spec, pdbdir), arch, entry["module"], entry["build"],
-                              family, entry["note"], top=spec.get("top", "ntddk.h"))
+                              family, entry["note"], top=spec.get("top", "ntddk.h"),
+                              only=spec.get("only"))
+        if entry.get("asserts"):
+            attest(doc, assert_names(entry["asserts"], pdbdir))
         for k in ("buildLabel", "incomplete"):
             if entry.get(k):
                 doc[k] = entry[k]
@@ -520,9 +539,7 @@ def handle(entry, base, pdbdir):
         if entry.get("headers"):
             merge_headers(doc, entry["headers"], pdbdir)
         if entry.get("asserts"):
-            attest(doc, strnames.names([fetch_pkg(dict(x, member=x.get("member", [])), pdbdir, "lib")
-                                        for x in entry["asserts"]],
-                                       [source_label(x) for x in entry["asserts"]]))
+            attest(doc, assert_names(entry["asserts"], pdbdir))
         for k in ("buildLabel", "incomplete"):
             if entry.get(k):
                 doc[k] = entry[k]
