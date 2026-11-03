@@ -73,8 +73,8 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # (tools/legacy/strnames.py): names without a
                                                # layout here become opaque, with evidence
                                                # (doc.attested)
-                                               # "headers": {url, dirs, files, sha256, [top],
-                                               # [only]}
+                                               # "headers": {url | image, dirs, files, sha256,
+                                               # [top], [only]}
                                                # a DDK's C headers (archive.org serves each
                                                # file of the image; sha256 pins the set:
                                                # sha256 of "<sha256>  <path>\n" per sorted
@@ -120,7 +120,7 @@ import urllib.request
 
 import pdb_to_json
 import pe_pdbid
-from legacy import cv3, cv4, headers, hsfs, kdext, pcjs, strnames, szdd
+from legacy import cv3, cv4, headers, hsfs, kdext, pcjs, rawcd, strnames, szdd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -220,8 +220,9 @@ def fetch_pkg(entry, outdir, url_key="pkg"):
     name of "member" from the previous archive with 7z. Cached as one file in outdir.
     (Also any other pinned download: "lib" entries, their "kdext".) A member may instead
     be {"hsfs": path} (a file of a High Sierra CD image, which 7z can't read),
-    {"pcjs": name} (a PCjs disk-image JSON -> its raw sector image) or {"szdd": name}
-    (the previous file expanded from COMPRESS.EXE's SZDD format, e.g. NTOSKRNL.EX_)."""
+    {"pcjs": name} (a PCjs disk-image JSON -> its raw sector image), {"szdd": name}
+    (the previous file expanded from COMPRESS.EXE's SZDD format, e.g. NTOSKRNL.EX_) or
+    {"rawcd": name} (a raw BIN/MDF CD image -> a plain ISO)."""
     url, members = entry[url_key], entry.get("member", [])
     label = lambda m: m if isinstance(m, str) else json.dumps(m, sort_keys=True)
     key = hashlib.sha256((url + "|" + "|".join(map(label, members))).encode()).hexdigest()[:16]
@@ -232,13 +233,18 @@ def fetch_pkg(entry, outdir, url_key="pkg"):
         return out
     sevenzip = tool("7z", "7zz", "7za")
     with tempfile.TemporaryDirectory() as work:
-        cur = download(url, os.path.join(work, "pkg"))
+        # an image several entries unpack (a DDK's libraries per arch) downloads once
+        cached = os.path.join(outdir, "dl-" + entry["sha256"].lower()[:16]) if members else None
+        cur = cached if cached and os.path.exists(cached) else download(url, os.path.join(work, "pkg"))
         h = hashlib.sha256()
         with open(cur, "rb") as f:
             for chunk in iter(lambda: f.read(1 << 20), b""):
                 h.update(chunk)
         if h.hexdigest() != entry["sha256"].lower():
             raise RuntimeError("sha256 mismatch for %s: %s" % (url, h.hexdigest()))
+        if cached and cur != cached:
+            shutil.copyfile(cur, cached + ".part")
+            os.replace(cached + ".part", cached)
         if any(isinstance(m, str) for m in members) and not sevenzip:
             raise Skip("need 7-Zip (7z/7zz) to unpack " + url)
         for i, member in enumerate(members):
@@ -248,6 +254,9 @@ def fetch_pkg(entry, outdir, url_key="pkg"):
                 nxt = os.path.join(step, os.path.basename(member["hsfs"]))
                 with open(nxt, "wb") as f:
                     f.write(hsfs.extract(cur, member["hsfs"]))
+            elif isinstance(member, dict) and "rawcd" in member:
+                nxt = os.path.join(step, member["rawcd"])
+                rawcd.convert(cur, nxt)
             elif isinstance(member, dict) and "szdd" in member:
                 nxt = os.path.join(step, member["szdd"])
                 with open(cur, "rb") as f, open(nxt, "wb") as g:
@@ -270,7 +279,10 @@ def fetch_pkg(entry, outdir, url_key="pkg"):
 
 def fetch_headers(spec, outdir):
     """A pinned header set -> its include dirs (local, file names lower-cased: the
-    sources #include them so), in spec order. Cached under outdir by the set's sha256."""
+    sources #include them so), in spec order. Cached under outdir by the set's sha256.
+    Files come one by one from spec["url"] (archive.org serves files inside ISO/ZIP
+    images), or out of spec["image"] ({lib, sha256, member}: a whole image fetched like a
+    "lib", e.g. a raw CD image via "rawcd", read with 7z)."""
     root = os.path.join(outdir, "hdr-" + spec["sha256"][:16])
     dirs = [os.path.join(root, "%d" % i) for i in range(len(spec["dirs"]))]
     if os.path.exists(root + ".ok"):
@@ -278,15 +290,23 @@ def fetch_headers(spec, outdir):
     shutil.rmtree(root, ignore_errors=True)
     for d in dirs:
         os.makedirs(d)
+    image = fetch_pkg(spec["image"], outdir, "lib") if "image" in spec else None
     h = hashlib.sha256()
     for path in sorted(spec["files"]):
         local = os.path.join(dirs[spec["dirs"].index(os.path.dirname(path))],
                              os.path.basename(path).lower())
-        download(spec["url"] + "/" + urllib.parse.quote(path), local)
+        if image:
+            with tempfile.TemporaryDirectory() as w:
+                subprocess.run([tool("7z", "7zz", "7za"), "e", "-y", "-o" + w, image, path],
+                               check=True, capture_output=True)
+                shutil.move(os.path.join(w, os.path.basename(path)), local)
+        else:
+            download(spec["url"] + "/" + urllib.parse.quote(path), local)
         with open(local, "rb") as f:
             h.update(("%s  %s\n" % (hashlib.sha256(f.read()).hexdigest(), path)).encode())
     if h.hexdigest() != spec["sha256"]:
-        raise RuntimeError("sha256 mismatch for the header set at %s: %s" % (spec["url"], h.hexdigest()))
+        raise RuntimeError("sha256 mismatch for the header set at %s: %s"
+                           % (spec.get("url") or spec["image"]["lib"], h.hexdigest()))
     open(root + ".ok", "w").close()
     return dirs
 

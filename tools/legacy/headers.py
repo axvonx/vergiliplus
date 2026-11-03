@@ -254,16 +254,19 @@ def flat(doc, i, base=0, pre="", depth=0):
 
 def check(rec, hdr):
     """Shared struct names whose header members don't all sit where the recorded layout
-    has them: [(name, first header member not found)]. A missing member is fine (the
-    header's public view); one at another offset is not."""
+    has them: [(name, first header member the records place elsewhere)]. A member the
+    records lack is fine: the header's public view, or an anonymous aggregate 1993's
+    CodeView doesn't record (404.1's _LARGE_INTEGER has only QuadPart); one the records
+    have at another offset is not."""
     bad = []
     for n in sorted(set(rec["named"]) & set(hdr["named"])):
         if hdr["types"][hdr["named"][n]]["kind"] == "enum":
             continue
-        have = set(flat(rec, rec["named"][n]))
-        offs = {x[1:] for x in have}
+        have = {}
+        for x in flat(rec, rec["named"][n]):
+            have.setdefault(x[0], set()).add(x[1:])
         for x in flat(hdr, hdr["named"][n]):
-            if x not in have and x[1:] not in offs:
+            if x[0] in have and x[1:] not in have[x[0]]:
                 bad.append((n, x))
                 break
     return bad

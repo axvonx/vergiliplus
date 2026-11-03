@@ -2,10 +2,11 @@
 
 Static browser of Windows struct/union/enum layouts from Microsoft's **public PDBs** (and,
 before those carried types, the type records in its DDKs, SDKs and debuggers): kernel
-(`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), 32 x86 (1991-92
+(`ntoskrnl`) and userland (`ntdll`) across 22 x64 builds (XP x64 → Canary), 33 x86 (1991-92
 pre-releases, NT 3.1 → Windows 10 22H2), 3 IA-64 (2003 SP1 → 2008 SP2), NT on MIPS (Apr/Dec
-1991, Jul 1992, 3.1 betas 340/404, 3.1, 3.5, 3.51, 4.0), Alpha (3.1 beta 438, 3.5, 3.51, 4.0,
-2000 RC2), PowerPC (3.51, 4.0) and ARM64 (24H2), live at
+1991, Jul 1992, 3.1 betas 340/404, 3.1, 3.5, 3.51, 4.0 beta 2, 4.0), Alpha (3.1 beta 438,
+3.1, 3.5, 3.51, 4.0 beta 2, 4.0, 2000 RC2), PowerPC (3.51, 4.0 beta 2, 4.0) and ARM64
+(24H2), live at
 https://vergiliplus.com. Not a fork of Vergilius; it borrows only its look.
 
 ## Map
@@ -19,8 +20,8 @@ tools/build.py        manifest data/sources.json -> data/<module>-<build>-<arch>
   legacy/cv4.py       COFF .lib/.obj .debug$T (CV4) tables merged into one doc
   legacy/kdext.py     cross-check _EPROCESS/_ETHREAD vs a KDEXT*.DLL's !processfields
   legacy/cv3.py       1991 debuggers' CodeView 3 -> computed natural 32-bit layouts
-  legacy/hsfs.py, pcjs.py, szdd.py   High Sierra CD / PCjs disk JSON / COMPRESS.EXE
-                      (NTOSKRNL.EX_) readers (fetch chain steps)
+  legacy/hsfs.py, pcjs.py, szdd.py, rawcd.py   High Sierra CD / PCjs disk JSON /
+                      COMPRESS.EXE (NTOSKRNL.EX_) / raw BIN-MDF CD readers (fetch chain steps)
   legacy/strnames.py  type names a debug build's ASSERT text names (sizeof/cast/FIELD_OFFSET)
   legacy/headers.py   a DDK's/SDK's C headers -> computed layouts (clang + lld-link -> PDB); merge/check
   legacy/hstub/       one-line stand-ins for the C runtime headers DDKs include but don't ship
@@ -89,7 +90,8 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   `doc.opaque` ({name: kind}); in a build where a type is opaque its view is the
   declaration, "defined in" and used in. Dimmed in lists.
 - **Header layouts** (`"headers"`: a pinned set of a DDK's C headers, files fetched one by
-  one from the archive.org image, `sha256` over "<sha256>  <path>\n" per sorted file):
+  one from the archive.org image, or out of a whole fetched `"image"` (a BIN/MDF archive.org
+  can't list inside; `"rawcd"` step), `sha256` over "<sha256>  <path>\n" per sorted file):
   `tools/legacy/headers.py` preprocesses `ntddk.h` with the arch's macros, drops function
   bodies (and any top-level declaration clang rejects, warning if a type definition goes
   with it), compiles the rest as MSVC x86 with CodeView for every type, links a PDB and
@@ -99,9 +101,11 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   `_RTL_CRITICAL_SECTION`'s debug members under it; that build's binaries agree). The SDK's
   WINNT.H (`"top": "windef.h", "only": ["winnt.h"]`: just the types it defines) gives each
   release's ntdll doc, Dec 1991 → 4.0. A header is the *public* view: private members can
-  be missing, a private struct may be declared only up to its public prefix (Alpha `_KPRCB`). So on a `lib` entry the
-  records win: headers only add the types they lack (`provenanceTypes`), and the build
-  fails if any header member sits elsewhere in the records. Alone, they are a build's doc
+  be missing, a private struct may be declared only up to its public prefix (Alpha
+  `_KPRCB`). So on a `lib` entry the records win: headers only add the types they lack
+  (`provenanceTypes`), and the build fails if a header member the records also have sits
+  elsewhere in them (by name: 1993 CodeView drops anonymous aggregates, so 404.1's
+  `_LARGE_INTEGER` records only `QuadPart`). Alone, they are a build's doc
   (3.10.340.1, 3.10.404.1, 3.50.807), marked incomplete. Clang predefines `i386`; non-x86
   arches undefine it (1992 headers test it).
 - **Attested names** (`"asserts"` on a `lib` entry): a debug build keeps each ASSERT's
@@ -197,7 +201,7 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 ## Open (undecided)
 
-**Scale:** 74 builds over 7 arches ≈ 114 MB in ~26k files; a build adds ~1 MB (its new
+**Scale:** 79 builds over 7 arches ≈ 114 MB in ~26k files; a build adds ~1 MB (its new
 types' pages and changed views); a new arch is another /t/ tree (x86 added ~23 MB).
 Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
 more ARM64 builds · more canary builds (UUP sets) · home

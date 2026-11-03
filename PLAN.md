@@ -36,14 +36,12 @@ inventories stay in `$VP_IMAGES/research/` (not in the repo).
 
 - Done: checked kernels' ASSERT names for Oct 1991, 3.1 (511), 3.5, 3.51, 4.0 on every arch; SDK
   WINNT.H for ntdll Dec 1991 → 4.0; NT 3.1 kernel from the July 1994 MSDN DDK headers.
-- Not yet: NT 3.1 Alpha (July 1994 disc 2 `ALPHA/NTOSKRNL.EXE`, checked, FileVersion
-  3.10.520.1: no Alpha 3.1 doc to attach to); 3.5 build 800 (April 1995 disc 5's MIPS
-  NTKRNLMP is checked, 3.50.800.1); NT 4.0 Beta 2 checked build + DDK (archive.org
-  `microsoft-windows-nt-4.0-workstation-beta-2-checked-build`,
-  `microsoft-windows-ddk-for-windows-nt-4.0-beta-2`, bin/cue); 404.1 SDK
-  (`3.10.404.1_SDK`, an MDF in a zip) for 404.1's ntdll; the March 1993 DDK (CDAC-038600,
-  bin/cue). Drivers' names (NTFS.SYS, FASTFAT.SYS on the checked discs) belong to modules
-  the site doesn't have yet.
+- Also done: NT 3.1 Alpha (528), 404.1's checked kernels (March 1993 DDK) and SDK
+  (MDF), NT 4.0 Beta 2 (1314: x86/PPC LIBCNTPR.LIB records, MIPS/Alpha headers, checked
+  kernels). April 1995 disc 5's "3.50.800.1" kernels are 3.5 RTM (807) checked again.
+- Not yet: Beta 2's ntdll (its DDK ships WINNT.H without WINDEF.H; the Beta 2 SDK
+  would do); drivers' names (NTFS.SYS, FASTFAT.SYS on the checked discs) belong to
+  modules the site doesn't have yet.
 
 ## Facts that cost time to find
 
@@ -51,6 +49,9 @@ inventories stay in `$VP_IMAGES/research/` (not in the repo).
   types before Win2000 SP3 exist only in DDK/SDK libraries and debuggers.
   The 4.0 checked build's `.DBG` files carry none either. The NT 3.1 DDK's libraries
   (July 1994 MSDN disc 2, `DDK/LIB/*/CHECKED`) are import libraries: no `.debug$T`.
+- Raw CD images (BIN 2352-byte, MDF 2448-byte sectors) convert to ISO with
+  `legacy/rawcd.py`; images unpacked by several entries download once
+  (`$TMPDIR/vergiliplus-pdbs/dl-<sha256>`).
 - NT 3.x setup media compress binaries two ways: `.EX_` is SZDD on 3.1 (`szdd` member
   step) and a one-file CAB on 3.5/3.51 (7z reads it).
 - NT 3.1's kernel FileVersion reads 3.10.5098.1; `NtBuildNumber`'s initial value
