@@ -85,8 +85,8 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   Pre-release builds without a number have a sortable `build` key (`0.1991.10.0`) and
   `buildLabel: "no build number"`, shown wherever builds are (the exception to "labels
   come from binaries"). A build with a gap its tags don't say carries `incomplete: "<the
-  gap, one line>"`: the `partial` tag, the line its tooltip. An `untyped` struct (NT 3.51
-  kernel: names+offsets from KDEXT's !processfields) has members with `type: null`,
+  gap, one line>"`: the `partial` tag, the line its tooltip. An `untyped` struct (NT 3.5 and
+  3.51 kernels: names+offsets from KDEXT's !processfields) has members with `type: null`,
   rendered `+0x068  Pcb;`, without holes, sizes or size.
 - **Derivation prose** (manifest `cite`, `note`, `incomplete`; page text): a `cite` is
   `<verb> <file>, <release>` in about 60 characters (*recorded in*, *computed from*,
@@ -124,7 +124,9 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   because a listed one reaches it yields to the headers where they have members it lacks
   (404.1 MIPS ntoskrnl takes `_KPCR`, `_PEB`, the ACEs from CDPLAYER/DISKPERF; `_PEB`
   reaches `_LARGE_INTEGER`, which stays the header's). Alone, they are a build's doc
-  (3.10.340.1, 3.10.404.1 x86, 3.50.807.1), marked `partial`. Clang predefines `i386`; non-x86
+  (3.10.340.1, 3.10.404.1 x86), marked `partial`. NT 4.0 and Beta 2 x86/PPC ntdll take
+  `_PEB` and the process parameters from the kernel's LIBCNTPR.LIB (`names`), WINNT.H for
+  the rest; Beta 2's MIPS and Alpha libraries carry no CodeView at all. Clang predefines `i386`; non-x86
   arches undefine it (1992 headers test it).
 - **Attested names** (`"asserts"` on a `lib` entry): a debug build keeps each ASSERT's
   source text, and `sizeof(X)`, `FIELD_OFFSET(X, …)` and a pointer cast `(PX)` name a
@@ -220,7 +222,7 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   and old CodeView store `-1` in an `int` enum as 4294967295; `signed_enumerators`).
 - Before NT 4.0 no Microsoft-published file found defines `_KTHREAD`/`_EPROCESS`
   (scanned: 1991-93 pre-release CDs and SDK/DDKs, NT 3.1 retail .dbg/kernels, 3.5/3.51
-  DDKs). 1991 debuggers carry only what they decode; MIPS 1992-93 binaries carry NB08
+  DDKs; .DBG files and import libraries are publics only). 1991 debuggers carry only what they decode; MIPS 1992-93 binaries carry NB08
   CodeView inline (`cv4.pe_type_tables`), Native-API/TEB/PEB/KPCR level. Build numbers
   only where the media state them (404.1: the DDK's version.h); else "no build number".
 - ARM64 isn't in winbindex (x64 only): it comes from UUP sets. Only the edition's metadata
