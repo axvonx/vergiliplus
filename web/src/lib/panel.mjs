@@ -6,7 +6,7 @@
 // links ("<Type>.html") resolve within the module's /t/ dir; struct.js appends #<build>.
 import { esc, html, slug } from "./types.mjs";
 import { structLayout, enumLayout, offAnn, hexv } from "./layout.mjs";
-import { catalog, typesFor, typeList, usedInFor, cmpBuild } from "./catalog.mjs";
+import { catalog, typesFor, typeList, usedInFor, cmpBuild, TAGS } from "./catalog.mjs";
 
 const IND = "    ";
 const ind = (d) => IND.repeat(d + 1);
@@ -23,17 +23,17 @@ function rowHtml(r, T) {
   if (r.close)
     return `<div class="sc-line sc-grp"><span class="sc-code">${ind(r.depth)}}${r.field ? ` <span class="sc-field">${esc(r.field)}</span>` : ""};</span><span class="sc-ann">/* 0x${r.offset.toString(16)}  ${r.size} */</span></div>`;
   const bits = r.bits != null ? ` : ${r.bits}` : "";
-  return `<div class="sc-member k-${r.fkind}${r.linked ? " link" : ""}"><span class="sc-code">${ind(r.depth)}${html(r.typePre, T)}${r.sep}<span class="sc-field">${esc(r.field)}</span>${html(r.typeSuf, T)}${bits};</span><span class="sc-ann">/* ${offAnn(r)} */</span></div>`;
+  return `<div class="sc-member k-${r.fkind}${r.linked ? " link" : ""}"><span class="sc-code">${ind(r.depth)}${html(r.typePre, T)}${r.sep}<span class="sc-field">${esc(r.field)}</span>${html(r.typeSuf, T)}${bits};</span>${r.bare ? "" : `<span class="sc-ann">/* ${offAnn(r)} */</span>`}</div>`;
 }
 
-// a documented type's view: code + stats line. A layout not from a public PDB ends with
-// its provenance as a last code line (so copy carries it); a partial build says so.
+// a documented type's view: code + stats line. A layout not from a public PDB carries its
+// source tag (linking the build's sources panel) and ends with its short provenance as a
+// last code line (so copy carries it); the build's own gaps are the context bar's.
 // A type the sources define in more than one way (doc.variants) shows every definition,
-// one at a time, picked from a select under the notices (struct.js switches them).
+// one at a time, picked from a select (struct.js switches them).
 export function panelHtml(T, name, doc = null) {
-  const notes = doc?.incomplete ? incompleteHtml(doc) : "";
   const vs = doc?.variants?.[name];
-  if (!vs) return notes + layoutHtml(T, name);
+  if (!vs) return layoutHtml(T, name, doc);
   const base = T.provenance(name);
   const views = vs.map((v) => {
     const TV = Object.create(T);  // the same doc, with this definition under the name
@@ -41,16 +41,21 @@ export function panelHtml(T, name, doc = null) {
     TV.provenance = (n) => (n === name ? `${base ? base + "; " : ""}this definition: ${v.note}` : T.provenance(n));
     return { v, T: TV, size: TV.sizeof(v.type) };
   });
-  return notes +
-    `<div data-vars><p class="var-note"><span class="var">${vs.length} variants</span> the sources define ${esc(name)} differently: ` +
+  return `<div data-vars><p class="var-note"><span class="var">${vs.length} variants</span> the sources disagree: ` +
     `<select class="var-sel" data-var-sel aria-label="Definition">${views.map((x, i) =>
       `<option value="${i}">${esc(x.v.note)} (${x.size} bytes)</option>`).join("")}</select></p>` +
-    views.map((x, i) => `<div class="var-view" data-var="${i}"${i ? " hidden" : ""}>${layoutHtml(x.T, name)}</div>`).join("") +
+    views.map((x, i) => `<div class="var-view" data-var="${i}"${i ? " hidden" : ""}>${layoutHtml(x.T, name, doc)}</div>`).join("") +
     `</div>`;
 }
 
+// a source tag linking the build's sources panel; the tooltip says what it means and,
+// given a cite, which source
+export const tagHtml = (doc, tag, cite) =>
+  `<a class="tag t-${tag}" href="${esc(ctxHref(doc))}#sources" title="${esc(TAGS[tag] + (cite ? "\n· " + cite : ""))}">${tag}</a>`;
+const ctxHref = (doc) => `/v/${doc.arch}/${doc.build}/${doc.module}.html`;
+
 // one layout's code + stats
-function layoutHtml(T, name) {
+function layoutHtml(T, name, doc) {
   const L = structLayout(T, name), E = L ? null : enumLayout(T, name);
   let head, body, stats;
   if (E) {
@@ -70,25 +75,35 @@ function layoutHtml(T, name) {
   const st = stats.map(([k, v]) => /^\d/.test(k)
     ? `<span><b>${k.split(" ")[0]}</b> ${k.split(" ").slice(1).join(" ")}${v !== "" ? ` (${esc(v)})` : ""}</span>`
     : `<span>${k} <b>${esc(v)}</b></span>`).join("");
-  const p = T.provenance(name);
-  return `<div class="sc meta-off" data-sc><pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-tgl" data-sc-meta aria-pressed="false"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div>` +
+  const p = T.provenance(name), tag = doc && T.provTag(name);
+  return `<div class="sc meta-off" data-sc><pre class="sc-pre"><code><div class="sc-ctrls">${tag ? tagHtml(doc, tag, p) : ""}<button class="sc-tgl" data-sc-meta aria-pressed="false"><span class="sc-box"></span>Metadata</button><button class="sc-copy" data-sc-copy>copy</button></div>` +
     `<div class="sc-line sc-head"><span class="sc-code">${head}</span></div>${body}<div class="sc-line"><span class="sc-code">};</span></div>` +
     (p ? `<div class="sc-line sc-prov"><span class="sc-code">/* ${esc(p)} */</span></div>` : "") +
     `</code></pre></div>` +
     `<div class="stats">${st}</div>`;
 }
 
-const incompleteHtml = (doc) =>
-  `<p class="inc-note"><span class="inc">incomplete</span> ${esc(doc.incomplete)}</p>`;
+// a name only a debug build's ASSERT text gives (doc.attested): the expression verbatim,
+// the file, the members it names (the about page explains why ASSERT text counts)
+const attestedHtml = (doc, a, known) =>
+  `<dl class="att"><dt>ASSERT</dt><dd><code>${esc(a.text)}</code></dd>` +
+  `<dt>in</dt><dd>${esc(a.file)} ${tagHtml(doc, "names", null)}</dd>` +
+  (a.members ? `<dt>members</dt><dd>${a.members.map(esc).join(", ")}</dd>` : "") +
+  (known ? "" : `<dt>kind</dt><dd>unknown (struct, union or scalar)</dd>`) + `</dl>`;
 
-// a name only a debug build's ASSERT text gives (doc.attested): the expression, verbatim
-const HOW = { sizeof: "a <code>sizeof</code>", cast: "a pointer cast", FIELD_OFFSET: "<code>FIELD_OFFSET</code>" };
-const attestedHtml = (a, name, known) =>
-  `<p class="opaque-note">Named, without a layout, by ${HOW[a.how] || "an expression"} in <b>${esc(a.file)}</b>'s ASSERT text ` +
-  `for this build (a debug build keeps each assertion's source text): <code class="att">${esc(a.text)}</code>` +
-  (a.as !== name ? ` It says <b>${esc(a.as)}</b>; recorded builds name the struct <b>${esc(name)}</b> (NT's <code>typedef struct _X {…} X</code> convention).` : "") +
-  (a.members ? ` Members it names: ${a.members.map((m) => `<b>${esc(m)}</b>`).join(", ")}.` : "") +
-  (known ? "" : " Its kind (struct, union or scalar) isn't known.") + `</p>`;
+// where else a name has a layout, as a range: this build's other modules by name, then
+// other builds oldest → newest with the full list behind a disclosure
+function definedIn(doc, name, defs) {
+  if (!defs.length) return "";
+  const a = (d) => `<a href="${esc(typePath(d.arch, d.module, name))}#${esc(d.build)}">${d.module !== doc.module ? esc(d.module) + " " : ""}${esc(d.buildLabel || d.build)}</a>`;
+  const here = defs.filter((d) => d.build === doc.build), other = defs.filter((d) => d.build !== doc.build);
+  const old = other.at(-1), neu = other[0];
+  return `<div class="defined-in">` +
+    (here.length ? `<span>This build: ${here.map(a).join(" ")}</span>` : "") +
+    (other.length === 1 ? `<span>Layout in ${a(neu)}</span>`
+      : other.length ? `<details><summary>Layout in ${a(old)} → ${a(neu)} <span class="n">(${other.length} builds)</span></summary>` +
+        `${other.map(a).join("")}</details>` : "") + `</div>`;
+}
 
 // an opaque name's view in one build: its declaration, and where it does have a layout
 // (other modules of this build first, then other builds, newest first)
@@ -98,17 +113,12 @@ export function opaqueHtml(doc, name, kind) {
     .sort((x, y) => ((y.build === doc.build) - (x.build === doc.build)) || cmpBuild(y.build, x.build) ||
       (x.module < y.module ? -1 : 1));
   const att = doc.attested?.[name], known = kind !== "type";
-  return (doc.incomplete ? incompleteHtml(doc) : "") +
-    `<pre class="sc-pre"><code><div class="sc-line"><span class="sc-code">${known ? `<span class="kw">${esc(kind)}</span> ` : ""}${esc(name)};</span>` +
+  return `<pre class="sc-pre"><code><div class="sc-line"><span class="sc-code">${known ? `<span class="kw">${esc(kind)}</span> ` : ""}${esc(name)};</span>` +
     `<span class="sc-ann">/* ${att ? "named only" : "opaque"} */</span></div></code></pre>` +
-    (att ? attestedHtml(att, name, known)
-    : doc.provenance
-      ? `<p class="opaque-note">Named but not defined in the type records <b>${esc(doc.module)}</b>'s layouts for this build ` +
-        `come from (a forward declaration or pointer target). The layout isn't known here.</p>`
-      : `<p class="opaque-note">Declared but not defined in <b>${esc(doc.module)}</b>'s public PDB for this build: a forward ` +
-        `declaration, or a name that only appears in mangled C++ symbols. The layout isn't public here.</p>`) +
-    (defs.length ? `<div class="defined-in">Defined in: ${defs.map((d) =>
-      `<a href="${esc(typePath(d.arch, d.module, name))}#${esc(d.build)}">${esc(d.module)} ${esc(d.buildLabel || d.build)}</a>`).join("")}</div>` : "");
+    (att ? attestedHtml(doc, att, known)
+    : `<p class="opaque-note">${doc.sources ? "Declared, not defined, in the sources this build's layouts come from."
+      : "Declared, not defined, in the public PDB: a forward declaration or a name from a mangled symbol."}</p>`) +
+    definedIn(doc, name, defs);
 }
 
 // Every type page: [{arch, module, name, slug, aliases, kind, builds, has, def, names}].

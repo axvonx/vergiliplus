@@ -87,4 +87,4 @@ struct _EPROCESS {
     };                                                      /* 0x1f2  2 */
     void* Win32Process;                                     /* 0x1f4  4 */
 };
-/* source: NT 4.0 DDK (August 1996) I386 LIBCNTPR.LIB CodeView type records; _EPROCESS/_ETHREAD offsets match KDEXTX86.DLL (NT 4.0 Server CD) */
+/* recorded in LIBCNTPR.LIB, NT 4.0 DDK */

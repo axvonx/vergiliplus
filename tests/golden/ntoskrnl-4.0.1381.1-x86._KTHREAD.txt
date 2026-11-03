@@ -76,4 +76,4 @@ struct _KTHREAD {
     unsigned char IdealProcessor;                           /* 0x1ae  1 */
     unsigned char DisableBoost;                             /* 0x1af  1 */
 };
-/* source: NT 4.0 DDK (August 1996) I386 LIBCNTPR.LIB CodeView type records; _EPROCESS/_ETHREAD offsets match KDEXTX86.DLL (NT 4.0 Server CD) */
+/* recorded in LIBCNTPR.LIB, NT 4.0 DDK */

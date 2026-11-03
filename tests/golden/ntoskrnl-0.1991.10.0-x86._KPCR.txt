@@ -22,4 +22,4 @@ struct _KPCR {
     unsigned long Version;                                  /* 0x1c8  4 */
     char IsExecutingDpc;                                    /* 0x1cc  1 */
 };
-/* computed: October 1991 pre-release CD, SETUP/DBUGDISK/I386KD.EXE CodeView 3 types (compiled 1-byte packed for its 16-bit host), laid out with natural 32-bit alignment; _KPCR agrees with NT 3.1's offsets on every shared member */
+/* from I386KD.EXE's types, re-laid out for 32-bit */

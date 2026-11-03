@@ -1,0 +1,61 @@
+---
+// How the layouts are made: each source tag explained once (type pages and the build
+// listings' sources panels link here instead of repeating it).
+import Layout from "../layouts/Layout.astro";
+import { TAGS } from "../lib/catalog.mjs";
+---
+<Layout title="About">
+  <article class="about">
+    <h1>Where the layouts come from</h1>
+    <p>Every layout comes from material Microsoft itself published: its symbol server, its
+      DDKs and SDKs, its debuggers and its OS media (or archive.org copies of them, pinned by
+      hash). Nothing comes from leaked source, and nothing is inferred.</p>
+
+    <h2>Public PDBs</h2>
+    <p>Most builds: the kernel's and ntdll's PDBs from Microsoft's symbol server, which carry
+      the full type records. These have no tag. Public PDBs carry types from Windows 2000 SP3
+      on; XP SP2's carry none.</p>
+
+    <h2>Before public PDBs had types</h2>
+    <p>The NT 3.x and 4.0 debug symbols carry no type records. For those builds, and for the
+      1991-93 pre-releases, layouts come from other published files. Each layout is tagged
+      with the kind of source it came from; a build's listing has its full sources, behind
+      <i>Sources</i>.</p>
+    <dl class="about-tags">
+      <dt><span class="tag t-records" title={TAGS.records}>records</span></dt>
+      <dd>Type records (CodeView) the compiler left in a DDK or SDK library, or in a binary.
+        Exact, but only for the types that file was compiled with.</dd>
+      <dt><span class="tag t-debugger" title={TAGS.debugger}>debugger</span></dt>
+      <dd>The 1991 kernel debuggers carry CodeView 3 types for what they decode. They were
+        compiled 1-byte packed for their 16-bit host, so the offsets are recomputed with
+        32-bit alignment.</dd>
+      <dt><span class="tag t-headers" title={TAGS.headers}>headers</span></dt>
+      <dd>The DDK's or SDK's C headers, compiled with Microsoft's layout rules (clang targeting
+        MSVC, with each architecture's macros) into a PDB that is read like any other.
+        Checked against NT 4.0's type records on x86, MIPS, Alpha and PowerPC, every offset
+        matched. A header is the public view: private members can be missing, and kernel
+        internals are often only declared.</dd>
+      <dt><span class="tag t-offsets" title={TAGS.offsets}>offsets</span></dt>
+      <dd>NT 3.51's kernel debugger extensions print <code>_EPROCESS</code>,
+        <code>_ETHREAD</code> and <code>_TOKEN</code> members with their offsets. No types,
+        no sizes.</dd>
+      <dt><span class="tag t-names" title={TAGS.names}>names</span></dt>
+      <dd>A checked (debug) build keeps the source text of each <code>ASSERT</code>. There,
+        <code>sizeof(X)</code>, <code>FIELD_OFFSET(X, m)</code> and a pointer cast
+        <code>(PX)</code> name a type for certain, so the page shows the name with the
+        expression as evidence, but no layout. NT declares <code>typedef struct _X {"{…}"} X</code>,
+        so where the text says <code>X</code> the page is <code>_X</code>.</dd>
+      <dt><span class="tag t-partial" title={TAGS.partial}>partial</span></dt>
+      <dd>A build with a gap the other tags don't say, named in one line (hover it).</dd>
+    </dl>
+
+    <h2>Opaque</h2>
+    <p>A name a source declares or mentions but never defines (a forward declaration, a
+      pointer target, a name in a mangled symbol). Its page shows the declaration and the
+      builds where it does have a layout.</p>
+
+    <h2>Build numbers</h2>
+    <p>Read from the binaries (the image's build, else the kernel's version), or from a DDK's
+      version header. Pre-releases without one say <i>no build number</i>.</p>
+  </article>
+</Layout>

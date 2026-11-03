@@ -190,20 +190,21 @@ test("product(): every family splits", async () => {
 });
 
 // April 1991: the debug kernel's ASSERT text names types it has no layout for; the page
-// quotes the expression, maps the typedef to a recorded build's tag, says what isn't known
+// quotes the expression (which shows the typedef spelling), lists the members it names,
+// says what isn't known
 test("attested names: April 1991 ASSERT text", async () => {
   const { opaqueHtml } = await import("../web/src/lib/panel.mjs");
   const doc = loadDoc(path.join(DATA, "ntoskrnl-0.1991.4.0-mips.json"));
   const sem = opaqueHtml(doc, "_KSEMAPHORE", "struct");
   assert.match(sem, /<span class="kw">struct<\/span> _KSEMAPHORE;.*named only/);
   assert.match(sem, /sizeof\(KSEMAPHORE\)/);
-  assert.match(sem, /It says <b>KSEMAPHORE<\/b>/);
+  assert.match(sem, /<dt>in<\/dt><dd>NTOSKRNL\.EXE <a class="tag t-names"/);
   const fcb = opaqueHtml(doc, "FCB", "type");
   assert.match(fcb, /<span class="sc-code">FCB;/);
   assert.match(fcb, /\(\(PFCB\)Fcb\)/);
-  assert.match(fcb, /kind \(struct, union or scalar\) isn't known/);
+  assert.match(fcb, /<dt>kind<\/dt><dd>unknown/);
   const io = opaqueHtml(doc, "_IO_STACK_LOCATION", "struct");
-  assert.match(io, /Members it names: <b>Parameters\.Read\.ByteOffset<\/b>/);
+  assert.match(io, /<dt>members<\/dt><dd>[^<]*Parameters\.Read\.ByteOffset/);
   // KD.EXE (March 1991) defines the wait-state packet smaller than MIPSKD.EXE
   assert.deepEqual(doc.variants._DBGKD_WAIT_STATE_CHANGE.map((v) => v.note), ["MIPSKD.EXE", "KD.EXE"]);
 });
@@ -213,8 +214,22 @@ test("attested names: April 1991 ASSERT text", async () => {
 test("headers merged into NT 4.0's recorded doc", () => {
   const T = renderer(NT40);
   assert.ok(!T.provTypes._EPROCESS);  // recorded (LIBCNTPR.LIB): the doc's own provenance
-  assert.match(T.provTypes._ZONE_HEADER?.note || "", /DDK headers .*clang/);
-  assert.equal(T.provTypes._ZONE_HEADER.kind, "computed");
+  assert.equal(T.provenance("_ZONE_HEADER"), "computed from the NT 4.0 DDK headers");
+  assert.equal(T.provTag("_ZONE_HEADER"), "headers");
+  assert.equal(T.provTag("_EPROCESS"), "records");
   const doc = loadDoc(path.join(DATA, FEB93));
   for (const n of ["_EPROCESS", "_KTHREAD", "_PEB"]) assert.ok(n in doc.opaque, n);
+});
+
+// source tags: derived from doc.sources (tools/build.py), none for a public PDB; a gap the
+// tags don't say is "partial", its line the tooltip
+test("source tags", async () => {
+  const { docTags, tagTitle } = await import("../web/src/lib/catalog.mjs");
+  const b2 = loadDoc(path.join(DATA, "ntoskrnl-4.0.1314.1-x86.json"));
+  assert.deepEqual(docTags(b2), ["records", "headers", "names"]);
+  assert.match(tagTitle(b2, "records"), /· recorded in LIBCNTPR\.LIB, 4\.0 Beta 2 DDK/);
+  const k351 = loadDoc(path.join(DATA, NT351));
+  assert.deepEqual(docTags(k351), ["headers", "offsets", "names", "partial"]);
+  assert.equal(tagTitle(k351, "partial"), "_EPROCESS, _ETHREAD, _TOKEN: names and offsets only");
+  assert.deepEqual(docTags(loadDoc(path.join(DATA, NTOS))), []);
 });

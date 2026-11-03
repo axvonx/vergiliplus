@@ -80,6 +80,7 @@ export function structLayout(T, name) {
   const st = { holes: 0, sumHoles: 0, lastLine: 0, sum: 0 };
   // names and offsets only (no member types, no size): no holes, sizes or padding
   const untyped = !!n.untyped;
+  const offW = untyped ? Math.max(3, ...members.map((m) => m.offset.toString(16).length)) : 0;
   const hx = (x) => "0x" + x.toString(16);
 
   const member = ({ m, pos }, depth) => {
@@ -99,14 +100,16 @@ export function structLayout(T, name) {
         return;
       }
     }
-    const tp = T.typeParts(bf ? node.type : m.type);
+    // names+offsets only: the offset stands where the type would ("+0x068  Pcb;")
+    const tp = untyped && m.type == null ? { pre: [{ t: "+0x" + m.offset.toString(16).padStart(offW, "0") }], suf: [] }
+      : T.typeParts(bf ? node.type : m.type);
     const ref = T.refName(m.type);
     rows.push({
-      depth, typePre: tp.pre, typeSuf: tp.suf, sep: text(tp.pre).endsWith("(*") ? "" : " ",
+      depth, typePre: tp.pre, typeSuf: tp.suf, sep: text(tp.pre).endsWith("(*") ? "" : untyped && m.type == null ? "  " : " ",
       fkind: T.memberKind(m.type), field: m.name, offset: m.offset,
       size: untyped ? null : bf ? T.sizeof(node.type) : T.sizeof(m.type),
       bits: bf ? node.bits : null, bitpos: bf ? pos : null,
-      ref, linked: T.hasPage(ref),
+      ref, linked: T.hasPage(ref), bare: untyped && m.type == null,  // offset shown inline
     });
   };
   const emitUnit = (u, depth) => u.ms.forEach((x) => member(x, depth));
@@ -227,7 +230,8 @@ export function layoutText(T, name, meta = true) {
       out += "\n" + ann(`${ind}}${r.field ? " " + r.field : ""};`, `0x${r.offset.toString(16)}  ${r.size}`);
     } else {
       const bits = r.bits != null ? ` : ${r.bits}` : "";
-      out += "\n" + ann(`${ind}${text(r.typePre)}${r.sep}${r.field}${text(r.typeSuf)}${bits};`, offAnn(r));
+      const line = `${ind}${text(r.typePre)}${r.sep}${r.field}${text(r.typeSuf)}${bits};`;
+      out += "\n" + (r.bare ? line : ann(line, offAnn(r)));
     }
   }
   return out + "\n};" + prov;

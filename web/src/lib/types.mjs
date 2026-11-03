@@ -42,11 +42,14 @@ export class Types {
     this.ptr = PTR_SIZE[doc.arch] ?? 8;
     this.prov = doc.provenance || null; this.provTypes = doc.provenanceTypes || {};
   }
-  // where a layout not from a public PDB came from: "source: …" / "computed: …", or null
+  // where a layout not from a public PDB came from, short ("recorded in LIBCNTPR.LIB,
+  // NT 4.0 DDK"; the long note is the build's sources panel), or null
   provenance(name) {
     const p = this.provTypes[name] || this.prov;
-    return p ? `${p.kind}: ${p.note}` : null;
+    return p ? p.cite || `${p.kind}: ${p.note}` : null;
   }
+  // its source tag (records, headers, debugger, offsets), or null for a public PDB
+  provTag(name) { return (this.provTypes[name] || this.prov)?.tag || null; }
   // has a page in this doc: documented, or opaque (declared/mentioned only)
   hasPage(name) { return name in this.named || name in this.opaque; }
   get(idx) { return this.t[idx] || { kind: "other" }; }
@@ -90,8 +93,8 @@ export class Types {
 
   // C declarator split around the field name: `${pre} name${suf}`, as segments
   typeParts(idx) {
-    // names+offsets-only structs (an "incomplete" build's debugger-extension data)
-    if (idx == null) return { pre: [{ t: "/* type unknown */" }], suf: [] };
+    // names+offsets-only structs (a debugger extension's data): layout.mjs shows the offset
+    if (idx == null) return { pre: [], suf: [] };
     const n = this.get(idx);
     switch (n.kind) {
       case "base": return { pre: words(n.name || "void"), suf: [] };

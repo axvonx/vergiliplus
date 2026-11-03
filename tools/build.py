@@ -90,7 +90,10 @@ Manifest (data/sources.json) is a list of entries. Source kinds:
                                                # may carry "asserts" too).
                                                # "build" is required (a sort key; buildLabel
                                                # is what shows when there is no real number);
-                                               # "note" becomes the layouts' provenance line;
+                                               # "cite" is the layouts' short provenance line
+                                               # ("recorded in X, <release> DDK"), "note"
+                                               # the long one (the build's sources panel);
+                                               # "headers"/"supplement" carry their own;
                                                # "kdext" cross-checks _EPROCESS/_ETHREAD
                                                # against the offsets that debugger extension
                                                # prints, and fails the entry on a mismatch
@@ -323,6 +326,46 @@ def merge_headers(doc, spec, pdbdir):
     shared = len(set(doc["named"]) & set(hdr["named"]))
     added = headers.merge(doc, hdr, spec["note"])
     print("  headers: %d shared types agree; %d added" % (shared, len(added)), file=sys.stderr)
+    return "%d types the headers share with the records agree" % shared if shared else None
+
+
+TAG = {"cv3": "debugger", "kdext": "offsets"}  # a "lib" entry's format -> its source tag
+
+
+def cite_sources(doc, entry, checks):
+    """doc.sources: [{tag, cite, note, url[, check]}] for the build's sources panel, and
+    tag + cite (the short form a type page shows) on every provenance object. Tags:
+    records (type records), debugger (1991 debuggers' CodeView 3), offsets (names and
+    offsets from a debugger extension), headers (computed from C headers), names (ASSERT
+    text). The manifest's "cite" is the short form, "note" the long one."""
+    url = lambda x: x.get("lib") or x.get("url") or x["image"]["lib"]
+    main = {"tag": TAG.get(entry.get("format"), "records") if "lib" in entry else "headers",
+            "cite": entry["cite"], "note": entry["note"],
+            "url": url(entry) if "lib" in entry else url(entry["headers"])}
+    srcs, by_note = [main], {entry["note"]: main}
+    h = entry.get("headers") if "lib" in entry else None
+    if h and "cite" in h:
+        by_note[h["note"]] = {"tag": "headers", "cite": h["cite"], "note": h["note"], "url": url(h)}
+    sup = entry.get("supplement")
+    if sup and "cite" in sup:
+        by_note[sup["note"]] = {"tag": "records", "cite": sup["cite"], "note": sup["note"], "url": sup["lib"]}
+    used = {p["note"] for p in doc.get("provenanceTypes", {}).values()}
+    srcs += [x for n, x in by_note.items() if x is not main and n in used]
+    for x, c in checks.items():
+        if c:
+            next(y for y in srcs if y["tag"] == x)["check"] = c
+    if doc.get("attested"):
+        files = [source_label(x).split("/")[-1] for x in entry["asserts"]]
+        srcs.append({"tag": "names", "cite": "named by %s's ASSERT text" % " and ".join(files),
+                     "note": "%d names a checked build's ASSERT text gives, without layouts" % len(doc["attested"]),
+                     "url": entry["asserts"][0]["lib"]})
+    doc["sources"] = srcs
+    for p in [doc["provenance"], *doc.get("provenanceTypes", {}).values()]:
+        x = by_note.get(p["note"], main)
+        p["tag"], p["cite"] = x["tag"], x["cite"]
+        one = re.search(r"; this type: (\S+)$", p["note"])  # cv3: one debugger of several
+        if one:
+            p["cite"] = "from %s's types, re-laid out for 32-bit" % one.group(1)
 
 
 def source_label(entry):
@@ -502,6 +545,7 @@ def handle(entry, base, pdbdir):
                               only=spec.get("only"))
         if entry.get("asserts"):
             attest(doc, assert_names(entry["asserts"], pdbdir))
+        cite_sources(doc, entry, {})
         for k in ("buildLabel", "incomplete"):
             if entry.get(k):
                 doc[k] = entry[k]
@@ -511,6 +555,7 @@ def handle(entry, base, pdbdir):
         return produced
 
     if "lib" in entry:
+        checks = {}
         build, src = entry["build"], fetch_pkg(entry, pdbdir, "lib")
         more = [fetch_pkg(dict(x, member=x.get("member", [])), pdbdir, "lib")
                 for x in entry.get("also", [])]
@@ -556,10 +601,13 @@ def handle(entry, base, pdbdir):
                 raise RuntimeError("%s disagrees with %s on %s" % (
                     entry["lib"], entry["kdext"]["url"], ", ".join(b[0] for b in bad) or "everything"))
             print("  kdext: %d/%d _EPROCESS/_ETHREAD offsets agree" % (ok, n), file=sys.stderr)
+            checks["records"] = "all %d _EPROCESS/_ETHREAD offsets agree with %s" % (
+                n, source_label(dict(entry["kdext"], lib=entry["kdext"]["url"])))
         if entry.get("headers"):
-            merge_headers(doc, entry["headers"], pdbdir)
+            checks["headers"] = merge_headers(doc, entry["headers"], pdbdir)
         if entry.get("asserts"):
             attest(doc, assert_names(entry["asserts"], pdbdir))
+        cite_sources(doc, entry, checks)
         for k in ("buildLabel", "incomplete"):
             if entry.get(k):
                 doc[k] = entry[k]

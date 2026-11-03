@@ -64,12 +64,19 @@ export function catalog() {
     // current ones first, then the historical ones
     archs: () => [...new Set(docs.map((d) => d.arch))].sort((a, b) => archRank(a) - archRank(b) || (a < b ? -1 : 1)),
     // what a build is called on screen: its build string, or doc.buildLabel where that is
-    // only a sort key ("no build number" pre-releases); inc = why it is incomplete, if so
+    // only a sort key ("no build number" pre-releases)
     label: (a, b) => docs.find((d) => d.arch === a && d.build === b)?.buildLabel || b,
-    // one entry per arch × build, newest first: {arch, build, family, label, inc}
-    versions: () => [...new Map(docs.slice().sort((x, y) => cmpBuild(y.build, x.build))
-      .map((d) => [d.arch + "/" + d.build, { arch: d.arch, build: d.build, family: d.family,
-        label: d.buildLabel || d.build, inc: d.incomplete || null }])).values()],
+    // one entry per arch × build, newest first: {arch, build, family, label, tags} (tags:
+    // the union over the build's modules, see docTags)
+    versions: () => {
+      const out = new Map();
+      for (const d of docs.slice().sort((x, y) => cmpBuild(y.build, x.build))) {
+        const k = d.arch + "/" + d.build, v = out.get(k);
+        if (v) v.tags = [...new Set([...v.tags, ...docTags(d)])].sort((a, b) => TAG_ORDER.indexOf(a) - TAG_ORDER.indexOf(b));
+        else out.set(k, { arch: d.arch, build: d.build, family: d.family, label: d.buildLabel || d.build, tags: docTags(d) });
+      }
+      return [...out.values()];
+    },
   };
   return _cat;
 }
@@ -96,7 +103,8 @@ export function slugNames(doc) {
   return _s.get(doc);
 }
 
-// every type with a page in a doc, documented and opaque: [{n, k, s, o}] by name.
+// every type with a page in a doc, documented and opaque: [{n, k, s, o[, a]}] by name
+// (a: named only, by ASSERT text: doc.attested).
 // Slugs are unique per doc (documented names claim theirs first).
 export function typeList(doc) {
   if (!_l.has(doc)) {
@@ -104,7 +112,7 @@ export function typeList(doc) {
     const out = slugNames(doc).map((n) => ({ n, k: T.get(doc.named[n]).kind, s: slug(n), o: false }));
     for (const [n, k] of Object.entries(doc.opaque)) {
       const s = slug(n);
-      if (!seen.has(s)) { seen.add(s); out.push({ n, k, s, o: true }); }
+      if (!seen.has(s)) { seen.add(s); out.push(doc.attested?.[n] ? { n, k, s, o: true, a: true } : { n, k, s, o: true }); }
     }
     _l.set(doc, out.sort((a, b) => (a.n < b.n ? -1 : a.n > b.n ? 1 : 0)));
   }
@@ -116,10 +124,29 @@ const archRank = (a) => (ARCHS.includes(a) ? ARCHS.indexOf(a) : ARCHS.length);
 
 export const ctxPath = (a, b, m) => `/v/${a}/${b}/${m}`;
 
-// a build's row with its display label and incomplete flag appended where they apply:
-// [...row] | [...row, label] | [...row, label, 1]
+// a build's row with its display label and source tags appended where they apply:
+// [...row] | [...row, label] | [...row, label, tags] (tags as given: names, or
+// [tag, tooltip] pairs)
 export const vrow = (x, row) =>
-  x.inc ? [...row, x.label, 1] : x.label !== x.build ? [...row, x.label] : row;
+  x.tags?.length ? [...row, x.label, x.tags] : x.label !== x.build ? [...row, x.label] : row;
+
+// Where a build's layouts come from, as tags (doc.sources, written by tools/build.py);
+// none for a public PDB. "partial" marks a build with a hole the tags don't say
+// (doc.incomplete: one line naming the gap).
+export const TAGS = {
+  records: "Microsoft's own type records (CodeView) in a library or binary",
+  debugger: "a 1991 kernel debugger's own types, re-laid out for 32-bit",
+  headers: "computed by compiling the DDK or SDK headers",
+  offsets: "member names and offsets only, as a debugger extension prints them",
+  names: "names only, from a checked build's ASSERT text",
+  partial: "",
+};
+const TAG_ORDER = Object.keys(TAGS);
+export const docTags = (doc) => [...new Set((doc.sources || []).map((s) => s.tag)),
+  ...(doc.incomplete ? ["partial"] : [])].sort((a, b) => TAG_ORDER.indexOf(a) - TAG_ORDER.indexOf(b));
+// a tag's tooltip in one doc: what it means, then the sources it stands for
+export const tagTitle = (doc, tag) => tag === "partial" ? doc.incomplete
+  : [TAGS[tag], ...(doc.sources || []).filter((s) => s.tag === tag).map((s) => "· " + s.cite)].join("\n");
 
 // a family name split for display: product = the group heading, release = what a row
 // shows. "Windows 10 1703" -> {Windows 10, 1703}, "Windows Server 2016" -> {Windows
@@ -135,8 +162,8 @@ export const channel = (family) =>
   /server/i.test(family) ? "server" : /canary|insider|dev|beta|preview|pre-release|\bRC\d/i.test(family) ? "insider" : "client";
 
 // The search palette's rows (/search-index.json; /member-index.json refers to t by
-// position): v = [[arch, build, family, channel[, label, incomplete]]] newest first (label
-// only where it isn't the build string, the flag only on incomplete builds), m = [module],
+// position): v = [[arch, build, family, channel[, label, tags]]] newest first (label
+// only where it isn't the build string, tags only where a build has them), m = [module],
 // t = [[name, kind, slug, module#, [v# defining it], [v# where opaque]]] by name.
 let _rows = null;
 export function searchRows() {

@@ -31,4 +31,4 @@ struct _DEVICE_OBJECT {
     unsigned long Spare1;                                   /* 0xac  4 */
     union _LARGE_INTEGER Spare2;                            /* 0xb0  8 */
 };
-/* computed: Windows NT 3.1 beta DDK headers (DDK/INC/NTDDK.H, NTDEF.H, ...) compiled with MSVC 32-bit layout rules (clang); build 404.1 per the DDK's version.h */
+/* computed from the Feb 1993 DDK headers */

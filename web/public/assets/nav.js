@@ -19,7 +19,9 @@
   };
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
   // a kind filter: "all", "opaque", or a kind among *documented* types
-  const kindOk = (kind, k, opaque) => kind === "all" || (kind === "opaque" ? opaque : !opaque && k === kind);
+  // kind filter: struct/union/enum (defined), opaque (declared only), named (ASSERT text only)
+  const kindOk = (kind, k, opaque, named) => kind === "all" ||
+    (kind === "named" ? named : kind === "opaque" ? opaque && !named : !opaque && k === kind);
 
   // ---- sidebar -------------------------------------------------------------
   const sb = { items: [], ctx: "", q: "", kind: "all", loc: null };
@@ -41,16 +43,17 @@
     const root = document.getElementById("vp-sb");
     if (!root || !sb.loc) return;
     const v = sb.q.toLowerCase();
-    const shown = sb.items.filter((it) => kindOk(sb.kind, it.k, it.o) && (!v || it.n.toLowerCase().includes(v)));
-    const c = { all: sb.items.length, struct: 0, union: 0, enum: 0, opaque: 0 };
-    for (const it of sb.items) it.o ? c.opaque++ : c[it.k]++;
+    const shown = sb.items.filter((it) => kindOk(sb.kind, it.k, it.o, it.a) && (!v || it.n.toLowerCase().includes(v)));
+    const c = { all: sb.items.length, struct: 0, union: 0, enum: 0, opaque: 0, named: 0 };
+    for (const it of sb.items) it.a ? c.named++ : it.o ? c.opaque++ : c[it.k]++;
     root.querySelectorAll(".btn[data-k]").forEach((b) => {
       b.classList.toggle("on", b.dataset.k === sb.kind);
       b.title = `${c[b.dataset.k] || 0} ${b.dataset.k}`;
+      if (b.dataset.k === "named") b.hidden = !c.named;
     });
     root.querySelector(".sb-count").textContent = `${shown.length} types`;
     root.querySelector(".sb-list").innerHTML = shown.map((it) =>
-      `<a class="sb-item${it.s === sb.loc.slug ? " active" : ""}${it.o ? " op" : ""}" href="${esc(typeUrl(sb.loc.arch, sb.loc.module, it.s, sb.loc.build))}">${dot(it.k)}${esc(it.n)}</a>`).join("");
+      `<a class="sb-item${it.s === sb.loc.slug ? " active" : ""}${it.o ? " op" : ""}${it.a ? " nm" : ""}" href="${esc(typeUrl(sb.loc.arch, sb.loc.module, it.s, sb.loc.build))}">${dot(it.k)}${esc(it.n)}</a>`).join("");
     nearest(root.querySelector(".sb-list"), root.querySelector(".sb-item.active"));
   };
   const sbSync = () => {
@@ -79,7 +82,7 @@
     const v = tl.q.toLowerCase();
     document.querySelectorAll("[data-tl] a").forEach((a) => {
       const k = (a.className.match(/\bk-(\w+)/) || [])[1];
-      a.hidden = !(kindOk(tl.kind, k, a.classList.contains("op")) && (!v || a.textContent.toLowerCase().includes(v)));
+      a.hidden = !(kindOk(tl.kind, k, a.classList.contains("op"), a.classList.contains("nm")) && (!v || a.textContent.toLowerCase().includes(v)));
     });
     document.querySelectorAll("[data-tl-ctrl] .btn[data-k]").forEach((b) => b.classList.toggle("on", b.dataset.k === tl.kind));
   };
@@ -92,7 +95,7 @@
   });
 
   // ---- home: jump into the module last viewed for each build, else the kernel ----
-  const homeLinks = () => document.querySelectorAll("a.vrow[data-ab]").forEach((a) => {
+  const homeLinks = () => document.querySelectorAll(".vrow a[data-ab]").forEach((a) => {
     const last = store(`vp-mod:${a.dataset.ab}`);
     const mod = last && a.dataset.mods.split(",").includes(last) ? last : a.dataset.def;
     a.href = `/v/${a.dataset.ab}/${mod}.html`;
@@ -101,8 +104,8 @@
   // ---- context bar build switcher: same type in the chosen build, else its listing ----
   // The page ships only its own build's button; the popover (created here, grouped by
   // product, newest first) comes from /builds.json: rows [build, family, product,
-  // release[, label, incomplete]]. On a type page this also re-syncs the button, steps
-  // and module links to the shown build.
+  // release[, label, [[tag, tooltip]]]]. On a type page this also re-syncs the button,
+  // source tags, steps and module links to the shown build.
   let builds = null;
   const bp = { list: null, has: "", cur: "", sel: -1, shown: [] };
   const btn = () => document.querySelector(".cb-build[data-am]");
@@ -112,8 +115,12 @@
   // the build's name as the button and rows show it: "10 1703", "Server 2016", "8"
   const bname = (x) => `<span class="cbb-p">${esc(short(x[2]))}</span>` +
     (x[3] !== short(x[2]) ? `<span class="cbb-r">${esc(x[3])}</span>` : "");
-  const status = (st, inc) => (inc ? `<span class="inc">incomplete</span>` : "") +
-    (st === "o" ? `<span class="cbb-o">opaque</span>` : st === "-" ? `<span class="cbb-o">not defined</span>` : "");
+  const status = (st) =>
+    st === "o" ? `<span class="cbb-o">opaque</span>` : st === "-" ? `<span class="cbb-o">not defined</span>` : "";
+  // a build's source tags (none for a public PDB); in the popover, plain
+  const tagsHtml = (x, href) => (x[5] || []).map(([t, title]) => href
+    ? `<a class="tag t-${t}" href="${esc(href)}#sources" title="${esc(title)}">${t}</a>`
+    : `<span class="tag t-${t}" title="${esc(title)}">${t}</span>`).join("");
   const barSync = () => {
     const s = btn();
     if (!s) return;
@@ -130,7 +137,9 @@
         const ci = list.findIndex(([b]) => b === cur);
         if (ci >= 0) {
           s.title = list[ci][1];
-          s.innerHTML = bname(list[ci]) + `<span class="cbb-l">${esc(lab(list[ci]))}</span>` + status(mark(ci) === "o" ? "o" : "d", list[ci][5]);
+          s.innerHTML = bname(list[ci]) + `<span class="cbb-l">${esc(lab(list[ci]))}</span>` + status(mark(ci) === "o" ? "o" : "d");
+          const tg = document.querySelector("[data-tags]");
+          if (tg) tg.innerHTML = tagsHtml(list[ci], s.dataset.l.replace("@", encodeURIComponent(cur)));
         }
         const step = document.querySelector("[data-step]");
         if (!step || !has) return;
@@ -161,7 +170,7 @@
         const st = bp.has ? bp.has[i] : "d";
         out += `<div class="bp-opt${st === "-" ? " absent" : st === "o" ? " opq" : ""}${x[0] === bp.cur ? " cur" : ""}${k === bp.sel ? " sel" : ""}"` +
           ` role="option" aria-selected="${x[0] === bp.cur}" data-k="${k}"><span class="cbb-r">${esc(x[3])}</span>` +
-          `<span class="cbb-l">${esc(lab(x))}</span>${status(st, x[5])}</div>`;
+          `<span class="cbb-l">${esc(lab(x))}</span>${tagsHtml(x)}${status(st)}</div>`;
         k++;
       }
     }
@@ -245,7 +254,7 @@
     `<div class="ck-foot">↑↓ move · ↵ open · click a square for that build · esc close · / or ⌘K to open</div></div></div>`;
   // once there is more than one architecture a build is named "<build> · <arch>"
   const arched = () => new Set(ck.ix.v.map((v) => v[0])).size > 1;
-  // v = [arch, build, family, channel[, label, incomplete]]: the label is what to show
+  // v = [arch, build, family, channel[, label, tags]]: the label is what to show
   const vname = (v) => (arched() ? `${v[4] ?? v[1]} · ${v[0]}` : v[4] ?? v[1]);
   // per-version on/off, recomputed only when F.vOff is replaced (it is never mutated)
   let onFor = null, on = [];

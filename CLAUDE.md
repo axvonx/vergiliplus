@@ -74,13 +74,25 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   type records Microsoft itself shipped: DDK/SDK libraries (`lib` manifest kind,
   `tools/legacy/`), 1991 kernel debuggers. Only Microsoft-published material (or an
   archive.org mirror of it, pinned by sha256) — never leaked source. Such a doc carries
-  `provenance: {kind: "source"|"computed", note}` (per type: `provenanceTypes`), rendered as
-  a last `/* kind: note */` code line (copy includes it). Pre-release builds without a
-  number have a sortable `build` key (`0.1991.10.0`) and `buildLabel: "no build number"`,
-  shown wherever builds are (the exception to "labels come from binaries"). Partial builds
-  carry `incomplete: "<why>"`: a red `incomplete` marker on home, select and type page.
-  An `untyped` struct (NT 3.51 kernel: names+offsets from KDEXT's !processfields) has
-  members with `type: null`, rendered `/* type unknown */`, without holes, sizes or size.
+  `provenance: {kind, tag, cite, note}` (per type: `provenanceTypes`) and `sources:
+  [{tag, cite, note, url[, check]}]` (build.py `cite_sources`, from the manifest's `cite`
+  and `note`). Tags: `records`, `debugger`, `headers`, `offsets`, `names` (+ `partial`),
+  explained once on `/about.html`; the context bar, home and popover show a build's
+  tags, a type's view its own tag, and `cite` ends the code (copy includes it). The long
+  `note` only shows in the listing's Sources panel (`#sources`, where tags link).
+  Pre-release builds without a number have a sortable `build` key (`0.1991.10.0`) and
+  `buildLabel: "no build number"`, shown wherever builds are (the exception to "labels
+  come from binaries"). A build with a gap its tags don't say carries `incomplete: "<the
+  gap, one line>"`: the `partial` tag, the line its tooltip. An `untyped` struct (NT 3.51
+  kernel: names+offsets from KDEXT's !processfields) has members with `type: null`,
+  rendered `+0x068  Pcb;`, without holes, sizes or size.
+- **Derivation prose** (manifest `cite`, `note`, `incomplete`; page text): a `cite` is
+  `<verb> <file>, <release>` in about 60 characters (*recorded in*, *computed from*,
+  *names and offsets printed by*, *from X's types, re-laid out*); a `note` leads with the
+  media and path; `incomplete` states the gap, never the method. A method is explained
+  once, on the about page, never in a note ("compiled with MSVC layout rules"). No
+  nested parentheses or semicolon chains. Vocabulary: recorded, computed, named,
+  offsets; not "derived", "source:" or "attested" in reader-facing text.
   Where a build's sources define a type differently (`"variants": true` on a multi-file
   `lib` entry), `doc.variants = {name: [{type, note}]}` keeps each definition (the chosen
   one is `named[name]`); the page shows one at a time under a select (struct.js).
@@ -88,7 +100,8 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   declarations, plus struct/union/enum names that `llvm-undname` finds in public
   symbols, kept fully qualified, e.g. `AutoBoost::_AB_PRIORITY`). They live in
   `doc.opaque` ({name: kind}); in a build where a type is opaque its view is the
-  declaration, "defined in" and used in. Dimmed in lists.
+  declaration, "defined in" (a range, oldest → newest, full list in a disclosure) and used
+  in. Dimmed in lists; names only (`doc.attested`) get a hollow marker and a "named" filter.
 - **Header layouts** (`"headers"`: a pinned set of a DDK's C headers, files fetched one by
   one from the archive.org image, or out of a whole fetched `"image"` (a BIN/MDF archive.org
   can't list inside; `"rawcd"` step), `sha256` over "<sha256>  <path>\n" per sorted file):
@@ -106,13 +119,13 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   (`provenanceTypes`), and the build fails if a header member the records also have sits
   elsewhere in them (by name: 1993 CodeView drops anonymous aggregates, so 404.1's
   `_LARGE_INTEGER` records only `QuadPart`). Alone, they are a build's doc
-  (3.10.340.1, 3.10.404.1, 3.50.807), marked incomplete. Clang predefines `i386`; non-x86
+  (3.10.340.1, 3.10.404.1, 3.50.807.1), marked `partial`. Clang predefines `i386`; non-x86
   arches undefine it (1992 headers test it).
 - **Attested names** (`"asserts"` on a `lib` entry): a debug build keeps each ASSERT's
   source text, and `sizeof(X)`, `FIELD_OFFSET(X, …)` and a pointer cast `(PX)` name a
   type for certain. Names the build has no layout for join `doc.opaque`, evidence in
-  `doc.attested` ({page: {as, how, text, file[, members]}}), shown verbatim on the page
-  (`/* named only */`). Page name: `_X` where a recorded doc has the tag `_X`, else `X`;
+  `doc.attested` ({page: {as, how, text, file[, members]}}), shown on the page as the
+  ASSERT verbatim, the file and the members it names (`/* named only */`). Page name: `_X` where a recorded doc has the tag `_X`, else `X`;
   kind from that doc, else `"type"` (unknown, no keyword). Never attribute members via
   variables (`Process->Pcb`): that's inference. Yield is tens per build, not hundreds
   (April 1991 kernel 18, all 95 December 1991 checked binaries 40, the 3.1-4.0 checked

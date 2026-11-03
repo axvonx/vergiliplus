@@ -83,7 +83,7 @@ html.side-collapsed .docs-side { display: none; }
 .vlist { display: grid; gap: 0.6rem; }
 .vrow { display: flex; align-items: baseline; gap: 1.2rem; padding: 1rem 1.5rem; background: var(--panel);
   border-left: 4px solid var(--ch); border-radius: 0 0.5rem 0.5rem 0; }
-.vrow:hover { background: color-mix(in srgb, var(--ch) 10%, var(--panel)); }
+.vrow { align-items: center; flex-wrap: wrap; }
 .vr-fam { color: var(--ch); font-weight: 600; font-size: 2.4rem; flex: 1 1 auto; min-width: 0; }
 /* an architecture, wherever one is named: neutral, so it adds no colour of its own */
 .arch { display: inline-block; padding: 0 0.6rem; border: 1px solid color-mix(in srgb, var(--mute) 55%, transparent);
@@ -212,18 +212,57 @@ a.str-link:hover { color: yellow; }
 .op { opacity: 0.6; font-style: italic; }
 .kind-btn[data-k="opaque"] { color: var(--mute); }
 .opaque-note { color: var(--mute); font-size: 1.6rem; margin: 1.2rem 0 0.4rem; }
-.opaque-note b { color: var(--mint); }
-.opaque-note code.att { display: block; margin: 0.6rem 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--fg); }
-.defined-in { font-size: 1.6rem; color: var(--mute); }
-.defined-in a { display: inline-block; margin: 0 1rem 0 0.4rem; color: var(--gold); font-family: var(--mono); }
+/* names only (a checked build's ASSERT text): not dimmed like opaque, a hollow marker */
+.op.nm { opacity: 0.85; font-style: normal; }
+.nm .dot { background: none; box-shadow: inset 0 0 0 1.5px var(--k-union); }
+.kind-btn[data-k="named"] { color: var(--k-union); }
+/* the ASSERT evidence: label / value rows */
+.att { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.4rem 1.4rem; margin: 1.2rem 0; font-size: 1.6rem; }
+.att dt { color: var(--mute); }
+.att dd { margin: 0; color: var(--fg); min-width: 0; overflow-wrap: anywhere; }
+.att code { white-space: pre-wrap; }
+.defined-in { display: grid; gap: 0.4rem; font-size: 1.6rem; color: var(--mute); }
+.defined-in a { display: inline-block; margin: 0 0.8rem 0 0; color: var(--gold); font-family: var(--mono); }
+.defined-in summary { cursor: pointer; }
+.defined-in details[open] summary { margin-bottom: 0.4rem; }
+.defined-in .n { color: var(--mute); }
 
-/* ---- layouts not from a public PDB: provenance line; partial builds marked incomplete ---- */
+/* ---- layouts not from a public PDB: a source tag (about.astro), a short provenance line ---- */
 .sc-prov { white-space: normal; }
 .sc-prov .sc-code { color: var(--comment); font-style: italic; padding-left: 0; text-indent: 0; }
-.inc { color: var(--red); border: 1px solid var(--red); border-radius: 3px; padding: 0 0.5rem; font-size: 1.3rem;
-  font-family: var(--mono); text-transform: lowercase; white-space: nowrap; }
-.inc-note { color: var(--mute); font-size: 1.6rem; margin: 0 0 1rem; }
-option.inc { color: var(--red); }
+.tag { display: inline-block; padding: 0 0.5rem; border: 1px solid; border-radius: 0.3rem; font: 600 1.2rem/1.6 var(--mono);
+  white-space: nowrap; text-transform: lowercase; vertical-align: middle; --t: var(--mute); color: var(--t);
+  border-color: color-mix(in srgb, var(--t) 45%, transparent); background: color-mix(in srgb, var(--t) 8%, transparent); }
+a.tag:hover { color: #fff; border-color: var(--t); }
+.t-records { --t: var(--k-enum); } .t-debugger { --t: var(--k-struct); } .t-headers { --t: var(--kw); }
+.t-offsets { --t: var(--orange); } .t-names { --t: var(--k-union); } .t-partial { --t: var(--mute); }
+.cb-tags, .vr-tags { display: inline-flex; flex-wrap: wrap; gap: 0.4rem; }
+.cb-tags:empty { display: none; }
+.sc-ctrls .tag { align-self: center; }
+/* a build's sources (listing pages; the tags link #sources) */
+.srcs { margin: 0 0 1.5rem; padding: 0.6rem 1rem; background: var(--panel); border-radius: 0.3rem; font-size: 1.5rem; }
+.srcs summary { cursor: pointer; color: var(--mint); font-weight: 700; }
+.srcs-gap { color: var(--mute); font-weight: 400; }
+.srcs ul { list-style: none; margin: 0.8rem 0 0; padding: 0; display: grid; gap: 0.8rem; }
+.srcs li { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: 1rem; align-items: start; }
+.srcs li .tag { justify-self: start; }
+.srcs li div { display: grid; gap: 0.1rem; min-width: 0; }
+.srcs-cite { color: var(--fg); }
+.srcs-note { color: var(--mute); overflow-wrap: anywhere; }
+.srcs-check { color: var(--k-enum); }
+.srcs-url { font-family: var(--mono); font-size: 1.3rem; overflow-wrap: anywhere; }
+.srcs-about { margin: 0.8rem 0 0; color: var(--mute); }
+/* about page */
+.about { max-width: 80rem; font-size: 1.7rem; line-height: 1.6; }
+.about h1 { font-size: 3rem; margin: 0 0 1rem; }
+.about h2 { font-size: 2.2rem; margin: 2.4rem 0 0.6rem; }
+.about p { margin: 0.6rem 0; color: var(--mint); }
+.about-tags { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 1rem 1.6rem; }
+.about-tags dt { padding-top: 0.2rem; }
+.about-tags dd { margin: 0; }
+/* home: a release's architectures, each its own link */
+.vr-archs { display: inline-flex; flex-wrap: wrap; gap: 0.4rem; }
+.vrow a.vr-fam:hover { text-decoration: underline; }
 /* ---- several definitions of one type in a build's sources ---- */
 .var { color: var(--orange); border: 1px solid var(--orange); border-radius: 3px; padding: 0 0.5rem; font-size: 1.3rem;
   font-family: var(--mono); white-space: nowrap; }

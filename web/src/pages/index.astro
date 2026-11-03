@@ -1,34 +1,46 @@
 ---
-// Home: one row per Windows version, newest first, colour-coded by channel, grouped
+// Home: one row per Windows release, newest first, colour-coded by channel, grouped
 // under its product (Windows 10, Windows Server, …) in order of each one's newest build.
-// A row links to the build's kernel listing; nav.js retargets it to the module
-// last viewed for that build.
+// A release's architectures are chips on its row, each linking that arch's kernel
+// listing (the row's name links the first); nav.js retargets each to the module last
+// viewed for that build. Source tags (none for a public PDB) are the union over its arches
+// and modules; "partial" is per module, so it stays in the context bar.
 import Layout from "../layouts/Layout.astro";
-import { catalog, ctxPath, channel, product } from "../lib/catalog.mjs";
+import { catalog, ctxPath, channel, product, TAGS } from "../lib/catalog.mjs";
 import { modInfo } from "../lib/modules.mjs";
 const cat = catalog();
-const versions = cat.versions().map((d) => {
-    const mods = cat.modules(d.arch, d.build);
-    const kernel = mods.includes("ntoskrnl") ? "ntoskrnl" : mods.find((m) => modInfo(m).ring === "kernel") || mods[0];
-    return { ...d, mods, kernel, ...product(d.family) };
-  });
+const rows = new Map();  // family -> {family, product, release, arches: [version]}, newest first
+for (const d of cat.versions()) {
+  const mods = cat.modules(d.arch, d.build);
+  const kernel = mods.includes("ntoskrnl") ? "ntoskrnl" : mods.find((m) => modInfo(m).ring === "kernel") || mods[0];
+  const r = rows.get(d.family) || rows.set(d.family, { family: d.family, ...product(d.family), arches: [] }).get(d.family);
+  r.arches.push({ ...d, mods, kernel });
+}
+const rank = (a) => cat.archs().indexOf(a);
+for (const r of rows.values()) {
+  r.arches.sort((a, b) => rank(a.arch) - rank(b.arch));
+  r.labels = [...new Set(r.arches.map((v) => v.label))];
+  r.tags = Object.keys(TAGS).filter((t) => t !== "partial" && r.arches.some((v) => v.tags.includes(t)));
+}
 const groups = new Map();
-for (const v of versions) (groups.get(v.product) || groups.set(v.product, []).get(v.product)).push(v);
-const multiArch = cat.archs().length > 1;
+for (const r of rows.values()) (groups.get(r.product) || groups.set(r.product, []).get(r.product)).push(r);
+const href = (v) => `${ctxPath(v.arch, v.build, v.kernel)}.html`;
+const data = (v) => ({ "data-ab": `${v.arch}/${v.build}`, "data-mods": v.mods.join(","), "data-def": v.kernel });
 ---
 <Layout>
-  {[...groups].map(([name, vs]) => (
+  {[...groups].map(([name, rs]) => (
     <section class="vgroup">
       <h2 class="vg-name">{name}</h2>
       <ul class="vlist">
-        {vs.map((v) => (
-          <li><a class={`vrow ch-${channel(v.family)}`} href={`${ctxPath(v.arch, v.build, v.kernel)}.html`}
-                 data-ab={`${v.arch}/${v.build}`} data-mods={v.mods.join(",")} data-def={v.kernel} title={v.family}>
-            <span class="vr-fam">{v.release}</span>
-            {multiArch && <span class="arch">{v.arch}</span>}
-            <span class="vr-build">{v.label}</span>
-            {v.inc && <span class="inc" title={v.inc}>incomplete</span>}
-          </a></li>
+        {rs.map((r) => (
+          <li class={`vrow ch-${channel(r.family)}`} title={r.family}>
+            <a class="vr-fam" href={href(r.arches[0])} {...data(r.arches[0])}>{r.release}</a>
+            <span class="vr-archs">{r.arches.map((v) => (
+              <a class="arch" href={href(v)} {...data(v)} title={`${r.family} on ${v.arch}: ${v.label}`}>{v.arch}</a>))}</span>
+            {r.tags.length > 0 && <span class="vr-tags">{r.tags.map((t) => (
+              <span class={`tag t-${t}`} title={TAGS[t]}>{t}</span>))}</span>}
+            <span class="vr-build">{r.labels.join(" · ")}</span>
+          </li>
         ))}
       </ul>
     </section>

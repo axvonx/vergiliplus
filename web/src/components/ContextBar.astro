@@ -6,7 +6,7 @@
 // On a listing the build is the page's. On a type page (`page` from lib/panel.mjs) it
 // is the URL's #<build>: this renders the default build and nav.js re-syncs the select,
 // steps and module links when struct.js switches builds (vp:build).
-import { catalog, ctxPath, product } from "../lib/catalog.mjs";
+import { catalog, ctxPath, product, docTags, tagTitle } from "../lib/catalog.mjs";
 import { modInfo } from "../lib/modules.mjs";
 import { typePath } from "../lib/panel.mjs";
 const { arch, build, module, type, page } = Astro.props;
@@ -15,7 +15,9 @@ const fam = (b) => cat.get(arch, b, module)?.family || "";
 // the button names the build as nav.js does: short product, release where it differs
 const cp = product(fam(build)), cpShort = cp.product.replace(/^Windows /, "");
 const lab = (b) => cat.get(arch, b, module)?.buildLabel || b;
-const inc = (b) => !!cat.get(arch, b, module)?.incomplete;
+// where the shown build's layouts come from (none for a public PDB): tags linking its
+// listing's sources panel, the sources on hover; nav.js redraws them on a build switch
+const cur = cat.get(arch, build, module), tags = docTags(cur);
 const listHref = (b, m = module) => `${ctxPath(arch, b, m)}.html`;
 const multiArch = cat.archs().length > 1;
 
@@ -55,9 +57,10 @@ const inMod = (m) => page && catalog().docs.some((d) => d.arch === arch && d.mod
     <span class="cbb-p">{cpShort}</span>
     {cp.release !== cpShort && <span class="cbb-r">{cp.release}</span>}
     <span class="cbb-l">{lab(build)}</span>
-    {inc(build) && <span class="inc">incomplete</span>}
     {page && page.has[builds.indexOf(build)] === "o" && <span class="cbb-o">opaque</span>}
   </button>
+  <span class="cb-tags" data-tags>{tags.map((t) => (
+    <a class={`tag t-${t}`} href={`${listHref(build)}#sources`} title={tagTitle(cur, t)}>{t}</a>))}</span>
   <span class="cb-sep">/</span>
   <span class="cb-mods">
     {mods.map((m) => {

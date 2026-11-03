@@ -43,4 +43,4 @@ struct _IRP {
         struct _KAPC Apc;                                   /* 0x40  48 */
     } Tail;                                                 /* 0x40  48 */
 };
-/* computed: Windows NT 3.1 beta DDK headers (DDK/INC/NTDDK.H, NTDEF.H, ...) compiled with MSVC 32-bit layout rules (clang); build 404.1 per the DDK's version.h */
+/* computed from the Feb 1993 DDK headers */

@@ -1,60 +1,60 @@
 struct _EPROCESS {
-    /* type unknown */ Pcb;                                 /* 0x0 */
-    /* type unknown */ ExitStatus;                          /* 0x68 */
-    /* type unknown */ LockEvent;                           /* 0x6c */
-    /* type unknown */ LockCount;                           /* 0x7c */
-    /* type unknown */ CreateTime;                          /* 0x80 */
-    /* type unknown */ ExitTime;                            /* 0x88 */
-    /* type unknown */ LockOwner;                           /* 0x90 */
-    /* type unknown */ UniqueProcessId;                     /* 0x94 */
-    /* type unknown */ ActiveProcessLinks;                  /* 0x98 */
-    /* type unknown */ QuotaPeakPoolUsage;                  /* 0xa0 */
-    /* type unknown */ QuotaPoolUsage;                      /* 0xa8 */
-    /* type unknown */ PagefileUsage;                       /* 0xb0 */
-    /* type unknown */ CommitCharge;                        /* 0xb4 */
-    /* type unknown */ PeakPagefileUsage;                   /* 0xb8 */
-    /* type unknown */ PeakVirtualSize;                     /* 0xbc */
-    /* type unknown */ VirtualSize;                         /* 0xc0 */
-    /* type unknown */ Vm;                                  /* 0xc8 */
-    /* type unknown */ LastProtoPteFault;                   /* 0xf8 */
-    /* type unknown */ DebugPort;                           /* 0xfc */
-    /* type unknown */ ExceptionPort;                       /* 0x100 */
-    /* type unknown */ ObjectTable;                         /* 0x104 */
-    /* type unknown */ Token;                               /* 0x108 */
-    /* type unknown */ WorkingSetLock;                      /* 0x10c */
-    /* type unknown */ WorkingSetPage;                      /* 0x12c */
-    /* type unknown */ ProcessOutswapEnabled;               /* 0x130 */
-    /* type unknown */ ProcessOutswapped;                   /* 0x131 */
-    /* type unknown */ AddressSpaceInitialized;             /* 0x132 */
-    /* type unknown */ AddressSpaceDeleted;                 /* 0x133 */
-    /* type unknown */ AddressCreationLock;                 /* 0x134 */
-    /* type unknown */ ForkInProgress;                      /* 0x158 */
-    /* type unknown */ VmOperation;                         /* 0x15c */
-    /* type unknown */ ForkWasSuccessful;                   /* 0x15e */
-    /* type unknown */ VmOperationEvent;                    /* 0x160 */
-    /* type unknown */ PageDirectoryPte;                    /* 0x164 */
-    /* type unknown */ LastFaultCount;                      /* 0x168 */
-    /* type unknown */ VadRoot;                             /* 0x170 */
-    /* type unknown */ VadHint;                             /* 0x174 */
-    /* type unknown */ CloneRoot;                           /* 0x178 */
-    /* type unknown */ NumberOfPrivatePages;                /* 0x17c */
-    /* type unknown */ NumberOfLockedPages;                 /* 0x180 */
-    /* type unknown */ ExitProcessCalled;                   /* 0x186 */
-    /* type unknown */ CreateProcessReported;               /* 0x187 */
-    /* type unknown */ SectionHandle;                       /* 0x188 */
-    /* type unknown */ Peb;                                 /* 0x18c */
-    /* type unknown */ SectionBaseAddress;                  /* 0x190 */
-    /* type unknown */ QuotaBlock;                          /* 0x194 */
-    /* type unknown */ LastThreadExitStatus;                /* 0x198 */
-    /* type unknown */ WorkingSetWatch;                     /* 0x19c */
-    /* type unknown */ LpcPort;                             /* 0x1a0 */
-    /* type unknown */ InheritedFromUniqueProcessId;        /* 0x1a4 */
-    /* type unknown */ GrantedAccess;                       /* 0x1a8 */
-    /* type unknown */ LdtInformation;                      /* 0x1b0 */
-    /* type unknown */ VadFreeHint;                         /* 0x1b4 */
-    /* type unknown */ VdmObjects;                          /* 0x1b8 */
-    /* type unknown */ ProcessMutant;                       /* 0x1bc */
-    /* type unknown */ ImageFileName;                       /* 0x1dc */
-    /* type unknown */ VmTrimFaultValue;                    /* 0x1ec */
+    +0x000  Pcb;
+    +0x068  ExitStatus;
+    +0x06c  LockEvent;
+    +0x07c  LockCount;
+    +0x080  CreateTime;
+    +0x088  ExitTime;
+    +0x090  LockOwner;
+    +0x094  UniqueProcessId;
+    +0x098  ActiveProcessLinks;
+    +0x0a0  QuotaPeakPoolUsage;
+    +0x0a8  QuotaPoolUsage;
+    +0x0b0  PagefileUsage;
+    +0x0b4  CommitCharge;
+    +0x0b8  PeakPagefileUsage;
+    +0x0bc  PeakVirtualSize;
+    +0x0c0  VirtualSize;
+    +0x0c8  Vm;
+    +0x0f8  LastProtoPteFault;
+    +0x0fc  DebugPort;
+    +0x100  ExceptionPort;
+    +0x104  ObjectTable;
+    +0x108  Token;
+    +0x10c  WorkingSetLock;
+    +0x12c  WorkingSetPage;
+    +0x130  ProcessOutswapEnabled;
+    +0x131  ProcessOutswapped;
+    +0x132  AddressSpaceInitialized;
+    +0x133  AddressSpaceDeleted;
+    +0x134  AddressCreationLock;
+    +0x158  ForkInProgress;
+    +0x15c  VmOperation;
+    +0x15e  ForkWasSuccessful;
+    +0x160  VmOperationEvent;
+    +0x164  PageDirectoryPte;
+    +0x168  LastFaultCount;
+    +0x170  VadRoot;
+    +0x174  VadHint;
+    +0x178  CloneRoot;
+    +0x17c  NumberOfPrivatePages;
+    +0x180  NumberOfLockedPages;
+    +0x186  ExitProcessCalled;
+    +0x187  CreateProcessReported;
+    +0x188  SectionHandle;
+    +0x18c  Peb;
+    +0x190  SectionBaseAddress;
+    +0x194  QuotaBlock;
+    +0x198  LastThreadExitStatus;
+    +0x19c  WorkingSetWatch;
+    +0x1a0  LpcPort;
+    +0x1a4  InheritedFromUniqueProcessId;
+    +0x1a8  GrantedAccess;
+    +0x1b0  LdtInformation;
+    +0x1b4  VadFreeHint;
+    +0x1b8  VdmObjects;
+    +0x1bc  ProcessMutant;
+    +0x1dc  ImageFileName;
+    +0x1ec  VmTrimFaultValue;
 };
-/* source: NT 3.51 Workstation CD, SUPPORT/DEBUG/I386/KDEXTX86.DLL !processfields, !threadfields and !tokenfields output */
+/* names and offsets printed by KDEXTX86.DLL, NT 3.51 */
