@@ -38,9 +38,8 @@ inventories stay in `$VP_IMAGES/research/` (not in the repo).
   WINNT.H for ntdll Dec 1991 → 4.0; NT 3.1 kernel from the July 1994 MSDN DDK headers.
 - Also done: NT 3.1 Alpha (528), 404.1's checked kernels (March 1993 DDK) and SDK
   (MDF), NT 4.0 Beta 2 (1314: x86/PPC LIBCNTPR.LIB records, MIPS/Alpha headers, checked
-  kernels). April 1995 disc 5's "3.50.800.1" kernels are 3.5 RTM (807) checked again.
-- Not yet: Beta 2's ntdll (its DDK ships WINNT.H without WINDEF.H; the Beta 2 SDK
-  would do); drivers' names (NTFS.SYS, FASTFAT.SYS on the checked discs) belong to
+  kernels; ntdll from the Beta 2 SDK). April 1995 disc 5's "3.50.800.1" kernels are 3.5 RTM (807) checked again.
+- Not yet: drivers' names (NTFS.SYS, FASTFAT.SYS on the checked discs) belong to
   modules the site doesn't have yet.
 
 ## Facts that cost time to find
