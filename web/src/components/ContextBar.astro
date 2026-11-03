@@ -29,21 +29,29 @@ const i = tb.indexOf(build);
 const prev = i > 0 ? tb[i - 1] : null;
 const next = i >= 0 && i < tb.length - 1 ? tb[i + 1] : null;
 // other modules: their page for this type where they have one (any build)
-// other arches: this type's page there (a type page), else the module's newest listing;
-// only arches that have it
-const archs = multiArch ? cat.archs().filter((a) => a === arch || (page
-  ? cat.docs.some((d) => d.arch === a && d.module === module && (type in d.named || type in d.opaque))
-  : cat.builds(a, module).length)) : [];
-const archHref = (a) => page ? typePath(a, module, type) : `${ctxPath(a, cat.builds(a, module).at(-1), module)}.html`;
+// other arches: only those with a build of the shown release (same family), linking that
+// build: this type there if that build has it, else that build's listing. nav.js redraws
+// them on a build switch from /builds.json; data-tarchs = arches with this type's page
+// (struct.js sends a type page's absent build to its listing).
+const famOf = (a, b) => cat.get(a, b, module)?.family;
+const sameRel = (a) => cat.builds(a, module).filter((b) => famOf(a, b) === fam(build)).at(-1);
+const hasType = (a, b) => { const d = cat.get(a, b, module); return !!d && (type in d.named || type in d.opaque); };
+const archs = multiArch ? cat.archs().filter((a) => a === arch || sameRel(a)) : [];
+const archHref = (a) => {
+  const b = sameRel(a);
+  return page && hasType(a, b) ? `${typePath(a, module, type)}#${b}` : `${ctxPath(a, b, module)}.html`;
+};
+const tarchs = page && multiArch ? cat.archs().filter((a) =>
+  cat.docs.some((d) => d.arch === a && d.module === module && (type in d.named || type in d.opaque))).join(",") : undefined;
 // break long names after _ and :: only, never mid-word
 const parts = type ? type.split(/(?<=[^_:][_:]+)(?=[^_:])/) : [];
 const inMod = (m) => page && catalog().docs.some((d) => d.arch === arch && d.module === m && (type in d.named || type in d.opaque));
 ---
 <div class="cbar">
   {archs.length > 0 && (
-    <span class="cb-archs">
+    <span class="cb-archs" data-tarchs={tarchs}>
       {archs.map((a) => a === arch ? <span class="arch on">{a}</span>
-        : <a class="arch" href={archHref(a)} title={page ? `${type} on ${a}` : `${module} on ${a}`}>{a}</a>)}
+        : <a class="arch" href={archHref(a)} title={`${fam(build)} on ${a}`}>{a}</a>)}
     </span>
   )}
   {/* Only the current build is rendered; nav.js builds the popover from /builds.json

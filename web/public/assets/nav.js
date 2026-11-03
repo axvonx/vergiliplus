@@ -121,6 +121,21 @@
   const tagsHtml = (x, href) => (x[5] || []).map(([t, title]) => href
     ? `<a class="tag t-${t}" href="${esc(href)}#sources" title="${esc(title)}">${t}</a>`
     : `<span class="tag t-${t}" title="${esc(title)}">${t}</span>`).join("");
+  // the arches with a build of the shown release (family), each linking that build: this
+  // type there where the arch has its page (data-tarchs), else that build's listing
+  const archSync = (all, s, fam) => {
+    const box = document.querySelector(".cb-archs");
+    if (!box) return;
+    const [arch, mod] = s.dataset.am.split("/"), tar = box.dataset.tarchs;
+    const slug = tar != null && location.pathname.split("/")[4];
+    box.innerHTML = Object.keys(all).filter((k) => k.endsWith("/" + mod)).map((k) => k.split("/")[0]).map((a) => {
+      if (a === arch) return `<span class="arch on">${esc(a)}</span>`;
+      const b = all[`${a}/${mod}`].filter((x) => x[1] === fam).at(-1)?.[0];
+      if (!b) return "";
+      const href = slug && tar.split(",").includes(a) ? `/t/${a}/${mod}/${slug}#${encodeURIComponent(b)}` : `/v/${a}/${b}/${mod}.html`;
+      return `<a class="arch" href="${esc(href)}" title="${esc(fam)} on ${esc(a)}">${esc(a)}</a>`;
+    }).join("");
+  };
   const barSync = () => {
     const s = btn();
     if (!s) return;
@@ -140,6 +155,7 @@
           s.innerHTML = bname(list[ci]) + `<span class="cbb-l">${esc(lab(list[ci]))}</span>` + status(mark(ci) === "o" ? "o" : "d");
           const tg = document.querySelector("[data-tags]");
           if (tg) tg.innerHTML = tagsHtml(list[ci], s.dataset.l.replace("@", encodeURIComponent(cur)));
+          archSync(all, s, list[ci][1]);
         }
         const step = document.querySelector("[data-step]");
         if (!step || !has) return;

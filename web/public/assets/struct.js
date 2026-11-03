@@ -96,6 +96,12 @@
   };
   const render = (tp, b, p) => {
     const i = p.n.indexOf(b), e = i >= 0 && p.b[i];
+    // a build of this module without the type (e.g. reached from another arch's
+    // context bar): its listing, as the build picker does
+    if (i >= 0 && !e) {
+      const [, , a, m] = tp.dataset.pack.split("/");
+      return location.replace(`/v/${a}/${encodeURIComponent(b)}/${m}.html`);
+    }
     const view = tp.querySelector("[data-view]");
     tp.dataset.cur = b;
     delete tp.dataset.base;  // Changes compares against the previous build again
