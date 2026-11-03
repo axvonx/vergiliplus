@@ -1,7 +1,7 @@
 ---
 // The one page shell. `side` adds the persisted type sidebar (type pages);
 // `wide` drops the centred max-width (type listings: as many columns as fit).
-// Behaviour lives in /assets/nav.js + struct.js: vanilla, cached once, no islands.
+// Behaviour lives in /assets/nav.js + struct.js (which loads diff.js for its Changes/History tabs): vanilla, cached once, no islands.
 import { ClientRouter } from "astro:transitions";
 const { title, side = false, wide = false } = Astro.props;
 ---

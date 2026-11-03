@@ -2,7 +2,8 @@
 // One page per arch x module x type, covering every build. It inlines the default
 // build's view (lib/panel.mjs: newest defining build, else newest declaring it) so it
 // reads without a fetch; #<build> selects another, which struct.js renders from the
-// type's pack (/p/...json.gz).
+// type's pack (/p/...json.gz). Below the view, tabs: Used in, Changes (this build against
+// an earlier one) and History (every build at once), the last two from public/assets/diff.js.
 import Layout from "../../../../layouts/Layout.astro";
 import ContextBar from "../../../../components/ContextBar.astro";
 import { slug } from "../../../../lib/types.mjs";
@@ -21,9 +22,10 @@ const { view, used } = viewOf(page, page.def);
   <div data-tp data-def={page.def} data-cur={page.def} data-has={page.has}
        data-pack={`/p/${page.arch}/${page.module}/${page.slug}.json.gz`}>
     <div class="panel" data-view set:html={view} />
-    <section class="panel" data-used hidden={!used.length}>
-      <div class="used-h">Used in (<span data-used-n>{used.length}</span>)</div>
-      <div class="used-list">{used.map((x) => (<a href={`${slug(x)}.html`}>{x}</a>))}</div>
+    {/* tabs: only Used in ships (it reads without JS); struct.js adds Changes and History */}
+    <section class="panel" data-tabs hidden={!used.length}>
+      <div class="tab-bar"><button type="button" class="tab" data-tab="used" aria-selected="true">Used in <span class="n" data-used-n>{used.length}</span></button></div>
+      <div data-pane="used" data-used><div class="used-list">{used.map((x) => (<a href={`${slug(x)}.html`}>{x}</a>))}</div></div>
     </section>
   </div>
 </Layout>

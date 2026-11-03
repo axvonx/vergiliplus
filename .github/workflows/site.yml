@@ -32,8 +32,8 @@ jobs:
           cache: pnpm
           cache-dependency-path: web/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - name: Golden tests
-        run: node --test ../tests/render.test.mjs
+      - name: Golden + diff tests
+        run: node --test ../tests/render.test.mjs ../tests/diff.test.mjs
       - name: Build
         run: ./node_modules/.bin/astro build
       - name: Link check

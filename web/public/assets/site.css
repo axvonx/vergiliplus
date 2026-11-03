@@ -203,11 +203,63 @@ a.str-link:hover { color: yellow; }
 /* ---- layout stats + "used in" (verg.css .maincross / .h4-tdata) ---- */
 .stats { display: flex; flex-wrap: wrap; gap: 0.4rem 2.4rem; margin-top: 1.2rem; color: var(--mute); font-size: 1.6rem; }
 .stats b { color: var(--mint); font-weight: 700; }
-.used-h { color: var(--cyan); font-weight: 600; font-size: 2.4rem; margin-bottom: 0.6rem; }
+/* tabs under the view: Used in · Changes · History */
+.tab-bar { display: flex; flex-wrap: wrap; gap: 0.4rem 2rem; margin-bottom: 1rem; border-bottom: 1px solid #3a3a4c; }
+.tab { background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 0 0 0.4rem;
+  color: var(--mute); font: 600 2.2rem var(--sans); cursor: pointer; }
+.tab:hover { color: var(--mint); }
+.tab[aria-selected="true"] { color: var(--cyan); border-bottom-color: var(--cyan); }
+.tab .n { font-size: 1.6rem; color: var(--mute); }
 .used-list { line-height: 1.6; }
 .used-list a { display: inline-block; color: var(--kw); font-size: 1.9rem; font-weight: 700; }
 .used-list a:hover { color: var(--kw); text-decoration: underline; }
 .used-list a:not(:last-child)::after { content: ","; color: var(--mint); margin-right: 0.6rem; }
+
+/* ---- Changes (diff.js): this build against an earlier one ---- */
+.df-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem 1.6rem; margin-bottom: 0.8rem; color: var(--mute); font-size: 1.5rem; }
+.df-base { background: var(--input); color: var(--mint); border: 1px solid var(--input-line); font: 600 1.4rem var(--mono); padding: 1px 4px; max-width: 100%; }
+.df-sum { display: inline-flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; font: 600 1.5rem var(--mono); }
+.df-a { color: var(--k-enum); } .df-r { color: #ff5555; } .df-t { color: #ffb86c; } .df-s { color: var(--mute); } .df-z { color: var(--fg); }
+.df-runs { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: 0.2rem; font: 400 1.45rem var(--mono); color: var(--fg); }
+.df-d { display: inline-block; min-width: 7rem; color: var(--comment); }
+.df-k { color: var(--mute); overflow-wrap: anywhere; }
+.df-why { color: var(--mute); font-family: var(--sans); }
+.df .sc-pre code { font-size: 1.6rem; }
+.df-mk { flex: 0 0 2ch; color: var(--comment); margin-left: -1rem; }
+.df-row { --accent: var(--comment); }
+.df-row.d-add { --accent: var(--k-enum); background: color-mix(in srgb, var(--k-enum) 11%, transparent); }
+.df-row.d-del { --accent: #ff5555; background: color-mix(in srgb, #ff5555 11%, transparent); }
+.df-row.d-del .sc-field { text-decoration: line-through; text-decoration-color: color-mix(in srgb, #ff5555 70%, transparent); }
+.df-row.d-was { --accent: #ffb86c; opacity: 0.6; }
+.df-row.d-type, .df-row.d-grew { --accent: #ffb86c; background: color-mix(in srgb, #ffb86c 10%, transparent); }
+.df-row.d-add .df-mk { color: var(--k-enum); } .df-row.d-del .df-mk { color: #ff5555; }
+.df-row.d-type .df-mk, .df-row.d-grew .df-mk, .df-row.d-was .df-mk { color: #ffb86c; }
+.df-row.d-same, .df-row.d-shift, .df-row.d-ctx { --accent: transparent; }
+.df-old { color: var(--comment); }
+.df-more { color: var(--comment); font-style: italic; cursor: pointer; }
+.df-more:hover, .df-more:focus { color: var(--kw); background: color-mix(in srgb, var(--comment) 15%, transparent); outline: none; }
+/* History: one row per top-level member, one column per build */
+.hs-scroll { overflow-x: auto; }
+.hs { border-collapse: collapse; font: 400 1.3rem var(--mono); }
+.hs th, .hs td { padding: 0; }
+.hs thead th { height: 10rem; vertical-align: bottom; font-weight: 400; white-space: nowrap; }
+.hs thead th a { color: var(--mute); display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); padding: 0.2rem 0; }
+.hs thead th a:hover { color: yellow; }
+.hs thead th.cur a { color: var(--fg); font-weight: 700; }
+.hs tbody th { text-align: left; color: var(--fg); font-weight: 400; padding-right: 1rem; white-space: nowrap; position: sticky; left: 0; background: var(--panel); z-index: 1; }
+.hs td { width: 2.2rem; min-width: 2.2rem; height: 1.9rem; position: relative; }
+.hs td a { position: absolute; inset: 0.25rem 0.15rem; border-radius: 2px; }
+.hs td.p a { background: #34374a; } .hs td.m a { background: #3d4a6a; } .hs td.n a { background: var(--k-enum); }
+.hs td.x a { border: 1px dashed #ff5555; }
+.hs td a:hover { outline: 1px solid #fff; }
+.hs td.op { background: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(255,255,255,0.04) 3px, rgba(255,255,255,0.04) 6px); }
+.hs td.cur, .hs th.cur { background-color: color-mix(in srgb, var(--cyan) 12%, transparent); }
+.hs-size td { height: 3.6rem; vertical-align: bottom; }
+.hs-size td i { position: absolute; left: 0.15rem; right: 0.15rem; bottom: 0.2rem; background: var(--comment); border-radius: 1px 1px 0 0; max-height: calc(100% - 0.4rem); }
+.hs-key { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; margin-top: 0.8rem; font-size: 1.3rem; color: var(--mute); }
+.hs-key span::before { content: ""; display: inline-block; width: 1rem; height: 1rem; margin-right: 0.4rem; vertical-align: -1px; border-radius: 2px; }
+.hs-key .n::before { background: var(--k-enum); } .hs-key .m::before { background: #3d4a6a; } .hs-key .p::before { background: #34374a; }
+.hs-key .x::before { border: 1px dashed #ff5555; } .hs-key .op::before { background: repeating-linear-gradient(45deg, #34374a, #34374a 2px, transparent 2px, transparent 4px); }
 
 /* ---- opaque types (declared or mentioned, never defined in that PDB) ---- */
 .op { opacity: 0.6; font-style: italic; }

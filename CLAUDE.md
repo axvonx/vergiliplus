@@ -31,9 +31,11 @@ web/src/lib/layout.mjs   pahole rows: anonymous union/struct reconstruction, enu
 web/src/lib/panel.mjs    type pages (one per arch x module x type) + packs; layout -> view HTML
 web/src/lib/catalog.mjs  all docs loaded once + cross-build indexes + memoized per-doc views
 web/src/lib/modules.mjs  module -> ring/label
-web/public/assets/       site.css, nav.js (sidebar, ⌘K, context bar, home links), struct.js (#build router, Metadata/copy)
+web/public/assets/       site.css, nav.js (sidebar, ⌘K, context bar, home links), struct.js (#build router, Metadata/copy,
+                         tabs: Used in · Changes · History), diff.js (those two tabs; loaded on first use)
 web/public/logo.svg      site logo, a circle (Earth's interior, fully opened); favicon.svg = same in an octagon
 tests/render.test.mjs    golden fixtures in tests/golden/ = the renderer's spec
+tests/diff.test.mjs      the diff over real views; its listing fixture is the Changes tab's spec
 ```
 
 ```sh
@@ -190,6 +192,11 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   Filters (kind, PDB, opaque, members, versions) persist in localStorage `vp-ck`; the
   palette opens with `/` or ⌘K.
 - PDBs cache in `$TMPDIR/vergiliplus-pdbs`, keyed by GUID+age.
+- Changes/History (diff.js) read the view HTML itself: a member's key is its `.sc-field`
+  path through named groups (an enum value's name), so the views carry no extra markup.
+  Keep `.sc-field`, `.sc-ann` (`/* 0x18:3  4 */`) and the stats' `size <b>N` parseable;
+  tests/diff.test.mjs fails if they drift. Shifts are runs credited to the change before
+  them (1809 → 1903 `_EPROCESS`: 236 shifts = `Pcb` grew, `Vm` grew), never "moved".
 - Stale `astro preview` servers keep their port; a new one silently moves.
 
 - XP SP2 public PDBs (msdl) carry no types at all, so it is absent. Windows 2000 ntdll PDBs
@@ -216,7 +223,7 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
 
 **Scale:** 79 builds over 7 arches ≈ 114 MB in ~26k files; a build adds ~1 MB (its new
 types' pages and changed views); a new arch is another /t/ tree (x86 added ~23 MB).
-Cross-build diff / per-field history · adding ndis + fltmgr (`docs/module-survey.md`) ·
+Adding ndis + fltmgr (`docs/module-survey.md`) ·
 more ARM64 builds · more canary builds (UUP sets) · home
 grouping (client/server/insider).
 

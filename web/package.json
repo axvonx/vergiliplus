@@ -6,7 +6,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node --test ../tests/render.test.mjs"
+    "test": "node --test ../tests/render.test.mjs ../tests/diff.test.mjs"
   },
   "dependencies": {
     "astro": "^5.14.1"

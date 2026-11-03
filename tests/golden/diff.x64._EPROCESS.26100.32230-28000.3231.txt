@@ -1,0 +1,27 @@
+struct _EPROCESS {
+  ⋯ 195 unchanged members
+  struct _EX_PUSH_LOCK EnclaveLock;                         /* 0x658  8 */
+~ unsigned long HighPriorityFaultsAllowed;                  /* 0x660  4 */
+~ volatile unsigned long HighPriorityFaultsAllowed;         /* 0x660  4 */
+  struct _PO_PROCESS_ENERGY_CONTEXT* EnergyContext;         /* 0x668  8 */
+  ⋯ 19 unchanged members
+  unsigned char MmSlabIdentity;                             /* 0x6ee  1 */
+− unsigned char Spare0;                                     /* was 0x6ef  1 */
++ unsigned char VirtualTimersPaused;                        /* 0x6ef  1 */
+  volatile union _PS_INTERLOCKED_TIMER_DELAY_VALUES ProcessTimerDelay;  /* 0x6f0  8 */
+  ⋯ 4 unchanged members
+  struct _LIST_ENTRY VirtualTimerListHead;                  /* 0x710  16 */
+− struct _WNF_STATE_NAME WakeChannel;                       /* was 0x720  8 */
+  struct _PS_PROCESS_WAKE_INFORMATION WakeInfo;             /* 0x720  48 */
+  ⋯ 126 unchanged members
+  struct _PROCESS_NETWORK_COUNTERS* NetworkCounters;        /* 0x7f0  8 */
+~ union _PROCESS_EXECUTION Execution;                       /* 0x7f8  4 */
+~ volatile union _PROCESS_EXECUTION Execution;              /* 0x7f8  4 */
+  void* ThreadIndexTable;                                   /* 0x800  8 */
++ void* JobCpuPartitionObject;                              /* 0x808  8 */
+  struct _LIST_ENTRY FreezeWorkLinks;                       /* 0x808 → 0x810  16 */
+  ⋯ 1 member shifted +0x8
+  unsigned long BamPpmPolicy;                               /* 0x820 → 0x828  4 */
++ struct _EPROCESS_POWER_THROTTLING_STATE ProcessPowerThrottlingState;  /* 0x82c  8 */
++ struct _SINGLE_LIST_ENTRY ProcessQosCallbackListEntry;    /* 0x838  8 */
+};
