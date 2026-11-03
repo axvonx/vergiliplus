@@ -45,6 +45,8 @@ const CASES = [
   [NTOS, "_LARGE_INTEGER"],            // top-level union + inlined <unnamed-tag> member
   [NTOS, "_CACHE_MANAGER_CALLBACKS"],  // function-pointer signatures
   [NTOS, "_DISPATCHER_HEADER"],        // unions nested three deep
+  [NTOS, "_MMSECTION_FLAGS"],          // bitfields of "unsigned" (T_UINT4): sized 4, flat
+  [NTOS, "wil_details_FeatureStateCache"], // union: unsigned word + unsigned bitfield struct
   // pre-PDB: CodeView 4 records of NT 4.0's DDK LIBCNTPR.LIB (tools/legacy/cv4.py),
   // offsets cross-checked against KDEXTX86.DLL; ends with its provenance line
   [NT40, "_EPROCESS"],
@@ -130,6 +132,22 @@ test("pointer size follows the doc's arch", () => {
   assert.equal(x86.sizeof("0x1002"), 4);
   assert.equal(structLayout(x86, "S").summary.holes, 0);
   assert.equal(T(types, { S: "0x1000" }, "x64").sizeof("0x1002"), 8);
+});
+
+test("an unknown base type fails loudly, never sizes 0", () => {
+  const types = {
+    "0x1000": { kind: "struct", name: "S", size: 4, fieldlist: "0x1001", forward: null },
+    "0x1001": fl([{ name: "x", type: "0x2", offset: 0 }]),
+    "0x2": { kind: "base", name: "mystery" },
+    "0x75": { kind: "base", name: "unsigned" },
+    "0x8": { kind: "base", name: "HRESULT" },
+    "0x42": { kind: "base", name: "long double" },
+  };
+  const t = T(types, { S: "0x1000" });
+  assert.throws(() => t.sizeof("0x2"), /no size for base type "mystery"/);
+  assert.equal(t.sizeof("0x75"), 4);
+  assert.equal(t.sizeof("0x8"), 4);
+  assert.equal(t.sizeof("0x42"), 8);
 });
 
 test("union of a word and a bitfield struct", () => {

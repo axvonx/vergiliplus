@@ -7,11 +7,20 @@
 
 // pointer width per arch; everything else in BASE_SIZES is LLP64 on every arch
 const PTR_SIZE = { x86: 4, x64: 8, arm64: 8, arm: 4, ia64: 8, mips: 4, alpha: 4, ppc: 4 };
+// (every primitive name llvm-pdbutil and pdb_to_json's CV_SIMPLE print; "unsigned" is
+// T_UINT4, "long double" is 8 bytes under MSVC)
 const BASE_SIZES = {
-  "char": 1, "signed char": 1, "unsigned char": 1, "bool": 1,
-  "short": 2, "unsigned short": 2, "wchar_t": 2, "__wchar_t": 2,
-  "int": 4, "unsigned int": 4, "long": 4, "unsigned long": 4, "float": 4,
-  "__int64": 8, "unsigned __int64": 8, "double": 8, "long long": 8,
+  "void": 0,
+  "char": 1, "signed char": 1, "unsigned char": 1, "bool": 1, "char8_t": 1,
+  "__int8": 1, "unsigned __int8": 1,
+  "short": 2, "unsigned short": 2, "wchar_t": 2, "__wchar_t": 2, "char16_t": 2,
+  "__int16": 2, "unsigned __int16": 2, "__bool16": 2,
+  "int": 4, "unsigned": 4, "unsigned int": 4, "long": 4, "unsigned long": 4,
+  "float": 4, "HRESULT": 4, "char32_t": 4, "__int32": 4, "unsigned __int32": 4,
+  "__bool32": 4,
+  "__int64": 8, "unsigned __int64": 8, "double": 8, "long double": 8, "long long": 8,
+  "unsigned long long": 8, "__bool64": 8,
+  "__int128": 16, "unsigned __int128": 16,
 };
 const KW = new Set(["struct", "union", "enum", "const", "volatile", "void", "char",
   "bool", "short", "int", "long", "float", "double", "signed", "unsigned",
@@ -63,7 +72,12 @@ export class Types {
     const n = this.get(idx);
     switch (n.kind) {
       case "pointer": return this.ptr;
-      case "base": return BASE_SIZES[n.name] ?? (String(n.name).endsWith("*") ? this.ptr : 0);
+      case "base": {
+        if (String(n.name).endsWith("*")) return this.ptr;
+        // an unknown primitive silently sized 0 mis-lays its whole struct: fail the build
+        if (!(n.name in BASE_SIZES)) throw new Error(`no size for base type "${n.name}" (${idx})`);
+        return BASE_SIZES[n.name];
+      }
       case "modifier": return this.sizeof(n.referent);
       case "array": return n.bytes || 0;
       case "struct": case "union": case "enum": {

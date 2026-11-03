@@ -1,0 +1,28 @@
+struct _MMSECTION_FLAGS {
+    unsigned BeingDeleted : 1;                              /* 0x0:0  4 */
+    unsigned BeingCreated : 1;                              /* 0x0:1  4 */
+    unsigned BeingPurged : 1;                               /* 0x0:2  4 */
+    unsigned NoModifiedWriting : 1;                         /* 0x0:3  4 */
+    unsigned FailAllIo : 1;                                 /* 0x0:4  4 */
+    unsigned Image : 1;                                     /* 0x0:5  4 */
+    unsigned Based : 1;                                     /* 0x0:6  4 */
+    unsigned File : 1;                                      /* 0x0:7  4 */
+    unsigned SectionOfInterest : 1;                         /* 0x0:8  4 */
+    unsigned PrefetchCreated : 1;                           /* 0x0:9  4 */
+    unsigned PhysicalMemory : 1;                            /* 0x0:10  4 */
+    unsigned ImageControlAreaOnRemovableMedia : 1;          /* 0x0:11  4 */
+    unsigned Reserve : 1;                                   /* 0x0:12  4 */
+    unsigned Commit : 1;                                    /* 0x0:13  4 */
+    unsigned NoChange : 1;                                  /* 0x0:14  4 */
+    unsigned WasPurged : 1;                                 /* 0x0:15  4 */
+    unsigned UserReference : 1;                             /* 0x0:16  4 */
+    unsigned GlobalMemory : 1;                              /* 0x0:17  4 */
+    unsigned DeleteOnClose : 1;                             /* 0x0:18  4 */
+    unsigned FilePointerNull : 1;                           /* 0x0:19  4 */
+    unsigned long PreferredNode : 7;                        /* 0x0:20  4 */
+    unsigned GlobalOnlyPerSession : 1;                      /* 0x0:27  4 */
+    unsigned ControlAreaOnUnusedList : 1;                   /* 0x0:28  4 */
+    unsigned SystemVaAllocated : 1;                         /* 0x0:29  4 */
+    unsigned NotBeingUsed : 1;                              /* 0x0:30  4 */
+    unsigned PageSize64K : 1;                               /* 0x0:31  4 */
+};

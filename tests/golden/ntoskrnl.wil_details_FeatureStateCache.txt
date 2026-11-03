@@ -1,0 +1,20 @@
+union wil_details_FeatureStateCache {
+    unsigned __int64 exchange64;                            /* 0x0  8 */
+    unsigned exchange;                                      /* 0x0  4 */
+    struct {
+        unsigned effectiveState : 1;                        /* 0x0:0  4 */
+        unsigned stateCached : 1;                           /* 0x0:1  4 */
+        unsigned hasNotificationCached : 1;                 /* 0x0:2  4 */
+        unsigned variantCached : 1;                         /* 0x0:3  4 */
+        unsigned deviceUsageFastPathEnabled : 1;            /* 0x0:4  4 */
+        unsigned deviceOpportunityFastPathEnabled : 1;      /* 0x0:5  4 */
+        unsigned desiredState : 1;                          /* 0x0:6  4 */
+        unsigned configuredState : 2;                       /* 0x0:7  4 */
+        unsigned needsRefresh : 1;                          /* 0x0:9  4 */
+        unsigned hasNotification : 1;                       /* 0x0:10  4 */
+        unsigned isWexpConfiguration : 1;                   /* 0x0:11  4 */
+        unsigned variant : 6;                               /* 0x0:12  4 */
+        unsigned unused : 14;                               /* 0x0:18  4 */
+        unsigned payloadId;                                 /* 0x4  4 */
+    };                                                      /* 0x0  8 */
+};
