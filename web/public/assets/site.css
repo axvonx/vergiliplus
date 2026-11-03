@@ -80,6 +80,7 @@ html.side-collapsed .docs-side { display: none; }
 /* ---- home: list of Windows versions, colour-coded by channel ---- */
 .vgroup + .vgroup { margin-top: 2.2rem; }
 .vg-name { margin: 0 0 0.8rem; color: var(--mute); font-size: 1.5rem; font-weight: 700; }
+.vg-note { margin: -0.4rem 0 0.8rem; color: var(--mute); font-size: 1.4rem; }
 .vlist { display: grid; gap: 0.6rem; }
 .vrow { display: flex; align-items: baseline; gap: 1.2rem; padding: 1rem 1.5rem; background: var(--panel);
   border-left: 4px solid var(--ch); border-radius: 0 0.5rem 0.5rem 0; }
@@ -91,7 +92,7 @@ html.side-collapsed .docs-side { display: none; }
   line-height: 1.7; text-transform: lowercase; white-space: nowrap; }
 a.arch:hover { color: #fff; border-color: #fff; }
 .arch.on { color: #fff; border-color: #fff; }
-.vr-build { color: var(--mute); font-family: var(--mono); font-size: 1.6rem; }
+.vr-build { color: var(--mute); font-family: var(--mono); font-size: 1.6rem; margin-left: 1.2rem; }
 .ch-client { --ch: var(--ch-client); } .ch-server { --ch: var(--ch-server); } .ch-insider { --ch: var(--ch-insider); }
 
 /* ---- context bar (verg.css .breadcrumb): arch | arch  build ▾ / module | module, Type below ---- */
@@ -236,7 +237,7 @@ a.str-link:hover { color: yellow; }
 a.tag:hover { color: #fff; border-color: var(--t); }
 .t-records { --t: var(--k-enum); } .t-debugger { --t: var(--k-struct); } .t-headers { --t: var(--kw); }
 .t-offsets { --t: var(--orange); } .t-names { --t: var(--k-union); } .t-partial { --t: var(--mute); }
-.cb-tags, .vr-tags { display: inline-flex; flex-wrap: wrap; gap: 0.4rem; }
+.cb-tags { display: inline-flex; flex-wrap: wrap; gap: 0.4rem; }
 .cb-tags:empty { display: none; }
 .sc-ctrls .tag { align-self: center; }
 /* a build's sources (listing pages; the tags link #sources) */
@@ -261,7 +262,10 @@ a.tag:hover { color: #fff; border-color: var(--t); }
 .about-tags dt { padding-top: 0.2rem; }
 .about-tags dd { margin: 0; }
 /* home: a release's architectures, each its own link */
-.vr-archs { display: inline-flex; flex-wrap: wrap; gap: 0.4rem; }
+.vr-archs { display: inline-flex; flex-wrap: wrap; color: var(--mute); font-family: var(--mono); font-size: 1.5rem; }
+.vr-arch { color: var(--mute); white-space: nowrap; }
+.vr-arch + .vr-arch::before { content: "·"; padding: 0 0.6rem; color: var(--mute); display: inline-block; }
+a.vr-arch:hover { color: #fff; }
 .vrow a.vr-fam:hover { text-decoration: underline; }
 /* ---- several definitions of one type in a build's sources ---- */
 .var { color: var(--orange); border: 1px solid var(--orange); border-radius: 3px; padding: 0 0.5rem; font-size: 1.3rem;
@@ -321,6 +325,11 @@ html { font-size: 8px; }
   .logo { width: 3.6rem; height: 3.6rem; }
   .page, .docs-main { padding: 1.2rem; }
   .cb-step { margin-left: 0; flex-basis: 100%; }
+  /* home: name and build on one line, architectures under them */
+  .vrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.2rem 1.2rem; }
+  .vr-fam { grid-column: 1; grid-row: 1; }
+  .vr-build { grid-column: 2; grid-row: 1; margin-left: 0; }
+  .vr-archs { grid-column: 1 / -1; grid-row: 2; }
   .cb-type { font-size: 2.6rem; }
   .bp { width: 100%; }
   .sc-ctrls { position: static; justify-content: flex-end; padding: 0 0.8rem 0.6rem; }

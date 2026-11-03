@@ -3,10 +3,10 @@
 // under its product (Windows 10, Windows Server, …) in order of each one's newest build.
 // A release's architectures are chips on its row, each linking that arch's kernel
 // listing (the row's name links the first); nav.js retargets each to the module last
-// viewed for that build. Source tags (none for a public PDB) are the union over its arches
-// and modules; "partial" is per module, so it stays in the context bar.
+// viewed for that build. Source tags stay off the rows (the context bar and a listing's
+// sources panel have them): a group says once which of its releases aren't public PDBs.
 import Layout from "../layouts/Layout.astro";
-import { catalog, ctxPath, channel, product, TAGS } from "../lib/catalog.mjs";
+import { catalog, ctxPath, channel, product } from "../lib/catalog.mjs";
 import { modInfo } from "../lib/modules.mjs";
 const cat = catalog();
 const rows = new Map();  // family -> {family, product, release, arches: [version]}, newest first
@@ -19,11 +19,18 @@ for (const d of cat.versions()) {
 const rank = (a) => cat.archs().indexOf(a);
 for (const r of rows.values()) {
   r.arches.sort((a, b) => rank(a.arch) - rank(b.arch));
-  r.labels = [...new Set(r.arches.map((v) => v.label))];
-  r.tags = Object.keys(TAGS).filter((t) => t !== "partial" && r.arches.some((v) => v.tags.includes(t)));
+  // build numbers only: an undated pre-release's "no build number" is already in its name
+  r.labels = [...new Set(r.arches.filter((v) => v.label === v.build).map((v) => v.label))];
+  r.legacy = r.arches.some((v) => v.tags.length);
 }
 const groups = new Map();
 for (const r of rows.values()) (groups.get(r.product) || groups.set(r.product, []).get(r.product)).push(r);
+// the group's note: all its releases, or the ones named, have no public PDB with types
+const legacy = (rs) => {
+  const ls = rs.filter((r) => r.legacy);
+  if (!ls.length) return null;
+  return ls.length === rs.length ? "" : ls.map((r) => r.release).join(", ").replace(/, ([^,]*)$/, " and $1") + ": ";
+};
 const href = (v) => `${ctxPath(v.arch, v.build, v.kernel)}.html`;
 const data = (v) => ({ "data-ab": `${v.arch}/${v.build}`, "data-mods": v.mods.join(","), "data-def": v.kernel });
 ---
@@ -31,15 +38,15 @@ const data = (v) => ({ "data-ab": `${v.arch}/${v.build}`, "data-mods": v.mods.jo
   {[...groups].map(([name, rs]) => (
     <section class="vgroup">
       <h2 class="vg-name">{name}</h2>
+      {legacy(rs) !== null && <p class="vg-note">{legacy(rs)}layouts from Microsoft's DDKs, SDKs and
+        debuggers, not public PDBs · <a href="/about.html">how</a></p>}
       <ul class="vlist">
         {rs.map((r) => (
           <li class={`vrow ch-${channel(r.family)}`} title={r.family}>
             <a class="vr-fam" href={href(r.arches[0])} {...data(r.arches[0])}>{r.release}</a>
             <span class="vr-archs">{r.arches.map((v) => (
-              <a class="arch" href={href(v)} {...data(v)} title={`${r.family} on ${v.arch}: ${v.label}`}>{v.arch}</a>))}</span>
-            {r.tags.length > 0 && <span class="vr-tags">{r.tags.map((t) => (
-              <span class={`tag t-${t}`} title={TAGS[t]}>{t}</span>))}</span>}
-            <span class="vr-build">{r.labels.join(" · ")}</span>
+              <a class="vr-arch" href={href(v)} {...data(v)} title={`${r.family} on ${v.arch}: ${v.label}`}>{v.arch}</a>))}</span>
+            {r.labels.length > 0 && <span class="vr-build">{r.labels.join(" · ")}</span>}
           </li>
         ))}
       </ul>
