@@ -253,11 +253,11 @@
   // ---- search palette ----------------------------------------------------------
   // Index (/search-index.json): v = [[arch, build, family, channel]] newest first,
   // m = [module], t = [[name, kind, slug, module#, [defined in v#], [opaque in v#]]].
-  // One row per type x module; a presence strip shows every selected version.
+  // One row per type x module; a presence sparkline shows every selected version below.
   const ck = { open: false, ix: null, loading: null, err: false, mx: null, mxLoading: null, hits: [], sel: 0, here: null };
   // filters, remembered: kind, modules switched off, versions switched off, opaque
-  // shown, and mem: match member/enumerator names (/member-index.json, f = [[name,
-  // [t#]]]) instead of type names
+  // shown, and mem: match member/enumerator names (/member-index.json, y = [typeStr],
+  // f = [[name, [[t#, y# | null]]]]) instead of type names
   const F = (() => { try { return JSON.parse(store("vp-ck")) || {}; } catch (e) { return {}; } })();
   F.kind ||= "all"; F.mOff ||= []; F.vOff ||= []; F.op ??= true;
   const saveF = () => store("vp-ck", JSON.stringify(F));
@@ -309,6 +309,34 @@
         `<span class="vf">${esc(v[2])}</span><span class="vb">${esc(vname(v))}</span></label>`).join("") + `</span></span>`;
   };
 
+  // highlight matching characters across all terms in distinct green
+  const markTerms = (str, terms) => {
+    if (!terms || !terms.length || !str) return esc(str || "");
+    const lower = str.toLowerCase();
+    const matched = new Uint8Array(str.length);
+    for (const term of terms) {
+      if (!term) continue;
+      let pos = 0;
+      while ((pos = lower.indexOf(term, pos)) !== -1) {
+        for (let j = 0; j < term.length; j++) matched[pos + j] = 1;
+        pos += term.length;
+      }
+    }
+    let res = "", inMark = false;
+    for (let j = 0; j < str.length; j++) {
+      if (matched[j] && !inMark) {
+        res += '<mark class="ck-hit">';
+        inMark = true;
+      } else if (!matched[j] && inMark) {
+        res += '</mark>';
+        inMark = false;
+      }
+      res += esc(str[j]);
+    }
+    if (inMark) res += '</mark>';
+    return res;
+  };
+
   const ckRender = () => {
     const root = el();
     if (!root) return;
@@ -317,7 +345,8 @@
     const ix = ck.ix, list = root.querySelector(".ck-list");
     if (!ix) { list.innerHTML = `<div class="ck-empty">${ck.err ? "Couldn't load the search index" : "Loading index…"}</div>`; return; }
     const raw = root.querySelector(".ck-input").value.toLowerCase().trim();
-    const terms = raw.split(/\s+/).filter(Boolean);
+    const norm = raw.replace(/([a-z0-9_])\.([a-z0-9_])/gi, "$1 $2");
+    const terms = norm.split(/\s+/).map((s) => s.replace(/^\.+/, "")).filter(Boolean);
     if (!terms.length) {
       list.innerHTML = `<div class="ck-empty">${ix.t.length.toLocaleString()} types across ${ix.v.length} builds. Type to search; several words narrow it down.</div>`;
       ck.hits = []; return;
@@ -338,41 +367,91 @@
       (t[4].some(vOn) || (F.op && t[5].some(vOn)));
     // documented beats opaque-only, this page's module first
     const rowScore = (t) => (t[4].length ? 0 : 5e4) + (t[3] === hm ? 0 : 500);
-    const out = [];  // [score, [t, member | null]]
-    if (F.mem) {
+
+    const scoreMember = (t, f, mt) => {
+      const fn = f.toLowerCase(), fbare = fn.replace(/^_+/, "");
+      const tn = t[0].toLowerCase(), tbare = tn.replace(/^_+/, "");
+      const mtn = mt ? mt.toLowerCase() : "";
+      let score = 0, matchedField = false;
+      for (const q of terms) {
+        const fi = fn.indexOf(q);
+        const ti = tn.indexOf(q);
+        const mti = mtn ? mtn.indexOf(q) : -1;
+        if (fi < 0 && ti < 0 && mti < 0) return -1;
+        if (fi >= 0) {
+          matchedField = true;
+          score += (fn === q || fbare === q ? 0 : fbare.startsWith(q) || fi === 0 ? 1e3 : 1e4 + fi * 10);
+        } else if (ti >= 0) {
+          score += (tn === q || tbare === q ? 500 : tbare.startsWith(q) || ti === 0 ? 2e3 : 2e4 + ti * 10);
+        } else if (mti >= 0) {
+          matchedField = true;
+          score += 5e3 + mti * 10;
+        }
+      }
+      if (!matchedField) return -1;
+      return score + fn.length;
+    };
+
+    const out = [];  // [score, [t, member | null, memberType | null]]
+    const searchMembers = F.mem || raw.includes(".");
+    if (searchMembers) {
       if (!ck.mx) { loadMembers(); list.innerHTML = `<div class="ck-empty">Loading member index…</div>`; ck.hits = []; return; }
       for (const [f, rows] of ck.mx.f) {
-        const sc = scoreOf(f);
-        if (sc < 0) continue;
-        for (const ti of rows) { const t = ix.t[ti]; if (rowOk(t)) out.push([sc + rowScore(t) + t[0].length / 100, [t, f]]); }
+        const fn = f.toLowerCase();
+        if (!terms.some((q) => fn.includes(q))) {
+          let anyPossible = false;
+          for (const r of rows) {
+            const ti = Array.isArray(r) ? r[0] : r;
+            const t = ix.t[ti];
+            if (rowOk(t) && terms.some((q) => t[0].toLowerCase().includes(q))) { anyPossible = true; break; }
+          }
+          if (!anyPossible) continue;
+        }
+        for (const r of rows) {
+          const ti = Array.isArray(r) ? r[0] : r;
+          const yi = Array.isArray(r) ? r[1] : null;
+          const mt = (yi != null && ck.mx.y) ? ck.mx.y[yi] : null;
+          const t = ix.t[ti];
+          if (!rowOk(t)) continue;
+          const sc = scoreMember(t, f, mt);
+          if (sc >= 0) out.push([sc + rowScore(t) + t[0].length / 100, [t, f, mt]]);
+        }
       }
     } else {
       for (const t of ix.t) {
         if (!rowOk(t)) continue;
         const sc = scoreOf(t[0]);
-        if (sc >= 0) out.push([sc + rowScore(t), [t, null]]);
+        if (sc >= 0) out.push([sc + rowScore(t), [t, null, null]]);
       }
     }
     out.sort((a, b) => a[0] - b[0]);
     ck.hits = out.slice(0, 80).map((x) => x[1]);
     ck.sel = Math.min(ck.sel, Math.max(0, ck.hits.length - 1));
-    const q0 = terms[0];
-    const mark = (name) => {
-      const i = name.toLowerCase().indexOf(q0);
-      return i < 0 ? esc(name) : esc(name.slice(0, i)) + `<b>${esc(name.slice(i, i + q0.length))}</b>` + esc(name.slice(i + q0.length));
-    };
+
     // oldest -> newest strip over the selected versions: filled = defined, ring = opaque
     const order = ix.v.map((_, i) => i).filter(vOn).reverse();
-    list.innerHTML = ck.hits.length ? ck.hits.map(([t, f], i) => {
+    list.innerHTML = ck.hits.length ? ck.hits.map(([t, f, mt], i) => {
       const ti = target(t), tv = ix.v[ti];
       const strip = order.map((vi) => {
         const st = t[4].includes(vi) ? "d" : t[5].includes(vi) ? "o" : "";
         const v = ix.v[vi];
         return `<i class="ch-${v[3]}${st ? " " + st : ""}"${st ? ` data-go="${esc(typeHref(t, vi, f))}"` : ""} title="${esc(v[2])} ${esc(vname(v))}${st === "o" ? " (opaque)" : st ? "" : " (absent)"}"></i>`;
       }).join("");
+      const mod = ix.m[t[3]];
+      const modName = mod + (mod === "ntdll" ? ".dll" : ".exe");
+      const vFam = tv[2].replace(/^Windows /, "");
+      const vArch = arched() ? `${tv[4] ?? tv[1]} · ${tv[0]}` : (tv[4] ?? tv[1]);
       return `<a class="ck-item${i === ck.sel ? " sel" : ""}${t[4].length ? "" : " op"}" data-i="${i}" href="${esc(typeHref(t, ti, f))}">` +
-        `${dot(t[1])}<span class="ck-name">${f ? `${esc(t[0])}<span class="ck-fld">.${mark(f)}</span>` : mark(t[0])}</span><span class="ck-mod">${esc(ix.m[t[3]])}</span>` +
-        `<span class="ck-strip">${strip}</span><span class="ck-ver ch-${tv[3]}">${esc(tv[2].replace(/^Windows /, ""))}${arched() ? " " + esc(tv[0]) : ""}</span></a>`;
+        `<div class="ck-main">` +
+        `<span class="ck-mod">${esc(modName)}</span>` +
+        `<span class="ck-type">${dot(t[1])}<span class="ck-tname">${markTerms(t[0], terms)}</span></span>` +
+        (f ? `<span class="ck-member"><span class="ck-sep">›</span>` +
+             (mt ? `<span class="ck-mtype">${markTerms(mt, terms)}</span>` : "") +
+             `<span class="ck-mname">${markTerms(f, terms)}</span></span>` : "") +
+        `<span class="ck-ver ch-${tv[3]}"><span class="ck-vfam">${esc(vFam)}</span> <span class="ck-varch">${esc(vArch)}</span></span>` +
+        `</div>` +
+        `<div class="ck-timeline">${strip}</div>` +
+        `</a>`;
     }).join("") : `<div class="ck-empty">No matches with these filters</div>`;
     nearest(list, list.querySelector(".ck-item.sel"));
   };

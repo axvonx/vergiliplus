@@ -341,25 +341,58 @@ a.vr-arch:hover { color: #fff; }
 .ck-vmenu .vf { color: var(--ch); flex: 1 1 auto; }
 .ck-vmenu .vb { color: var(--mute); font-family: var(--mono); font-size: 1.3rem; }
 .ck-list { max-height: 58vh; overflow-y: auto; margin-top: 0.6rem; }
-.ck-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.4rem 0.8rem; border-radius: 0.3rem; color: inherit; }
+.ck-item { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.6rem 0.8rem 0.45rem; border-radius: 0.4rem; color: inherit; }
 .ck-item:hover { color: inherit; }
 .ck-item.sel { background: var(--bg); }
-.ck-fld { color: var(--mute); }
-.ck-fld b { color: inherit; }
-.ck-item .dot { margin-right: 0; }
-.ck-name { color: var(--mint); font-size: 1.8rem; font-weight: 700; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ck-name b { color: var(--brand); }
-.ck-mod { color: var(--gold); font-size: 1.3rem; font-family: var(--mono); flex: 0 0 auto; }
-/* presence strip: one square per selected version, oldest -> newest */
-.ck-strip { display: inline-flex; gap: 2px; flex: 0 0 auto; }
-.ck-strip i { width: 0.9rem; height: 1.4rem; border-radius: 2px; background: #33334a; }
-.ck-strip i.d { background: var(--ch); cursor: pointer; }
-.ck-strip i.o { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ch); cursor: pointer; }
-.ck-strip i[data-go]:hover { outline: 1px solid #fff; }
-.ck-ver { color: var(--ch); font-size: 1.4rem; flex: 0 0 13rem; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ck-item.op { opacity: 0.75; }
+
+.ck-main { display: flex; align-items: center; gap: 0.8rem; width: 100%; min-width: 0; }
+
+/* 1. Binary badge */
+.ck-mod {
+  font-family: var(--mono);
+  font-size: 1.25rem;
+  color: var(--gold);
+  background: rgba(224, 205, 97, 0.1);
+  border: 1px solid rgba(224, 205, 97, 0.25);
+  border-radius: 3px;
+  padding: 0.1rem 0.5rem;
+  flex: 0 0 auto;
+  letter-spacing: 0.02em;
+}
+
+/* 2. Parent type */
+.ck-type { display: inline-flex; align-items: center; gap: 0.45rem; flex: 0 0 auto; min-width: 0; }
+.ck-type .dot { margin-right: 0; }
+.ck-tname { color: var(--mint); font-size: 1.7rem; font-weight: 700; white-space: nowrap; }
+
+/* 3. Member */
+.ck-member { display: inline-flex; align-items: baseline; gap: 0.5rem; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ck-sep { color: var(--mute); font-size: 1.4rem; flex: 0 0 auto; }
+.ck-mtype { color: var(--kw); font-family: var(--mono); font-size: 1.3rem; opacity: 0.9; flex: 0 0 auto; }
+.ck-mname { color: #fff; font-size: 1.6rem; font-weight: 600; flex: 0 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 4. Target OS + Version + Arch */
+.ck-ver { color: var(--ch); font-size: 1.35rem; flex: 0 0 auto; margin-left: auto; text-align: right; white-space: nowrap; display: inline-flex; gap: 0.6rem; }
+.ck-vfam { font-weight: 600; }
+.ck-varch { color: var(--mute); font-family: var(--mono); font-size: 1.25rem; }
+
+/* Matching characters highlight: distinct vibrant green */
+.ck-hit { color: #50fa7b; background: transparent; font-weight: 700; }
+
+/* Timeline: subtle sparkline line below the main row */
+.ck-timeline { display: flex; gap: 1.5px; width: 100%; height: 3px; margin-top: 0.1rem; border-radius: 1px; }
+.ck-timeline i { flex: 1 1 0; height: 100%; border-radius: 1px; background: #2b2b3d; transition: transform 0.12s ease; }
+.ck-timeline i.d { background: var(--ch); cursor: pointer; }
+.ck-timeline i.o { background: transparent; box-shadow: inset 0 0 0 1px var(--ch); cursor: pointer; }
+.ck-timeline i[data-go]:hover { outline: 1px solid #fff; transform: scaleY(2.6); }
+
 .ck-empty { padding: 1.8rem; color: var(--mute); text-align: center; }
 .ck-foot { margin-top: 0.6rem; color: var(--mute); font-size: 1.25rem; text-align: right; }
-@media (max-width: 760px) { .ck-strip { display: none; } }
+@media (max-width: 760px) {
+  .ck-timeline { display: none; }
+  .ck-varch { display: none; }
+}
 
 /* ---- responsive: scale every rem via html font-size (verg.css trick) ---- */
 /* phones floor at 8px: shrinking text with the screen made code ~9px on a phone */

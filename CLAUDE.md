@@ -192,9 +192,9 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   option + `data-has` (d/o/- per build) and nav.js fills it from `/builds.json`. The
   palette markup is created by nav.js.
 - `/search-index.json` is grouped: `{v: versions, m: modules, t: [[name, kind, slug,
-  module#, [defined v#], [opaque v#]]]}` (~380 KB). `/member-index.json` (`{f: [[member,
-  [t#]]]}`, ~730 KB, enum values too) loads only when the palette's "members" filter is on.
-  Filters (kind, PDB, opaque, members, versions) persist in localStorage `vp-ck`; the
+  module#, [defined v#], [opaque v#]]]}` (~380 KB). `/member-index.json` (`{y: [typeStr],
+  f: [[member, [[t#, y# | null]]]]}`, ~1.1 MB, enum values too) loads when member search
+  is used. Filters (kind, PDB, opaque, members, versions) persist in localStorage `vp-ck`; the
   palette opens with `/` or ⌘K.
 - PDBs cache in `$TMPDIR/vergiliplus-pdbs`, keyed by GUID+age. A doc's `pdb.age` is the
   DBI stream's (= the PE's RSDS age, msdl's key); pdbutil's summary prints the PDB
