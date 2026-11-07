@@ -255,11 +255,14 @@
   // m = [module], t = [[name, kind, slug, module#, [defined in v#], [opaque in v#]]].
   // One row per type x module; a presence sparkline shows every selected version below.
   const ck = { open: false, ix: null, loading: null, err: false, mx: null, mxLoading: null, hits: [], sel: 0, here: null };
-  // filters, remembered: kind, modules switched off, versions switched off, opaque
-  // shown, and mem: match member/enumerator names (/member-index.json, y = [typeStr],
-  // f = [[name, [[t#, y# | null]]]]) instead of type names
+  // filters, remembered: kinds (struct/union/enum), modules switched off, versions switched off,
+  // opaque shown, and mem: match member/enumerator names (/member-index.json)
   const F = (() => { try { return JSON.parse(store("vp-ck")) || {}; } catch (e) { return {}; } })();
-  F.kind ||= "all"; F.mOff ||= []; F.vOff ||= []; F.op ??= true;
+  if (!Array.isArray(F.kinds)) {
+    F.kinds = (F.kind === "struct" || F.kind === "union" || F.kind === "enum") ? [F.kind] : ["struct", "union", "enum"];
+  }
+  delete F.kind;
+  F.mOff ||= []; F.vOff ||= []; F.op ??= true;
   const saveF = () => store("vp-ck", JSON.stringify(F));
   const el = () => document.getElementById("vp-ck");
   // created on first open, not shipped in every page (ClientRouter swaps <body>, so
@@ -267,7 +270,8 @@
   const PALETTE = `<div id="vp-ck" class="ck-ov" hidden><div class="ck">` +
     `<input class="ck-input" placeholder="Search every type in every build…">` +
     `<div class="ck-filters"></div><div class="ck-list"></div>` +
-    `<div class="ck-foot">↑↓ move · ↵ open · click a square for that build · esc close · / or ⌘K to open</div></div></div>`;
+    `<div class="ck-tip" hidden></div>` +
+    `<div class="ck-foot">↑↓ move · ↵ open · hover/click a square for that build · esc close · / or ⌘K to open</div></div></div>`;
   // once there is more than one architecture a build is named "<build> · <arch>"
   const arched = () => new Set(ck.ix.v.map((v) => v[0])).size > 1;
   // v = [arch, build, family, channel[, label, tags]]: the label is what to show
@@ -296,17 +300,31 @@
 
   const renderFilters = () => {
     const root = el(), ix = ck.ix;
-    const kinds = ["all", "struct", "union", "enum"];
+    const allKinds = ["struct", "union", "enum"];
+    const allKindsChecked = allKinds.every((k) => F.kinds.includes(k));
+    const kindsLabel = allKindsChecked ? "Kinds: All ▾" : F.kinds.length === 0 ? "Kinds: None ▾" : `Kinds (${F.kinds.join(", ")}) ▾`;
     const nOn = ix.v.filter((_, i) => vOn(i)).length;
+
     root.querySelector(".ck-filters").innerHTML =
-      `<span class="ck-grp">${kinds.map((k) => `<button class="btn kind-btn${F.kind === k ? " on" : ""}" data-ck-k="${k}">${k}</button>`).join("")}</span>` +
+      `<span class="ck-kinds"><button class="btn${allKindsChecked ? "" : " on"}" data-ck-kinds>${esc(kindsLabel)}</button>` +
+      `<span class="ck-kmenu" hidden>` +
+      `<label><input type="checkbox" data-ck-kall${allKindsChecked ? " checked" : ""}><span>All</span></label>` +
+      `<div class="ck-menu-sep"></div>` +
+      allKinds.map((k) => `<label class="k-${k}"><input type="checkbox" data-ck-k="${k}"${F.kinds.includes(k) ? " checked" : ""}>` +
+        `<i class="dot k-${k}"></i><span>${k}</span></label>`).join("") +
+      `</span></span>` +
       `<span class="ck-grp" title="PDB">${ix.m.map((m) => `<button class="btn${F.mOff.includes(m) ? "" : " on"}" data-ck-m="${esc(m)}">${esc(m)}.pdb</button>`).join("")}</span>` +
       `<button class="btn${F.op ? " on" : ""}" data-ck-op title="include names a PDB declares but doesn't define">opaque</button>` +
-      `<button class="btn${F.mem ? " on" : ""}" data-ck-mem title="search struct members and enum values instead of type names">members</button>` +
+      `<button class="btn${F.mem ? " on" : ""}" data-ck-mem title="search struct members and enum values">members</button>` +
       `<span class="ck-vers"><button class="btn${nOn < ix.v.length ? " on" : ""}" data-ck-vers>Versions ${nOn}/${ix.v.length} ▾</button>` +
       `<span class="ck-vmenu" hidden><span class="ck-vall"><button class="btn" data-ck-vall="1">all</button><button class="btn" data-ck-vall="0">none</button></span>` +
       ix.v.map((v, i) => `<label class="ch-${v[3]}"><input type="checkbox" data-ck-v="${i}"${vOn(i) ? " checked" : ""}>` +
-        `<span class="vf">${esc(v[2])}</span><span class="vb">${esc(vname(v))}</span></label>`).join("") + `</span></span>`;
+        `<span class="vf">${esc(v[2])}</span><span class="vb">${esc(vname(v))}</span></label>`).join("") + `</span></span>` +
+      `<span class="ck-legend" title="Release channel color code">` +
+      `<span class="ck-lg ch-client"><i class="ck-lg-bar"></i>client</span>` +
+      `<span class="ck-lg ch-server"><i class="ck-lg-bar"></i>server</span>` +
+      `<span class="ck-lg ch-insider"><i class="ck-lg-bar"></i>canary/dev</span>` +
+      `</span>`;
   };
 
   // highlight matching characters across all terms in distinct green
@@ -363,7 +381,7 @@
       }
       return score + n.length;
     };
-    const rowOk = (t) => (F.kind === "all" || t[1] === F.kind) && !F.mOff.includes(ix.m[t[3]]) &&
+    const rowOk = (t) => F.kinds.includes(t[1]) && !F.mOff.includes(ix.m[t[3]]) &&
       (t[4].some(vOn) || (F.op && t[5].some(vOn)));
     // documented beats opaque-only, this page's module first
     const rowScore = (t) => (t[4].length ? 0 : 5e4) + (t[3] === hm ? 0 : 500);
@@ -393,35 +411,40 @@
     };
 
     const out = [];  // [score, [t, member | null, memberType | null]]
+    // Always search types
+    for (const t of ix.t) {
+      if (!rowOk(t)) continue;
+      const sc = scoreOf(t[0]);
+      if (sc >= 0) out.push([sc + rowScore(t), [t, null, null]]);
+    }
+
     const searchMembers = F.mem || raw.includes(".");
     if (searchMembers) {
-      if (!ck.mx) { loadMembers(); list.innerHTML = `<div class="ck-empty">Loading member index…</div>`; ck.hits = []; return; }
-      for (const [f, rows] of ck.mx.f) {
-        const fn = f.toLowerCase();
-        if (!terms.some((q) => fn.includes(q))) {
-          let anyPossible = false;
+      if (!ck.mx) {
+        loadMembers();
+        if (!out.length) { list.innerHTML = `<div class="ck-empty">Loading member index…</div>`; ck.hits = []; return; }
+      } else {
+        for (const [f, rows] of ck.mx.f) {
+          const fn = f.toLowerCase();
+          if (!terms.some((q) => fn.includes(q))) {
+            let anyPossible = false;
+            for (const r of rows) {
+              const ti = Array.isArray(r) ? r[0] : r;
+              const t = ix.t[ti];
+              if (rowOk(t) && terms.some((q) => t[0].toLowerCase().includes(q))) { anyPossible = true; break; }
+            }
+            if (!anyPossible) continue;
+          }
           for (const r of rows) {
             const ti = Array.isArray(r) ? r[0] : r;
+            const yi = Array.isArray(r) ? r[1] : null;
+            const mt = (yi != null && ck.mx.y) ? ck.mx.y[yi] : null;
             const t = ix.t[ti];
-            if (rowOk(t) && terms.some((q) => t[0].toLowerCase().includes(q))) { anyPossible = true; break; }
+            if (!rowOk(t)) continue;
+            const sc = scoreMember(t, f, mt);
+            if (sc >= 0) out.push([sc + rowScore(t) + (F.mem ? 0 : 500) + t[0].length / 100, [t, f, mt]]);
           }
-          if (!anyPossible) continue;
         }
-        for (const r of rows) {
-          const ti = Array.isArray(r) ? r[0] : r;
-          const yi = Array.isArray(r) ? r[1] : null;
-          const mt = (yi != null && ck.mx.y) ? ck.mx.y[yi] : null;
-          const t = ix.t[ti];
-          if (!rowOk(t)) continue;
-          const sc = scoreMember(t, f, mt);
-          if (sc >= 0) out.push([sc + rowScore(t) + t[0].length / 100, [t, f, mt]]);
-        }
-      }
-    } else {
-      for (const t of ix.t) {
-        if (!rowOk(t)) continue;
-        const sc = scoreOf(t[0]);
-        if (sc >= 0) out.push([sc + rowScore(t), [t, null, null]]);
       }
     }
     out.sort((a, b) => a[0] - b[0]);
@@ -435,12 +458,13 @@
       const strip = order.map((vi) => {
         const st = t[4].includes(vi) ? "d" : t[5].includes(vi) ? "o" : "";
         const v = ix.v[vi];
-        return `<i class="ch-${v[3]}${st ? " " + st : ""}"${st ? ` data-go="${esc(typeHref(t, vi, f))}"` : ""} title="${esc(v[2])} ${esc(vname(v))}${st === "o" ? " (opaque)" : st ? "" : " (absent)"}"></i>`;
+        return `<i class="ch-${v[3]}${st ? " " + st : ""}"${st ? ` data-go="${esc(typeHref(t, vi, f))}"` : ""} data-tip="${esc(v[2])}|${esc(v[4] ?? v[1])}|${esc(v[0])}|${st || "absent"}|${v[3]}"></i>`;
       }).join("");
       const mod = ix.m[t[3]];
       const modName = mod + (mod === "ntdll" ? ".dll" : ".exe");
       const vFam = tv[2].replace(/^Windows /, "");
-      const vArch = arched() ? `${tv[4] ?? tv[1]} · ${tv[0]}` : (tv[4] ?? tv[1]);
+      const vBuild = tv[4] ?? tv[1];
+      const vArch = arched() ? tv[0] : "";
       return `<a class="ck-item${i === ck.sel ? " sel" : ""}${t[4].length ? "" : " op"}" data-i="${i}" href="${esc(typeHref(t, ti, f))}">` +
         `<div class="ck-main">` +
         `<span class="ck-mod">${esc(modName)}</span>` +
@@ -448,7 +472,7 @@
         (f ? `<span class="ck-member"><span class="ck-sep">›</span>` +
              (mt ? `<span class="ck-mtype">${markTerms(mt, terms)}</span>` : "") +
              `<span class="ck-mname">${markTerms(f, terms)}</span></span>` : "") +
-        `<span class="ck-ver ch-${tv[3]}"><span class="ck-vfam">${esc(vFam)}</span> <span class="ck-varch">${esc(vArch)}</span></span>` +
+        `<span class="ck-ver ch-${tv[3]}"><span class="ck-vfam">${esc(vFam)}</span> <span class="ck-vbuild">${esc(vBuild)}</span>${vArch ? ` <span class="ck-varch">${esc(vArch)}</span>` : ""}</span>` +
         `</div>` +
         `<div class="ck-timeline">${strip}</div>` +
         `</a>`;
@@ -498,13 +522,34 @@
     if (e.target.matches(".ck-input")) { ck.sel = 0; ckRender(); }
   });
   document.addEventListener("change", (e) => {
-    const c = e.target.closest?.("[data-ck-v]");
-    if (!c) return;
-    const v = ck.ix.v[+c.dataset.ckV], key = v[0] + "/" + v[1];
-    F.vOff = c.checked ? F.vOff.filter((x) => x !== key) : [...F.vOff, key];
-    saveF();
-    el().querySelector("[data-ck-vers]").textContent = `Versions ${ck.ix.v.filter((_, i) => vOn(i)).length}/${ck.ix.v.length} ▾`;
-    ckRender();
+    const c = e.target;
+    if (c.closest?.("[data-ck-v]")) {
+      const v = ck.ix.v[+c.dataset.ckV], key = v[0] + "/" + v[1];
+      F.vOff = c.checked ? F.vOff.filter((x) => x !== key) : [...F.vOff, key];
+      saveF();
+      el().querySelector("[data-ck-vers]").textContent = `Versions ${ck.ix.v.filter((_, i) => vOn(i)).length}/${ck.ix.v.length} ▾`;
+      ckRender();
+      return;
+    }
+    if (c.closest?.("[data-ck-kall]")) {
+      F.kinds = c.checked ? ["struct", "union", "enum"] : [];
+      saveF();
+      const open = !el().querySelector(".ck-kmenu")?.hidden;
+      renderFilters();
+      if (open) el().querySelector(".ck-kmenu").hidden = false;
+      ckRender();
+      return;
+    }
+    if (c.closest?.("[data-ck-k]")) {
+      const k = c.dataset.ckK;
+      F.kinds = c.checked ? [...new Set([...F.kinds, k])] : F.kinds.filter((x) => x !== k);
+      saveF();
+      const open = !el().querySelector(".ck-kmenu")?.hidden;
+      renderFilters();
+      if (open) el().querySelector(".ck-kmenu").hidden = false;
+      ckRender();
+      return;
+    }
   });
   document.addEventListener("click", (e) => {
     const t = e.target;
@@ -520,12 +565,23 @@
       else location.href = go.dataset.go;
       return;
     }
-    const menu = el().querySelector(".ck-vmenu");
-    if (t.closest("[data-ck-vers]")) { menu.hidden = !menu.hidden; return; }
-    if (menu && !menu.hidden && !t.closest(".ck-vmenu")) menu.hidden = true;
+    const kmenu = el().querySelector(".ck-kmenu");
+    const vmenu = el().querySelector(".ck-vmenu");
+    if (t.closest("[data-ck-kinds]")) {
+      if (kmenu) kmenu.hidden = !kmenu.hidden;
+      if (vmenu) vmenu.hidden = true;
+      return;
+    }
+    if (t.closest("[data-ck-vers]")) {
+      if (vmenu) vmenu.hidden = !vmenu.hidden;
+      if (kmenu) kmenu.hidden = true;
+      return;
+    }
+    if (kmenu && !kmenu.hidden && !t.closest(".ck-kinds")) kmenu.hidden = true;
+    if (vmenu && !vmenu.hidden && !t.closest(".ck-vers")) vmenu.hidden = true;
+
     let b;
-    if ((b = t.closest("[data-ck-k]"))) F.kind = b.dataset.ckK;
-    else if ((b = t.closest("[data-ck-m]"))) {
+    if ((b = t.closest("[data-ck-m]"))) {
       const m = b.dataset.ckM;
       F.mOff = F.mOff.includes(m) ? F.mOff.filter((x) => x !== m) : [...F.mOff, m];
     } else if ((b = t.closest("[data-ck-op]"))) F.op = !F.op;
@@ -533,9 +589,11 @@
     else if ((b = t.closest("[data-ck-vall]"))) F.vOff = b.dataset.ckVall === "1" ? [] : ck.ix.v.map((v) => v[0] + "/" + v[1]);
     else return;
     saveF();
-    const open = !menu.hidden;
+    const vOpen = vmenu && !vmenu.hidden;
+    const kOpen = kmenu && !kmenu.hidden;
     renderFilters();
-    if (open) el().querySelector(".ck-vmenu").hidden = false;
+    if (vOpen) el().querySelector(".ck-vmenu").hidden = false;
+    if (kOpen) el().querySelector(".ck-kmenu").hidden = false;
     ckRender();
   });
   document.addEventListener("mouseover", (e) => {
@@ -543,6 +601,28 @@
     if (it && +it.dataset.i !== ck.sel) {
       el().querySelector(".ck-item.sel")?.classList.remove("sel");
       it.classList.add("sel"); ck.sel = +it.dataset.i;
+    }
+    const tick = e.target.closest?.(".ck-timeline i[data-tip]");
+    const tip = el()?.querySelector(".ck-tip");
+    if (tick && tip) {
+      const parts = tick.dataset.tip.split("|");
+      const [fam, build, arch, st, ch] = parts;
+      const stLabel = st === "d" ? "defined" : st === "o" ? "opaque" : "absent";
+      tip.className = `ck-tip ch-${ch}`;
+      tip.innerHTML = `<div class="ck-tip-top"><span class="ck-tip-fam">${esc(fam)}</span>` +
+        `<span class="ck-tip-st ${st}">${stLabel}</span></div>` +
+        `<div class="ck-tip-sub">${esc(build)} <span class="ck-tip-a">${esc(arch)}</span></div>` +
+        (st !== "absent" ? `<div class="ck-tip-hint">click to open this build</div>` : "");
+      tip.hidden = false;
+      const r = tick.getBoundingClientRect(), pr = el().querySelector(".ck").getBoundingClientRect();
+      tip.style.left = `${r.left + r.width / 2 - pr.left}px`;
+      tip.style.top = `${r.top - pr.top - 8}px`;
+    }
+  });
+  document.addEventListener("mouseout", (e) => {
+    if (e.target.closest?.(".ck-timeline i[data-tip]")) {
+      const tip = el()?.querySelector(".ck-tip");
+      if (tip) tip.hidden = true;
     }
   });
 
