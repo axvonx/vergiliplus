@@ -151,10 +151,26 @@ export const tagTitle = (doc, tag) => tag === "partial" ? doc.incomplete
 // a family name split for display: product = the group heading, release = what a row
 // shows. "Windows 10 1703" -> {Windows 10, 1703}, "Windows Server 2016" -> {Windows
 // Server, 2016}; a bare product ("Windows 8") is its own release ("8").
+// A dated beta or pre-release shrinks to its month: "3.1 beta, February 1993" -> "3.1
+// 02/1993", "pre-release, December 1991" -> "12/1991" (the family stays the title).
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August",
+  "September", "October", "November", "December"];
 export function product(family) {
   const m = /^Windows (NT|Server|Vista|XP|\d+(?:\.\d+)?)\b[ ,]*(.*)$/.exec(family || "");
   if (!m) return { product: family || "", release: family || "" };
-  return { product: "Windows " + m[1], release: m[2] || m[1] };
+  const release = (m[2] || m[1]).replace(/^(?:(\S+) beta|pre-release), (\w+) (\d{4})$/, (s, v, mon, y) => {
+    const i = MONTHS.indexOf(mon);
+    if (i < 0) throw new Error(`product(): unknown month in ${family}`);
+    return `${v ? v + " " : ""}${String(i + 1).padStart(2, "0")}/${y}`;
+  });
+  return { product: "Windows " + m[1], release };
+}
+// a build's name wherever one is shown: short product, then the release where it differs
+// ("10 1703", "Server 2016", "8", "NT 3.1 02/1993"); nav.js bname and struct.js short
+// apply the same rule to /builds.json rows
+export function buildName(family) {
+  const p = product(family), s = p.product.replace(/^Windows /, "");
+  return p.release === s ? s : `${s} ${p.release}`;
 }
 
 // release channel from the family name, for colour-coding versions

@@ -203,8 +203,19 @@ test("product(): every family splits", async () => {
     assert.ok(p.release && !/^Windows /.test(p.release), fam);
   }
   assert.deepEqual(product("Windows 10 1703"), { product: "Windows 10", release: "1703" });
-  assert.deepEqual(product("Windows NT pre-release, April 1991"), { product: "Windows NT", release: "pre-release, April 1991" });
+  assert.deepEqual(product("Windows NT pre-release, April 1991"), { product: "Windows NT", release: "04/1991" });
+  assert.deepEqual(product("Windows NT 3.1 beta, February 1993"), { product: "Windows NT", release: "3.1 02/1993" });
+  assert.deepEqual(product("Windows NT 4.0 beta 2"), { product: "Windows NT", release: "4.0 beta 2" });
   assert.deepEqual(product("Windows 8"), { product: "Windows 8", release: "8" });
+});
+
+test("buildName(): short product, then the release", async () => {
+  const { buildName } = await import("../web/src/lib/catalog.mjs");
+  for (const [fam, name] of [
+    ["Windows 10 1703", "10 1703"], ["Windows Server 2016", "Server 2016"], ["Windows 8", "8"],
+    ["Windows 11 Canary", "11 Canary"], ["Windows NT 3.1 beta, October 1992", "NT 3.1 10/1992"],
+    ["Windows NT pre-release, December 1991", "NT 12/1991"], ["Windows NT 3.51", "NT 3.51"],
+    ["Windows XP x64 / 2003 SP2", "XP x64 / 2003 SP2"]]) assert.equal(buildName(fam), name, fam);
 });
 
 // April 1991: the debug kernel's ASSERT text names types it has no layout for; the page

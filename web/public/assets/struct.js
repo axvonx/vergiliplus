@@ -121,9 +121,16 @@
   const buildRows = (tp) => (labels ||= fetch("/builds.json").then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
     .catch((e) => { labels = null; throw e; }))
     .then((all) => { const [, , a, m] = tp.dataset.pack.split("/"); return new Map((all[`${a}/${m}`] || []).map((r) => [r[0], r])); });
-  // a build as the tabs name it: its label, the release for an undated pre-release
-  const short = (row, b) => !row ? b : row[4] === "no build number" ? row[3] : (row[4] || b).replace(/^10\.0\./, "");
-  const full = (row, b) => (row ? `${row[4] || b} · ${row[1]}` : b);
+  // a build as the tabs name it: short product, then the release where it differs
+  // (catalog.mjs buildName's rule, as nav.js bname); full = family · build label
+  const short = (row, b) => {
+    if (!row) return b;
+    const p = row[2].replace(/^Windows /, "");
+    return row[3] === p ? p : `${p} ${row[3]}`;
+  };
+  const lab = (row, b) => (row && row[4]) || b;
+  const full = (row, b) => (row ? `${row[1]} · ${lab(row, b)}` : b);
+  const named = (row, b) => (!row || row[4] === "no build number" ? short(row, b) : `${short(row, b)} · ${lab(row, b)}`);
   const typeName = () => document.querySelector(".cb-type")?.textContent || "";
   const tabs = (tp) => {
     const box = tp.querySelector("[data-tabs]");
@@ -166,7 +173,7 @@
       const base = earlier.includes(tp.dataset.base) ? tp.dataset.base : earlier[0];
       const A = V.parse(p.v[p.b[p.n.indexOf(base)][0]]), B = V.parse(p.v[p.b[i][0]]);
       const sel = `<select class="df-base" data-df-base aria-label="Compare with">${earlier.map((b) =>
-        `<option value="${esc(b)}"${b === base ? " selected" : ""}>${esc(full(rows.get(b), b))}</option>`).join("")}</select>`;
+        `<option value="${esc(b)}"${b === base ? " selected" : ""} title="${esc(full(rows.get(b), b))}">${esc(named(rows.get(b), b))}</option>`).join("")}</select>`;
       const head = `<div class="df-head"><span class="df-since">since ${sel}</span>`;
       if (A.variants || B.variants)
         return void (pane.innerHTML = `${head}</div><p class="opaque-note">${esc(A.variants ? base : cur)}'s sources define ${name} in more than one way; Changes compares single definitions only.</p>`);

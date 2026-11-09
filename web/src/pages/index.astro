@@ -43,7 +43,7 @@ const data = (v) => ({ "data-ab": `${v.arch}/${v.build}`, "data-mods": v.mods.jo
       <ul class="vlist">
         {rs.map((r) => (
           <li class={`vrow ch-${channel(r.family)}`} title={r.family}>
-            <a class="vr-fam" href={href(r.arches[0])} {...data(r.arches[0])}>{r.release}</a>
+            <a class="vr-fam" href={href(r.arches[0])} {...data(r.arches[0])} title={r.family}>{r.release}</a>
             <span class="vr-archs">{r.arches.map((v) => (
               <a class="vr-arch" href={href(v)} {...data(v)} title={`${r.family} on ${v.arch}: ${v.label}`}>{v.arch}</a>))}</span>
             {r.labels.length > 0 && <span class="vr-build">{r.labels.join(" · ")}</span>}

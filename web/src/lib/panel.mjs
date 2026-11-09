@@ -6,7 +6,7 @@
 // links ("<Type>.html") resolve within the module's /t/ dir; struct.js appends #<build>.
 import { esc, html, slug } from "./types.mjs";
 import { structLayout, enumLayout, offAnn, hexv } from "./layout.mjs";
-import { catalog, typesFor, typeList, usedInFor, cmpBuild, TAGS } from "./catalog.mjs";
+import { catalog, typesFor, typeList, usedInFor, cmpBuild, TAGS, buildName } from "./catalog.mjs";
 
 const IND = "    ";
 const ind = (d) => IND.repeat(d + 1);
@@ -91,18 +91,29 @@ const attestedHtml = (doc, a, known) =>
   (a.members ? `<dt>members</dt><dd>${a.members.map(esc).join(", ")}</dd>` : "") +
   (known ? "" : `<dt>kind</dt><dd>unknown (struct, union or scalar)</dd>`) + `</dl>`;
 
-// where else a name has a layout, as a range: this build's other modules by name, then
-// other builds oldest → newest with the full list behind a disclosure
+// where else a name has a layout: this build's other modules by name, then per module
+// its other builds as a range oldest → newest, the full list behind a disclosure. A
+// build reads as its release name with the build number beside it (buildName).
 function definedIn(doc, name, defs) {
   if (!defs.length) return "";
-  const a = (d) => `<a href="${esc(typePath(d.arch, d.module, name))}#${esc(d.build)}">${d.module !== doc.module ? esc(d.module) + " " : ""}${esc(d.buildLabel || d.build)}</a>`;
+  const href = (d) => esc(`${typePath(d.arch, d.module, name)}#${d.build}`);
+  const lab = (d) => d.buildLabel || d.build;
+  const title = (d) => esc(`${d.family} · ${lab(d)} · ${d.module}`);
+  const a = (d) => `<a href="${href(d)}" title="${title(d)}">${esc(buildName(d.family))}` +
+    (d.buildLabel === "no build number" ? "" : ` <small>${esc(lab(d))}</small>`) + `</a>`;
   const here = defs.filter((d) => d.build === doc.build), other = defs.filter((d) => d.build !== doc.build);
-  const old = other.at(-1), neu = other[0];
+  const mods = [...new Set(other.map((d) => d.module))].sort((x, y) => (y === doc.module) - (x === doc.module) || (x < y ? -1 : 1));
+  const range = (m) => {
+    const ds = other.filter((d) => d.module === m);  // newest first
+    const lead = `Layout in ${m === doc.module ? "" : esc(m) + ": "}`;
+    if (ds.length === 1) return `<div>${lead}${a(ds[0])}</div>`;
+    return `<details><summary>${lead}${a(ds.at(-1))} → ${a(ds[0])} <span class="n">(${ds.length} builds)</span></summary>` +
+      `<div class="di-list">${ds.map(a).join(" · ")}</div></details>`;
+  };
   return `<div class="defined-in">` +
-    (here.length ? `<span>This build: ${here.map(a).join(" ")}</span>` : "") +
-    (other.length === 1 ? `<span>Layout in ${a(neu)}</span>`
-      : other.length ? `<details><summary>Layout in ${a(old)} → ${a(neu)} <span class="n">(${other.length} builds)</span></summary>` +
-        `${other.map(a).join("")}</details>` : "") + `</div>`;
+    (here.length ? `<div>Also in this build: ${here.map((d) =>
+      `<a href="${href(d)}" title="${title(d)}">${esc(d.module)}</a>`).join(", ")}</div>` : "") +
+    mods.map(range).join("") + `</div>`;
 }
 
 // an opaque name's view in one build: its declaration, and where it does have a layout

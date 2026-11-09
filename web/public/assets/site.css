@@ -275,9 +275,12 @@ a.str-link:hover { color: yellow; }
 .att dd { margin: 0; color: var(--fg); min-width: 0; overflow-wrap: anywhere; }
 .att code { white-space: pre-wrap; }
 .defined-in { display: grid; gap: 0.4rem; font-size: 1.6rem; color: var(--mute); }
-.defined-in a { display: inline-block; margin: 0 0.8rem 0 0; color: var(--gold); font-family: var(--mono); }
-.defined-in summary { cursor: pointer; }
+.defined-in a { color: var(--gold); white-space: nowrap; }
+.defined-in a small { color: var(--mute); font: 1.3rem var(--mono); }
+.defined-in summary { cursor: pointer; width: fit-content; padding-left: 0.2rem; }
+.defined-in summary:focus-visible { outline-offset: 2px; }
 .defined-in details[open] summary { margin-bottom: 0.4rem; }
+.defined-in .di-list { padding-left: 1.6rem; line-height: 1.7; }
 .defined-in .n { color: var(--mute); }
 
 /* ---- layouts not from a public PDB: a source tag (about.astro), a short provenance line ---- */
