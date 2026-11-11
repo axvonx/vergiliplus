@@ -666,6 +666,59 @@ def reachable(types, roots):
     return {k: types[k] for k in types if k in seen}
 
 
+def anonymous(name):
+    """MSVC's names for anonymous aggregates: one name, many unrelated definitions."""
+    return not name or name.startswith("<") or name.startswith("__unnamed")
+
+
+def named_defs(types):
+    """(kind, name) -> the indices of its definitions, anonymous aggregates left out."""
+    defs = {}
+    for k, t in types.items():
+        if t.get("fieldlist") and not t.get("forward") and not anonymous(t.get("name")):
+            defs.setdefault((t["kind"], t["name"]), []).append(k)
+    return defs
+
+
+def bind_forwards(types, named):
+    """A forward ref to a name with several definitions binds to the one `named`
+    documents (the last in the TPI, as resolve_forwards picks). llvm-pdbutil's "-> 0x.."
+    target comes from the TPI hash bucket and can be another of them: x64 ntoskrnl
+    19041+ carries a truncated _KPRCB (1792-2048 bytes) beside the real one, and
+    _KPCR.Prcb bound to it."""
+    defs = named_defs(types)
+    for t in types.values():
+        if t.get("kind") not in ("struct", "union", "enum") or t.get("fieldlist"):
+            continue
+        n = t.get("name")
+        if len(defs.get((t["kind"], n), ())) > 1 and named.get(n) in defs[(t["kind"], n)]:
+            t["forward"] = named[n]
+
+
+def check_slots(types, named):
+    """An embedded struct/union member whose name has several definitions must fill
+    its slot (up to the next member's offset, or its struct's end) when one of them
+    would: otherwise it is bound to the wrong definition. Raises."""
+    defs = named_defs(types)
+    for owner, key in named.items():
+        s = types[key]
+        if s["kind"] != "struct":
+            continue
+        ms = [m for m in types.get(s["fieldlist"], {}).get("members", []) if m.get("offset") is not None]
+        for m in ms:
+            t = types.get(m["type"], {})
+            if t.get("kind") not in ("struct", "union"):
+                continue
+            ds = defs.get((t["kind"], t.get("name")), ())
+            if len({types[d]["size"] for d in ds}) < 2:
+                continue
+            bound = types[t["forward"]] if t.get("forward") else t
+            slot = min([x["offset"] for x in ms if x["offset"] > m["offset"]] or [s["size"]]) - m["offset"]
+            if bound["size"] != slot and any(types[d]["size"] == slot for d in ds):
+                raise ValueError("%s.%s: %s bound to its %d-byte definition, its slot is %d bytes"
+                                 % (owner, m["name"], t["name"], bound["size"], slot))
+
+
 def convert(pdb, module, arch, build, family="", file_version=None, pdbutil=None):
     """PDB -> the vergiliplus doc for one module x build x arch."""
     pdb20 = is_pdb20(pdb)
@@ -687,6 +740,8 @@ def convert(pdb, module, arch, build, family="", file_version=None, pdbutil=None
     for n, k in ({} if pdb20 else mangled_type_names(pdb, pdbutil)).items():
         if n not in named:
             opaque.setdefault(n, k)
+    bind_forwards(types, named)
+    check_slots(types, named)
     return {
         "module": module, "arch": arch, "build": build, "family": family,
         "fileVersion": file_version, "pdb": pdb_identity(pdb, pdbutil),

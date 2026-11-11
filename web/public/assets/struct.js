@@ -154,6 +154,20 @@
   const buildRows = (tp) => (labels ||= fetch("/builds.json").then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
     .catch((e) => { labels = null; throw e; }))
     .then((all) => { const [, , a, m] = tp.dataset.pack.split("/"); return new Map((all[`${a}/${m}`] || []).map((r) => [r[0], r])); });
+  // another module's rows (same arch), for History's pointer to its layouts
+  const rowsIn = (tp, mod) => buildRows(tp).then(() => labels).then((all) => {
+    const a = tp.dataset.pack.split("/")[2], rows = all[`${a}/${mod}`];
+    if (!rows) throw new Error(`builds.json has no ${a}/${mod}`);
+    return new Map(rows.map((r) => [r[0], r]));
+  });
+  // data-sib = "module:build,build;…": builds this page has no layout for that the same
+  // arch's other module has (lib/panel.mjs siblingLayouts) -> one line per module
+  const sibLines = (tp) => Promise.all((tp.dataset.sib || "").split(";").filter(Boolean).map((x) => {
+    const [mod, bs] = x.split(":"), list = bs.split(",");
+    const [, , a, , file] = tp.dataset.pack.split("/"), page = file.replace(/\.json\.gz$/, ".html");
+    return rowsIn(tp, mod).then((rows) => `<p class="hs-sib">Layout${list.length > 1 ? "s" : ""} this module lacks, in ${esc(mod)}: ` +
+      list.map((b) => `<a href="/t/${esc(a)}/${esc(mod)}/${esc(page)}#${esc(encodeURIComponent(b))}" title="${esc(full(rows.get(b), b))}">${esc(short(rows.get(b), b))}</a>`).join(" · ") + `</p>`);
+  })).then((ls) => ls.join(""));
   // a build as the tabs name it: short product, then the release where it differs
   // (catalog.mjs buildName's rule, as nav.js bname); full = family · build label
   const short = (row, b) => {
@@ -229,7 +243,7 @@
   const history = (tp) => {
     const pane = tp.querySelector("[data-pane=hist]"), cur = tp.dataset.cur, has = tp.dataset.has;
     const all = tp.dataset.hsAll === "1";
-    Promise.all([pack(tp.dataset.pack), buildRows(tp), diffLib()]).then(([p, rows, V]) => {
+    Promise.all([pack(tp.dataset.pack), buildRows(tp), diffLib(), sibLines(tp)]).then(([p, rows, V, sib]) => {
       if (tp.dataset.cur !== cur || !tp.isConnected) return;
       const views = p.n.map((b, j) => has[j] === "-" || !p.b[j] ? null
         : { build: b, label: short(rows.get(b), b), title: full(rows.get(b), b), st: has[j], view: p.v[p.b[j][0]] }).filter(Boolean);
@@ -237,7 +251,7 @@
       const btn = H.shown === H.total && !all ? "" : `<button type="button" class="btn" data-hs-all>${all ? `only ${H.unit}s that appear or vanish` : `all ${H.total} ${H.unit}s`}</button>`;
       pane.innerHTML = `<div class="df-head"><span class="df-since">${views.length} builds · ${all ? `${H.total} ${H.unit}s`
         : `${H.shown} of ${H.total} ${H.unit}s, those that appear or vanish`}</span>${btn}</div>` +
-        (H.empty ? `<p class="opaque-note">No ${H.unit} appears or vanishes across these builds.</p>` : H.html) +
+        (H.empty ? `<p class="opaque-note">No ${H.unit} appears or vanishes across these builds.</p>` : H.html) + sib +
         `<div class="hs-key"><span class="n">first appears</span><span class="m">offset changed</span><span class="p">same offset</span><span class="x">gone</span>` +
         (H.partial ? `<span class="nr" title="the build's layout comes from sources that can lack members (italic builds)">not recorded</span>` : "") +
         `<span class="op">no layout</span></div>`;

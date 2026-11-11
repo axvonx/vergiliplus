@@ -140,3 +140,35 @@ test("history: a build whose sources define the type twice shows its first defin
   assert.ok(H.total > 0, "the column has members");
   assert.ok(!H.html.includes('class="op'), "not drawn as no layout");
 });
+
+test("forward refs to a name with several definitions bind the documented one (pdb_to_json bind_forwards)", () => {
+  // Bound right, the other definition is unreachable and pruned: two reachable
+  // definitions of one name appear only when a forward ref holds the wrong one.
+  const anon = (n) => !n || n.startsWith("<") || n.startsWith("__unnamed");
+  for (const f of fs.readdirSync(DATA).filter((f) => f.endsWith(".json") && f !== "sources.json")) {
+    const d = JSON.parse(fs.readFileSync(path.join(DATA, f), "utf8"));
+    if (d.sources) continue;  // records/headers docs are not convert()'s output
+    const defs = new Map();
+    for (const [k, t] of Object.entries(d.types))
+      if (t.fieldlist && !t.forward && !anon(t.name)) { const key = t.kind + "|" + t.name; defs.set(key, (defs.get(key) || 0) + 1); }
+    for (const t of Object.values(d.types)) {
+      if (!["struct", "union", "enum"].includes(t.kind) || t.fieldlist || !t.forward || anon(t.name)) continue;
+      if ((defs.get(t.kind + "|" + t.name) || 0) < 2 || !(t.name in d.named)) continue;
+      assert.equal(t.forward, d.named[t.name], `${f}: forward ${t.name} -> ${t.forward}, documented ${d.named[t.name]}`);
+    }
+  }
+});
+
+test("x64 ntoskrnl _KPCR embeds the whole _KPRCB (not its truncated twin) in every build", () => {
+  for (const b of ["10.0.19041.2006", "10.0.22621.7079", "10.0.29680.1000"]) {
+    const P = V.parse(view(b, "_KPCR")), prcb = P.rows.find((r) => r.k === "Prcb");
+    assert.equal(prcb.o + prcb.sz, P.size, `${b}: Prcb ends the struct`);
+  }
+});
+
+test("a page points at the other module's builds it has no layout for", async () => {
+  const { typePages, siblingLayouts } = await import("../web/src/lib/panel.mjs");
+  const pg = (m) => typePages().find((p) => p.arch === "x64" && p.module === m && p.name === "_KPCR");
+  assert.equal(siblingLayouts(pg("ntdll")), "ntoskrnl:5.2.3790.3959,6.0.6002.18005");
+  assert.equal(siblingLayouts(pg("ntoskrnl")), "");
+});

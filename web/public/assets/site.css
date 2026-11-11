@@ -258,6 +258,7 @@ a.str-link:hover { color: yellow; }
 .hs td.cur, .hs th.cur { background-color: color-mix(in srgb, var(--cyan) 12%, transparent); }
 .hs-size td { height: 3.6rem; vertical-align: bottom; }
 .hs-size td i { position: absolute; left: 0.15rem; right: 0.15rem; bottom: 0.2rem; background: var(--comment); border-radius: 1px 1px 0 0; max-height: calc(100% - 0.4rem); }
+.hs-sib { margin: 0.8rem 0 0; font-size: 1.3rem; color: var(--mute); }
 .hs-key { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; margin-top: 0.8rem; font-size: 1.3rem; color: var(--mute); }
 .hs-key span::before { content: ""; display: inline-block; width: 1rem; height: 1rem; margin-right: 0.4rem; vertical-align: -1px; border-radius: 2px; }
 .hs-key .n::before { background: var(--k-enum); } .hs-key .m::before { background: #3d4a6a; } .hs-key .p::before { background: #34374a; }

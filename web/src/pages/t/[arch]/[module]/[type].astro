@@ -7,7 +7,7 @@
 import Layout from "../../../../layouts/Layout.astro";
 import ContextBar from "../../../../components/ContextBar.astro";
 import { slug } from "../../../../lib/types.mjs";
-import { typePages, viewOf } from "../../../../lib/panel.mjs";
+import { typePages, viewOf, siblingLayouts } from "../../../../lib/panel.mjs";
 
 export function getStaticPaths() {
   return typePages().flatMap((page) => [page.slug, ...page.aliases]
@@ -16,10 +16,11 @@ export function getStaticPaths() {
 
 const { page } = Astro.props;
 const { view, used } = viewOf(page, page.def);
+const sib = siblingLayouts(page) || undefined;
 ---
 <Layout title={`${page.name} · ${page.module}`} side>
   <ContextBar arch={page.arch} build={page.def} module={page.module} type={page.name} page={page} />
-  <div data-tp data-def={page.def} data-cur={page.def} data-has={page.has}
+  <div data-tp data-def={page.def} data-cur={page.def} data-has={page.has} data-sib={sib}
        data-pack={`/p/${page.arch}/${page.module}/${page.slug}.json.gz`}>
     <div class="panel" data-view set:html={view} />
     {/* tabs: only Used in ships (it reads without JS); struct.js adds Changes and History */}

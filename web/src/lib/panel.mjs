@@ -172,6 +172,26 @@ export function typePages() {
   return (_pages = out.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)));
 }
 
+// Builds where this page has no layout and the same arch's other module does (x64 ntdll
+// _KPCR: ntoskrnl's XP x64 and Vista x64), as "module:build,build;…" for History's
+// pointer line ("" where none). Nothing is merged: each module keeps its own page.
+let _sib = null;
+export function siblingLayouts(page) {
+  if (!_sib) {
+    _sib = new Map();
+    for (const p of typePages()) {
+      const k = p.arch + "|" + p.slug.toLowerCase();
+      (_sib.get(k) || _sib.set(k, []).get(k)).push(p);
+    }
+  }
+  const mine = new Set(page.builds.filter((b, i) => page.has[i] === "d"));
+  return (_sib.get(page.arch + "|" + page.slug.toLowerCase()) || [])
+    .filter((p) => p.module !== page.module)
+    .map((p) => [p.module, p.builds.filter((b, i) => p.has[i] === "d" && !mine.has(b))])
+    .filter(([, bs]) => bs.length)
+    .map(([m, bs]) => `${m}:${bs.join(",")}`).join(";");
+}
+
 // one build's view of a type page: {view: html, used: [names]} (null where absent)
 export function viewOf(page, build) {
   const st = page.has[page.builds.indexOf(build)];

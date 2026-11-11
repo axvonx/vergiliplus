@@ -171,6 +171,10 @@ VP_IMAGES=/path/to/disk-images python3 tools/build.py --skip-render [--only <sub
   what they own and forward-declare the rest (`_TP_POOL` is full only in ntdll).
 - Union reconstruction ambiguity: when the *last* alternative is the longest, its tail
   renders after the union. Offsets are still exact.
+- A PDB can define one name twice (x64 ntoskrnl 19041+: a truncated `_KPRCB` beside the
+  real one). pdbutil's forward-ref target comes from the TPI hash and can be the wrong
+  one: `bind_forwards` rebinds to `named`'s, and `check_slots` fails the build where an
+  embedded member's definition doesn't fill its slot but another would.
 - Anything scaling with struct **size** rather than member count blows the heap.
   `_MI_HYPER_SPACE` (276 MB) is the test canary.
 - `<unnamed-tag>` is MSVC's name for every anonymous aggregate. `loadDoc` drops it from
