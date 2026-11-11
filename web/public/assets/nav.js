@@ -52,8 +52,10 @@
       if (b.dataset.k === "named") b.hidden = !c.named;
     });
     root.querySelector(".sb-count").textContent = `${shown.length} types`;
+    const act = sb.items.some((it) => it.s === sb.loc.slug) ? sb.loc.slug
+      : sb.items.find((it) => it.s.toLowerCase() === sb.loc.slug.toLowerCase())?.s;
     root.querySelector(".sb-list").innerHTML = shown.map((it) =>
-      `<a class="sb-item${it.s === sb.loc.slug ? " active" : ""}${it.o ? " op" : ""}${it.a ? " nm" : ""}" href="${esc(typeUrl(sb.loc.arch, sb.loc.module, it.s, sb.loc.build))}">${dot(it.k)}${esc(it.n)}</a>`).join("");
+      `<a class="sb-item${it.s === act ? " active" : ""}${it.o ? " op" : ""}${it.a ? " nm" : ""}" href="${esc(typeUrl(sb.loc.arch, sb.loc.module, it.s, sb.loc.build))}">${dot(it.k)}${esc(it.n)}</a>`).join("");
     nearest(root.querySelector(".sb-list"), root.querySelector(".sb-item.active"));
   };
   const sbSync = () => {
@@ -381,7 +383,9 @@
       }
       return score + n.length;
     };
-    const rowOk = (t) => F.kinds.includes(t[1]) && !F.mOff.includes(ix.m[t[3]]) &&
+    // kind "type": named only (ASSERT text), kind unknown: no kind filter can exclude
+    // it; being opaque-only, the opaque filter gates it
+    const rowOk = (t) => (t[1] === "type" || F.kinds.includes(t[1])) && !F.mOff.includes(ix.m[t[3]]) &&
       (t[4].some(vOn) || (F.op && t[5].some(vOn)));
     // documented beats opaque-only, this page's module first
     const rowScore = (t) => (t[4].length ? 0 : 5e4) + (t[3] === hm ? 0 : 500);
@@ -515,6 +519,7 @@
     else if (e.key === "Enter" && ck.hits[ck.sel]) {
       e.preventDefault();
       const [t, f] = ck.hits[ck.sel];
+      ckOpen(false);  // the same URL (this page's build) is no navigation: close first
       location.href = typeHref(t, target(t), f);
     }
   });
@@ -562,9 +567,10 @@
     if (go) {
       e.preventDefault();
       if (e.metaKey || e.ctrlKey || e.shiftKey) window.open(go.dataset.go, "_blank");
-      else location.href = go.dataset.go;
+      else { ckOpen(false); location.href = go.dataset.go; }
       return;
     }
+    if (t.closest(".ck-item") && !(e.metaKey || e.ctrlKey || e.shiftKey)) ckOpen(false);  // the link itself navigates
     const kmenu = el().querySelector(".ck-kmenu");
     const vmenu = el().querySelector(".ck-vmenu");
     if (t.closest("[data-ck-kinds]")) {

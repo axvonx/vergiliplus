@@ -12,17 +12,21 @@
   const hex = (n) => (n < 0 ? "-0x" + (-n).toString(16) : "0x" + n.toString(16));
   const signed = (n, isEnum) => (n < 0 ? "−" : "+") + (isEnum ? String(Math.abs(n)) : "0x" + Math.abs(n).toString(16));
 
-  // one view -> {kind, size, rows} | {opaque} | {variants: n}
-  // rows: {k (key or null), cls, depth, code (html), text, ann, o, bp, sz, open, close}
+  // one view -> {kind, size, rows, tag, tagTitle} | {opaque} | {variants: n}
+  // rows: {k (key or null), cls, depth, code (html), text, ann, o, bp, sz, open, close,
+  // untyped}. tag: the layout's source tag (none for a public PDB), tagTitle its tooltip.
+  // An untyped row (names and offsets only) has its "+0x068" lead taken out of text.
   const ROW = /<div class="((?:sc-line|sc-member)[^"]*)">(.*?)<\/div>/g;
   const FIELD = /<span class="sc-field">(.*?)<\/span>/;
   function parse(html) {
     if (!html || !html.includes("data-sc")) return { opaque: true };
     const nv = html.match(/data-var="/g);
     if (nv && nv.length > 1) return { variants: nv.length };
-    const out = { kind: null, size: null, rows: [] };
+    const out = { kind: null, size: null, rows: [], tag: null, tagTitle: null };
     const sz = /<span>size <b>(\d+)/.exec(html);
     if (sz) out.size = +sz[1];
+    const tg = /<a class="tag t-(\w+)"[^>]*? title="([^"]*)"/.exec(html);
+    if (tg) { out.tag = tg[1]; out.tagTitle = unesc(tg[2]); }
     for (const m of html.matchAll(ROW)) {
       const [, cls, inner] = m;
       const ann = /<span class="sc-ann">\/\* (.*?) \*\/<\/span>$/.exec(inner);
@@ -39,7 +43,10 @@
       else if (r.k == null && cls.includes("k-enum")) r.k = t.split(" = ")[0];
       const a = r.ann && /^(-?0x[0-9a-f]+)(?::(\d+))?(?:\s+(\d+))?/.exec(r.ann);
       if (a) { r.o = parseInt(a[1], 16); r.bp = a[2] != null ? +a[2] : null; r.sz = a[3] != null ? +a[3] : null; }
-      else if (r.k) { const b = /^\+0x([0-9a-f]+)/.exec(t); if (b) r.o = parseInt(b[1], 16); }  // untyped: offset inline
+      else if (r.k) {  // untyped: offset inline
+        const b = /^\+0x([0-9a-f]+) +/.exec(t);
+        if (b) { r.o = parseInt(b[1], 16); r.text = t.slice(b[0].length); r.untyped = true; }
+      }
       out.rows.push(r);
     }
     keys(out.rows);
@@ -83,7 +90,8 @@
       const a = am.get(r.k);
       let st = "same";
       if (!a) st = "add";
-      else if (!isEnum && a.text !== r.text) st = "type";
+      // an untyped side has no type to compare: only its offset counts
+      else if (!isEnum && !a.untyped && !r.untyped && a.text !== r.text) st = "type";
       else if (a.sz != null && r.sz != null && a.sz !== r.sz) st = "grew";
       else if (a.o !== r.o || a.bp !== r.bp) st = "shift";
       rows.push({ st, r, a });
@@ -198,40 +206,68 @@
     return { html, text: text.join("\n") };
   }
 
+  // Layouts whose sources can lack members the type has: a 1991 debugger decodes only
+  // what it prints, a header is the public view, a debugger extension prints a subset.
+  // A member such a layout lacks is "not recorded" there, not absent.
+  const PARTIAL = new Set(["debugger", "headers", "offsets"]);
+  const partial = (P) => !!P.tag && PARTIAL.has(P.tag);
+  // a view with several definitions (data-var): its first one, as the select shows it
+  const firstVariant = (html) => {
+    const a = html.indexOf('data-var="0"'), b = html.indexOf('data-var="1"');
+    if (a < 0 || b < 0) throw new Error("firstVariant: no data-var 0/1 in a variants view");
+    return html.slice(a, b);
+  };
+
   // History: views = [{build, label, title, st: "d" | "o", view}] oldest first.
   // Rows: the type's top-level names (members of anonymous unions/structs included),
-  // newest build's order first; by default only those that appear or vanish.
+  // newest build's order first; by default only those that appear or vanish. In a
+  // partial column a missing member is "not recorded" (nr): it neither appears nor
+  // vanishes there, and the next column compares with the last one that said.
   function history(views, cur, all) {
     const cols = views.map((v) => {
       if (v.st !== "d") return { ...v, m: null };
-      const P = parse(v.view);
+      let P = parse(v.view), vars = 0;
+      if (P.variants) { vars = P.variants; P = parse(firstVariant(v.view)); }
       if (!P.rows) return { ...v, m: null };
       const m = new Map();
       for (const r of P.rows) if (r.k != null && !r.k.includes(".")) m.set(r.k, r.o);
-      return { ...v, m, size: P.size, kind: P.kind };
+      return { ...v, m, size: P.size, kind: P.kind, vars, part: partial(P) ? P : null };
     });
     const keys = [];
     const seen = new Set();
     for (let i = cols.length - 1; i >= 0; i--) if (cols[i].m) for (const k of cols[i].m.keys()) if (!seen.has(k)) { seen.add(k); keys.push(k); }
-    const def = cols.filter((c) => c.m);
-    const moves = (k) => def.some((c, i) => i > 0 && c.m.has(k) !== def[i - 1].m.has(k));
-    const list = all ? keys : keys.filter(moves);
-    const maxS = Math.max(1, ...def.map((c) => c.size || 0));
-    const isEnum = def.at(-1)?.kind === "enum";
-    const th = cols.map((c) => `<th class="${c.build === cur ? "cur" : ""}${c.m ? "" : " op"}" title="${esc(c.title)}"><a href="#${esc(c.build)}"><span>${esc(c.label)}</span></a></th>`).join("");
-    const sizeRow = isEnum ? "" : `<tr class="hs-size"><th>size</th>${cols.map((c) => `<td class="${c.build === cur ? "cur" : ""}${c.m ? "" : " op"}" title="${esc(c.label)}: ${c.size != null ? c.size + " bytes" : "no layout"}">` +
-      (c.size ? `<i style="height:${(c.size / maxS * 100).toFixed(1)}%"></i>` : "") + `</td>`).join("")}</tr>`;
-    const body = list.map((k) => {
-      let last;  // previous column with a layout
-      const tds = cols.map((c) => {
-        const cl = c.build === cur ? " cur" : "";
-        if (!c.m) return `<td class="op${cl}"></td>`;
-        const has = c.m.has(k), v = c.m.get(k), p = last;
+    // one row's cells: "" | p | n | m | x | nr | op per column
+    const states = (k) => {
+      let last = null;  // previous column that says whether k is there
+      return cols.map((c) => {
+        if (!c.m) return { s: "op" };
+        const has = c.m.has(k), v = c.m.get(k);
+        if (!has && c.part) return { s: "nr" };
+        const p = last;
         last = c;
         let s = "";
         if (has) s = !p ? "p" : !p.m.has(k) ? "n" : p.m.get(k) !== v ? "m" : "p";
         else if (p && p.m.has(k)) s = "x";
-        const tip = `${c.label}: ${has ? (v == null ? "present" : hex(v)) : "absent"}`;
+        return { s, v, has };
+      });
+    };
+    const def = cols.filter((c) => c.m);
+    const moves = (k) => states(k).some((x) => x.s === "n" || x.s === "x");
+    const list = all ? keys : keys.filter(moves);
+    const maxS = Math.max(1, ...def.map((c) => c.size || 0));
+    const isEnum = def.at(-1)?.kind === "enum";
+    const colTitle = (c) => c.title +
+      (c.part ? `\n${c.part.tag}: members this layout lacks are not recorded, not absent\n${c.part.tagTitle}` : "") +
+      (c.vars ? `\n${c.vars} definitions in this build's sources: the first is shown` : "");
+    const th = cols.map((c) => `<th class="${c.build === cur ? "cur" : ""}${c.m ? "" : " op"}${c.part ? " pt" : ""}" title="${esc(colTitle(c))}"><a href="#${esc(c.build)}"><span>${esc(c.label)}</span></a></th>`).join("");
+    const sizeRow = isEnum ? "" : `<tr class="hs-size"><th>size</th>${cols.map((c) => `<td class="${c.build === cur ? "cur" : ""}${c.m ? "" : " op"}" title="${esc(c.label)}: ${c.size != null ? c.size + " bytes" : "no layout"}">` +
+      (c.size ? `<i style="height:${(c.size / maxS * 100).toFixed(1)}%"></i>` : "") + `</td>`).join("")}</tr>`;
+    const body = list.map((k) => {
+      const ss = states(k);
+      const tds = cols.map((c, i) => {
+        const cl = c.build === cur ? " cur" : "", { s, v, has } = ss[i];
+        if (s === "op") return `<td class="op${cl}"></td>`;
+        const tip = `${c.label}: ${s === "nr" ? `not recorded, ${c.part.tag} layout` : has ? (v == null ? "present" : hex(v)) : "absent"}`;
         return `<td class="${s}${cl}" title="${esc(tip)}">${s ? `<a href="#${esc(c.build)}"></a>` : ""}</td>`;
       }).join("");
       return `<tr><th>${esc(k)}</th>${tds}</tr>`;
@@ -240,10 +276,10 @@
     return {
       html: `<div class="hs-scroll"><table class="hs"><thead><tr><th></th>${th}</tr></thead><tbody>${sizeRow}${body}</tbody></table></div>`,
       shown: list.length, total: keys.length, unit,
-      empty: !list.length,
+      empty: !list.length, partial: def.some((c) => c.part),
     };
   }
 
-  const api = { parse, diff, summary, runsHtml, listing, history, causeText };
+  const api = { parse, diff, summary, runsHtml, listing, history, causeText, partial };
   globalThis.vpDiff = api;
 })();

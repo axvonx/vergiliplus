@@ -72,42 +72,75 @@
   };
   // type links (code rows, used-in) carry the build being viewed; "defined in" links
   // already name theirs
-  const tag = (tp) => tp.querySelectorAll("[data-view] a.str-link, [data-used] a, [data-pane=diff] a.str-link").forEach((a) => {
-    a.href = a.getAttribute("href").split("#")[0] + "#" + encodeURIComponent(tp.dataset.cur);
+  // (in Changes, a removed or "was" row names a type of the build compared with)
+  const tag = (tp, base) => tp.querySelectorAll("[data-view] a.str-link, [data-used] a, [data-pane=diff] a.str-link").forEach((a) => {
+    const b = base && a.closest(".d-del, .d-was") ? base : tp.dataset.cur;
+    a.href = a.getAttribute("href").split("#")[0] + "#" + encodeURIComponent(b);
   });
-  // ?m=<member> (from the palette's member filter): mark that row, once per URL
+  // ?m=<member> (from the palette's member filter): mark that row in every build shown,
+  // scroll to it once per page and member (a build switch never re-scrolls). The palette
+  // opens the newest build defining the type; where the member isn't in it, the newest
+  // build that has it.
   let hitFor = "";
+  const FIELD_OF = (m) => `<span class="sc-field">${esc(m)}</span>`;
+  const rowOf = (tp, m) => [...tp.querySelectorAll("[data-view] .sc-member")].find((r) =>
+    (r.querySelector(".sc-field")?.textContent ?? r.querySelector(".sc-code").textContent.trim().split(" ")[0]) === m);
   const hit = (tp) => {
-    const m = new URLSearchParams(location.search).get("m");
-    if (!m || hitFor === location.href) return;
-    hitFor = location.href;
-    const row = [...tp.querySelectorAll("[data-view] .sc-member")].find((r) =>
-      (r.querySelector(".sc-field")?.textContent ?? r.querySelector(".sc-code").textContent.trim().split(" ")[0]) === m);
-    if (!row) return;
-    row.classList.add("hit");
-    window.scrollTo({ top: Math.max(0, scrollY + row.getBoundingClientRect().top - innerHeight / 3) });
+    const m = new URLSearchParams(location.search).get("m"), key = location.pathname + location.search;
+    if (!m) return;
+    const row = rowOf(tp, m);
+    row?.classList.add("hit");
+    if (hitFor === key) return;
+    hitFor = key;
+    if (row) return window.scrollTo({ top: Math.max(0, scrollY + row.getBoundingClientRect().top - innerHeight / 3) });
+    const cur = tp.dataset.cur;
+    pack(tp.dataset.pack).then((p) => {
+      if (tp.dataset.cur !== cur || !tp.isConnected) return;
+      const has = (j) => p.b[j] && (p.v[p.b[j][0]].includes(FIELD_OF(m)) || p.v[p.b[j][0]].includes(`${IND}${esc(m)} = `));
+      const j = p.n.map((_, j) => j).reverse().find(has);
+      if (j == null) return note(tp, `No build of this type has a member ${esc(m)}.`);
+      if (p.n[j] === cur) throw new Error(`hit: ${m} is in ${cur}'s pack view but not its rows`);
+      hitFor = "";  // mark it in the build it is in
+      window.history.replaceState(null, "", "#" + encodeURIComponent(p.n[j]));
+      route();
+      noteNext = `${esc(m)} isn't in ${esc(cur)}: showing ${esc(p.n[j])}, the newest build that has it.`;
+    }).catch((err) => { console.error(err); note(tp, `Couldn't find ${esc(m)} in this type's other builds: ${esc(String(err))}`); });
   };
+  const IND = "    ";
+  // a one-line note above the view, shown after the next render (noteNext) or now
+  let noteNext = "";
+  const note = (tp, msg) => tp.querySelector("[data-view]").insertAdjacentHTML("afterbegin", `<p class="opaque-note" data-note>${msg}</p>`);
   const shown = (tp) => {
+    if (noteNext) { note(tp, noteNext); noteNext = ""; }
     tag(tp); apply(); hit(tp); tabs(tp);
     const name = document.querySelector(".cb-type")?.textContent;
     const mod = tp.dataset.pack.split("/")[3];
     if (name) document.title = `${name} · ${mod} ${tp.dataset.cur} · vergiliplus`;
     document.dispatchEvent(new CustomEvent("vp:build"));
   };
+  // build strings in the catalog's order (catalog.mjs buildKey/cmpBuild)
+  const bkey = (b) => b.split(/[.\-]/).concat(["0", "0", "0", "0"]).slice(0, 4).map((x) => parseInt(x, 10) || 0);
+  const cmpB = (x, y) => { const a = bkey(x), c = bkey(y); for (let i = 0; i < 4; i++) if (a[i] !== c[i]) return a[i] - c[i]; return 0; };
   const render = (tp, b, p) => {
-    const i = p.n.indexOf(b), e = i >= 0 && p.b[i];
-    // a build of this module without the type (e.g. reached from another arch's
-    // context bar): its listing, as the build picker does
-    if (i >= 0 && !e) {
+    let i = p.n.indexOf(b), e = i >= 0 && p.b[i];
+    // a build this page has no view for (a module link or another arch's context bar
+    // carries its own build): the nearest build that has one, newest not after it first,
+    // said above the view; the hash is replaced, so Back still leaves the page
+    if (!e) {
+      const at = p.n.map((_, j) => j).filter((j) => p.b[j]);
+      const before = at.filter((j) => cmpB(p.n[j], b) <= 0).at(-1), j = before ?? at[0];
       const [, , a, m] = tp.dataset.pack.split("/");
-      return location.replace(`/v/${a}/${encodeURIComponent(b)}/${m}.html`);
+      noteNext = `${esc(typeName())} isn't in ${esc(m)} ${esc(b)}${i < 0 ? ` (${a} ${esc(m)} has no such build)` : ""}: showing ${esc(p.n[j])}, the nearest build that has it.`;
+      window.history.replaceState(null, "", location.pathname + location.search + "#" + encodeURIComponent(p.n[j]));
+      i = j; e = p.b[j]; b = p.n[j];
+      tp.dataset.want = b;
+      if (b === tp.dataset.cur) return shown(tp);
     }
     const view = tp.querySelector("[data-view]");
     tp.dataset.cur = b;
     delete tp.dataset.base;  // Changes compares against the previous build again
-    if (!e) view.innerHTML = `<p class="opaque-note">Not in this module for ${esc(b)}.</p>`;
-    else view.innerHTML = p.v[e[0]];
-    const u = e ? p.u[e[1]] : [];
+    view.innerHTML = p.v[e[0]];
+    const u = p.u[e[1]];
     tp.querySelector("[data-used-n]").textContent = u.length;
     tp.querySelector("[data-used] .used-list").innerHTML = u.map((x) => `<a href="${esc(slugOf(x))}.html">${esc(x)}</a>`).join("");
     shown(tp);
@@ -164,7 +197,7 @@
   const paneMsg = (pane, msg) => { pane.innerHTML = `<p class="opaque-note">${msg}</p>`; };
   const changes = (tp) => {
     const pane = tp.querySelector("[data-pane=diff]"), cur = tp.dataset.cur, has = tp.dataset.has;
-    Promise.all([pack(tp.dataset.pack), buildRows(tp).catch(() => new Map()), diffLib()]).then(([p, rows, V]) => {
+    Promise.all([pack(tp.dataset.pack), buildRows(tp), diffLib()]).then(([p, rows, V]) => {
       if (tp.dataset.cur !== cur || !tp.isConnected) return;
       const i = p.n.indexOf(cur), name = esc(typeName());
       if (has[i] !== "d") return paneMsg(pane, `No layout for ${name} in this build to compare.`);
@@ -178,22 +211,25 @@
       if (A.variants || B.variants)
         return void (pane.innerHTML = `${head}</div><p class="opaque-note">${esc(A.variants ? base : cur)}'s sources define ${name} in more than one way; Changes compares single definitions only.</p>`);
       const D = V.diff(A, B), c = D.count;
+      const pa = [[A, base], [B, cur]].filter(([P]) => V.partial(P));
+      const ptxt = pa.length ? `<p class="opaque-note">Partial layout${pa.length > 1 ? "s" : ""} in ${pa.map(([P, b]) => `${esc(short(rows.get(b), b))} (${P.tag})`).join(" and ")}: ` +
+        `a member missing there is not recorded, so "added" or "removed" may mean only that.</p>` : "";
       const none = !(c.add + c.del + c.type + c.grew + c.shift);
       const L = none ? null : V.listing(D, `${B.kind || "struct"} ${typeName()} {`);
-      pane.innerHTML = `${head}<span class="df-sum">${V.summary(D)}</span></div>` +
+      pane.innerHTML = `${head}<span class="df-sum">${V.summary(D)}</span></div>` + ptxt +
         (D.runs.length ? `<ul class="df-runs">${V.runsHtml(D)}</ul>` : "") +
         (none ? `<p class="opaque-note">Same layout as ${esc(short(rows.get(base), base))}.</p>`
           : `<div class="sc df"><pre class="sc-pre"><code><div class="sc-ctrls"><button class="sc-copy" data-df-copy>copy</button></div>` +
             `<div class="sc-line sc-head"><span class="df-mk"> </span><span class="sc-code"><span class="kw">${esc(B.kind || "struct")}</span> ${name} {</span></div>${L.html}` +
             `<div class="sc-line"><span class="df-mk"> </span><span class="sc-code">};</span></div></code></pre></div>`);
       pane._text = L?.text || "";
-      tag(tp);
-    }).catch(() => paneMsg(pane, "Couldn't load this type's other builds."));
+      tag(tp, base);
+    }).catch((err) => { console.error(err); paneMsg(pane, `Couldn't load this type's other builds: ${esc(String(err))}`); });
   };
   const history = (tp) => {
     const pane = tp.querySelector("[data-pane=hist]"), cur = tp.dataset.cur, has = tp.dataset.has;
     const all = tp.dataset.hsAll === "1";
-    Promise.all([pack(tp.dataset.pack), buildRows(tp).catch(() => new Map()), diffLib()]).then(([p, rows, V]) => {
+    Promise.all([pack(tp.dataset.pack), buildRows(tp), diffLib()]).then(([p, rows, V]) => {
       if (tp.dataset.cur !== cur || !tp.isConnected) return;
       const views = p.n.map((b, j) => has[j] === "-" || !p.b[j] ? null
         : { build: b, label: short(rows.get(b), b), title: full(rows.get(b), b), st: has[j], view: p.v[p.b[j][0]] }).filter(Boolean);
@@ -202,8 +238,10 @@
       pane.innerHTML = `<div class="df-head"><span class="df-since">${views.length} builds · ${all ? `${H.total} ${H.unit}s`
         : `${H.shown} of ${H.total} ${H.unit}s, those that appear or vanish`}</span>${btn}</div>` +
         (H.empty ? `<p class="opaque-note">No ${H.unit} appears or vanishes across these builds.</p>` : H.html) +
-        `<div class="hs-key"><span class="n">first appears</span><span class="m">offset changed</span><span class="p">same offset</span><span class="x">gone</span><span class="op">no layout</span></div>`;
-    }).catch(() => paneMsg(pane, "Couldn't load this type's other builds."));
+        `<div class="hs-key"><span class="n">first appears</span><span class="m">offset changed</span><span class="p">same offset</span><span class="x">gone</span>` +
+        (H.partial ? `<span class="nr" title="the build's layout comes from sources that can lack members (italic builds)">not recorded</span>` : "") +
+        `<span class="op">no layout</span></div>`;
+    }).catch((err) => { console.error(err); paneMsg(pane, `Couldn't load this type's other builds: ${esc(String(err))}`); });
   };
   document.addEventListener("click", (e) => {
     const t = e.target, tp = t.closest?.("[data-tp]");

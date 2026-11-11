@@ -87,3 +87,56 @@ test("history marks where a member first appears", () => {
   assert.ok(row, "VirtualTimersPaused is listed: it appears in 26H1");
   assert.deepEqual([...row.matchAll(/<td class="(\w*)/g)].map((m) => m[1]), ["", "", "n"]);
 });
+
+test("untyped views compare by offset only: 3.50 → 3.51 and 3.51 → 4.0 _EPROCESS report no type changes", () => {
+  const x86 = (b) => V.parse(view(b, "_EPROCESS", "ntoskrnl", "x86"));
+  const A = x86("3.50.807.1"), B = x86("3.51.1057.1"), C = x86("4.0.1381.1");
+  const D1 = V.diff(A, B), D2 = V.diff(B, C);
+  assert.equal(D1.count.type, 0);
+  assert.equal(D2.count.type, 0);
+  const f = D1.rows.find((x) => x.r.k === "ForkWasSuccessful");
+  assert.equal(f.st, "shift");
+  assert.ok(B.rows.every((r) => r.k == null || !/^\+0x/.test(r.text)), "the inline offset is not part of the text");
+  assert.ok(D1.runs.length > 0, "the moves read as shifted runs");
+});
+
+// x86 _KPCR's history over the real pack builds (panel.mjs typePages/viewOf)
+const kpcrViews = async () => {
+  const { typePages, viewOf } = await import("../web/src/lib/panel.mjs");
+  const pg = typePages().find((p) => p.arch === "x86" && p.module === "ntoskrnl" && p.name === "_KPCR");
+  return pg.builds.map((b, j) => pg.has[j] === "-" ? null
+    : { build: b, label: b, title: b, st: pg.has[j], view: viewOf(pg, b).view }).filter(Boolean);
+};
+const cells = (H, k) => {
+  const row = H.html.split("<tr>").find((r) => r.startsWith(`<th>${k}</th>`));
+  return row && [...row.matchAll(/<td class="(\w*)/g)].map((m) => m[1]);
+};
+
+test("history: a member a partial layout lacks is not recorded there, never 'first appears' after it", async () => {
+  const views = await kpcrViews();
+  const H = V.history(views, views.at(-1).build, true);
+  assert.equal(H.partial, true);
+  const builds = views.map((v) => v.build);
+  // IrrActive: missing from the 1991 debugger's _KPCR, in the 3.5 headers
+  const irr = cells(H, "IrrActive");
+  assert.deepEqual(irr.slice(0, 3), ["nr", "nr", "p"]);
+  assert.ok(!irr.includes("n"));
+  // KdVersionBlock: missing from every partial layout and Windows 2000's records, new in XP SP1
+  const kd = cells(H, "KdVersionBlock");
+  assert.equal(kd[builds.indexOf("5.0.2195.7045")], "");
+  assert.equal(kd[builds.indexOf("5.1.2600.1106")], "n");
+  assert.ok(H.html.includes(' pt"'), "partial columns are marked");
+  // and without "all", IrrActive is not listed: it neither appears nor vanishes
+  assert.equal(cells(V.history(views, views.at(-1).build, false), "IrrActive"), undefined);
+});
+
+test("history: a build whose sources define the type twice shows its first definition", async () => {
+  const { typePages, viewOf } = await import("../web/src/lib/panel.mjs");
+  const pg = typePages().find((p) => p.arch === "mips" && p.module === "ntdll" && p.name === "_PEB");
+  const j = pg.builds.indexOf("3.10.404.1");
+  const v = viewOf(pg, "3.10.404.1").view;
+  assert.ok(V.parse(v).variants > 1);
+  const H = V.history([{ build: pg.builds[j], label: "404", title: "404", st: "d", view: v }], pg.builds[j], true);
+  assert.ok(H.total > 0, "the column has members");
+  assert.ok(!H.html.includes('class="op'), "not drawn as no layout");
+});

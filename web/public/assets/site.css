@@ -251,6 +251,8 @@ a.str-link:hover { color: yellow; }
 .hs td a { position: absolute; inset: 0.25rem 0.15rem; border-radius: 2px; }
 .hs td.p a { background: #34374a; } .hs td.m a { background: #3d4a6a; } .hs td.n a { background: var(--k-enum); }
 .hs td.x a { border: 1px dashed #ff5555; }
+.hs td.nr a { border: 1px dotted var(--mute); }
+.hs thead th.pt a { font-style: italic; text-decoration: underline dotted; }
 .hs td a:hover { outline: 1px solid #fff; }
 .hs td.op { background: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(255,255,255,0.04) 3px, rgba(255,255,255,0.04) 6px); }
 .hs td.cur, .hs th.cur { background-color: color-mix(in srgb, var(--cyan) 12%, transparent); }
@@ -259,7 +261,7 @@ a.str-link:hover { color: yellow; }
 .hs-key { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; margin-top: 0.8rem; font-size: 1.3rem; color: var(--mute); }
 .hs-key span::before { content: ""; display: inline-block; width: 1rem; height: 1rem; margin-right: 0.4rem; vertical-align: -1px; border-radius: 2px; }
 .hs-key .n::before { background: var(--k-enum); } .hs-key .m::before { background: #3d4a6a; } .hs-key .p::before { background: #34374a; }
-.hs-key .x::before { border: 1px dashed #ff5555; } .hs-key .op::before { background: repeating-linear-gradient(45deg, #34374a, #34374a 2px, transparent 2px, transparent 4px); }
+.hs-key .x::before { border: 1px dashed #ff5555; } .hs-key .nr::before { border: 1px dotted var(--mute); } .hs-key .op::before { background: repeating-linear-gradient(45deg, #34374a, #34374a 2px, transparent 2px, transparent 4px); }
 
 /* ---- opaque types (declared or mentioned, never defined in that PDB) ---- */
 .op { opacity: 0.6; font-style: italic; }
